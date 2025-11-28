@@ -1,6 +1,6 @@
 {
   "name": "@boshu2/vibe-check",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Measure vibe coding effectiveness with git commit analysis",
   "main": "dist/cli.js",
   "bin": {
