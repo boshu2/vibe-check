@@ -1,0 +1,42 @@
+{
+  "name": "vibe-check",
+  "version": "1.0.0",
+  "description": "Measure vibe coding effectiveness with git commit analysis",
+  "main": "dist/cli.js",
+  "bin": {
+    "vibe-check": "./bin/vibe-check.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/cli.ts",
+    "start": "node dist/cli.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "vibe-coding",
+    "git",
+    "metrics",
+    "developer-productivity",
+    "cli"
+  ],
+  "author": "bodefuller",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bodefuller/vibe-check"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^12.1.0",
+    "date-fns": "^3.6.0",
+    "simple-git": "^3.27.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.6",
+    "typescript": "^5.6.3",
+    "ts-node": "^10.9.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
