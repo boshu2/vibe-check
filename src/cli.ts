@@ -7,12 +7,15 @@ import { analyzeCommits } from './metrics';
 import { formatOutput } from './output';
 import { OutputFormat } from './types';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { version } = require('../package.json');
+
 const program = new Command();
 
 program
   .name('vibe-check')
   .description('Measure vibe coding effectiveness with git commit analysis')
-  .version('1.0.0')
+  .version(version)
   .option('--since <date>', 'Start date for analysis (e.g., "1 week ago", "2025-11-01")')
   .option('--until <date>', 'End date for analysis (default: now)')
   .option(

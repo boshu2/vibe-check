@@ -1,0 +1,20 @@
+# Source files (dist is sufficient)
+src/
+tsconfig.json
+
+# Development
+*.log
+.git/
+.github/
+tests/
+jest.config.js
+coverage/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
