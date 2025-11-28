@@ -70,3 +70,69 @@ export async function isGitRepo(repoPath: string): Promise<boolean> {
     return false;
   }
 }
+
+export interface FileStats {
+  filesPerCommit: Map<string, string[]>;
+  lineStats: { additions: number; deletions: number }[];
+}
+
+/**
+ * Get file-level statistics for semantic-free metrics.
+ */
+export async function getFileStats(
+  repoPath: string,
+  since?: string,
+  until?: string
+): Promise<FileStats> {
+  const git: SimpleGit = simpleGit(repoPath);
+  const filesPerCommit = new Map<string, string[]>();
+  const lineStats: { additions: number; deletions: number }[] = [];
+
+  // Build options for git log with stat
+  const options: string[] = ['--stat', '--name-only'];
+  if (since) options.push(`--since=${since}`);
+  if (until) options.push(`--until=${until}`);
+
+  try {
+    // Get log with file names
+    const log = await git.log(options as Record<string, string | number | boolean>);
+
+    for (const commit of log.all) {
+      const hash = commit.hash.substring(0, 7);
+
+      // Get diff stats for this commit
+      try {
+        const diffStat = await git.raw(['diff-tree', '--numstat', '--root', '-r', commit.hash]);
+        const lines = diffStat.trim().split('\n').filter(l => l.length > 0);
+
+        const files: string[] = [];
+        let additions = 0;
+        let deletions = 0;
+
+        for (const line of lines) {
+          const parts = line.split('\t');
+          if (parts.length >= 3) {
+            const add = parseInt(parts[0], 10) || 0;
+            const del = parseInt(parts[1], 10) || 0;
+            const file = parts[2];
+            additions += add;
+            deletions += del;
+            files.push(file);
+          }
+        }
+
+        filesPerCommit.set(hash, files);
+        lineStats.push({ additions, deletions });
+      } catch {
+        // If diff-tree fails, just record empty
+        filesPerCommit.set(hash, []);
+        lineStats.push({ additions: 0, deletions: 0 });
+      }
+    }
+  } catch (error) {
+    // Return empty stats on error
+    console.error('Failed to get file stats:', error);
+  }
+
+  return { filesPerCommit, lineStats };
+}
