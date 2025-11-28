@@ -9,13 +9,13 @@ Vibe coding is AI-assisted development where you collaborate with an AI coding a
 ## Installation
 
 ```bash
-npm install -g vibe-check
+npm install -g @boshu2/vibe-check
 ```
 
 Or run directly with npx:
 
 ```bash
-npx vibe-check
+npx @boshu2/vibe-check
 ```
 
 ## Usage
