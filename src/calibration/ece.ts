@@ -70,3 +70,24 @@ export function assessOutcome(
     return 'too_high'; // Level was too aggressive
   }
 }
+
+/**
+ * Infer the "true" vibe level from an actual vibe score.
+ * This is used to generate training labels for the model.
+ *
+ * Maps score ranges to levels:
+ * - 0.90-1.00 → 5 (Elite flow)
+ * - 0.80-0.90 → 4 (High flow)
+ * - 0.65-0.80 → 3 (Balanced)
+ * - 0.50-0.65 → 2 (AI-Augmented)
+ * - 0.30-0.50 → 1 (Human-Led)
+ * - 0.00-0.30 → 0 (Manual)
+ */
+export function inferTrueLevel(vibeScore: number): 0 | 1 | 2 | 3 | 4 | 5 {
+  if (vibeScore >= 0.90) return 5;
+  if (vibeScore >= 0.80) return 4;
+  if (vibeScore >= 0.65) return 3;
+  if (vibeScore >= 0.50) return 2;
+  if (vibeScore >= 0.30) return 1;
+  return 0;
+}

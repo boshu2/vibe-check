@@ -1,2 +1,2 @@
-export { loadCalibration, saveCalibration, addSample, getCalibrationPath } from './storage';
-export { calculateECE, assessOutcome } from './ece';
+export { loadCalibration, saveCalibration, addSample, getCalibrationPath, retrain, forceRetrain } from './storage';
+export { calculateECE, assessOutcome, inferTrueLevel } from './ece';

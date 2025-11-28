@@ -110,3 +110,84 @@ export function predictWithConfidence(
 
   return { level, confidence, ci, probs };
 }
+
+/**
+ * Single-step stochastic gradient descent update.
+ * Updates weights based on one sample's prediction error.
+ *
+ * For ordered logistic regression:
+ * - We minimize negative log-likelihood
+ * - Gradient for weight[j] = (p_k - y_k) * x_j summed over cutpoints
+ *
+ * Learning rate decays: lr = initialLr / (1 + decay * n)
+ */
+export function partialFit(
+  model: ModelState,
+  features: number[],
+  trueLevel: number,
+  learningRate: number = 0.01,
+  sampleCount: number = 1
+): ModelState {
+  const effectiveLr = learningRate / (1 + 0.001 * sampleCount);
+
+  // Get current predictions
+  const probs = predictProba(features, model);
+
+  // Create one-hot target
+  const target = new Array(N_LEVELS).fill(0);
+  target[Math.min(Math.max(0, Math.round(trueLevel)), N_LEVELS - 1)] = 1;
+
+  // Gradient for weights: dL/dw_j = sum_k (p_k - y_k) * x_j
+  const newWeights = [...model.weights];
+  for (let j = 0; j < features.length && j < newWeights.length; j++) {
+    let gradient = 0;
+    for (let k = 0; k < N_LEVELS; k++) {
+      gradient += (probs[k] - target[k]) * features[j];
+    }
+    newWeights[j] -= effectiveLr * gradient;
+  }
+
+  // Gradient for thresholds: dL/dt_k = p_k - cumTarget_k
+  const newThresholds = [...model.thresholds];
+  let cumTarget = 0;
+  for (let k = 0; k < model.thresholds.length; k++) {
+    cumTarget += target[k];
+    const cumProb = probs.slice(0, k + 1).reduce((a, b) => a + b, 0);
+    const gradient = cumProb - cumTarget;
+    newThresholds[k] -= effectiveLr * gradient;
+  }
+
+  // Ensure thresholds remain ordered
+  for (let i = 1; i < newThresholds.length; i++) {
+    if (newThresholds[i] <= newThresholds[i - 1]) {
+      newThresholds[i] = newThresholds[i - 1] + 0.1;
+    }
+  }
+
+  return {
+    weights: newWeights,
+    thresholds: newThresholds,
+  };
+}
+
+/**
+ * Batch partial fit - applies partialFit to multiple samples.
+ * Processes samples in order, accumulating updates.
+ */
+export function batchPartialFit(
+  model: ModelState,
+  samples: Array<{ features: number[]; trueLevel: number }>,
+  learningRate: number = 0.01
+): ModelState {
+  let current = model;
+  for (let i = 0; i < samples.length; i++) {
+    current = partialFit(
+      current,
+      samples[i].features,
+      samples[i].trueLevel,
+      learningRate,
+      i + 1
+    );
+  }
+  return current;
+}
