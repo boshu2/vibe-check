@@ -54,6 +54,9 @@ export interface UserProfile {
   achievements: Achievement[];
   sessions: SessionRecord[];
 
+  // Pattern memory - tracks spiral triggers over time
+  patternMemory?: PatternMemory;
+
   // Preferences
   preferences: {
     weeklyGoal: number;
@@ -70,6 +73,36 @@ export interface UserProfile {
     totalSpiralsDetected: number;
     spiralsAvoided: number;    // Sessions with 0 spirals
   };
+}
+
+// ============================================
+// PATTERN MEMORY (v1.4.0)
+// ============================================
+
+// Individual spiral occurrence
+export interface SpiralPatternRecord {
+  pattern: string;           // SECRETS_AUTH, VOLUME_CONFIG, etc. or "OTHER"
+  component: string;         // scope/component that triggered it
+  duration: number;          // minutes spent in this spiral
+  commits: number;           // number of fix commits
+  date: string;              // ISO date when this occurred
+}
+
+// Aggregated pattern memory
+export interface PatternMemory {
+  version: string;           // Schema version
+  records: SpiralPatternRecord[];  // Historical records (last 100)
+
+  // Aggregated statistics (computed from records)
+  patternCounts: Record<string, number>;     // pattern -> occurrences
+  componentCounts: Record<string, number>;   // component -> occurrences
+  patternDurations: Record<string, number>;  // pattern -> total minutes spent
+
+  // Computed insights
+  topPatterns: string[];       // top 3 patterns by frequency
+  topComponents: string[];     // top 3 components by frequency
+  avgRecoveryTime: number;     // average spiral duration in minutes
+  totalSpirals: number;        // total spirals ever recorded
 }
 
 // Level progression

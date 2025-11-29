@@ -8,9 +8,14 @@ import {
   XPState,
   Achievement,
 } from './types';
+import { FixChain } from '../types';
 import { createInitialStreak, updateStreak } from './streaks';
 import { createInitialXP, addXP, calculateSessionXP } from './xp';
 import { checkAchievements, ACHIEVEMENTS } from './achievements';
+import {
+  updatePatternMemory,
+  createInitialPatternMemory,
+} from './pattern-memory';
 
 const PROFILE_DIR = '.vibe-check';
 const PROFILE_FILE = 'profile.json';
@@ -144,7 +149,8 @@ export function recordSession(
   commits: number,
   spirals: number,
   periodFrom?: Date,
-  periodTo?: Date
+  periodTo?: Date,
+  fixChains?: FixChain[]
 ): {
   profile: UserProfile;
   xpEarned: number;
@@ -236,6 +242,14 @@ export function recordSession(
     allScores.reduce((a, b) => a + b, 0) / allScores.length
   );
 
+  // Update pattern memory if fix chains provided
+  if (fixChains && fixChains.length > 0) {
+    profile.patternMemory = updatePatternMemory(
+      profile.patternMemory,
+      fixChains
+    );
+  }
+
   // Save profile
   saveProfile(profile);
 
@@ -278,6 +292,11 @@ function migrateProfile(profile: UserProfile): UserProfile {
       totalSpiralsDetected: 0,
       spiralsAvoided: 0,
     };
+  }
+
+  // Initialize pattern memory if not present (v1.4.0+)
+  if (!profile.patternMemory) {
+    profile.patternMemory = createInitialPatternMemory();
   }
 
   return profile;

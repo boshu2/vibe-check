@@ -5,6 +5,7 @@ export * from './streaks';
 export * from './xp';
 export * from './achievements';
 export * from './profile';
+export * from './pattern-memory';
 
 // Re-export commonly used items for convenience
 export { LEVELS, XP_REWARDS } from './types';

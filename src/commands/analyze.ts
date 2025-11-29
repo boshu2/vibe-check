@@ -296,7 +296,8 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
         commits.length,
         spiralCount,
         result.period.from,
-        result.period.to
+        result.period.to,
+        result.fixChains  // Pass fix chains for pattern memory
       );
 
       // Show gamification summary

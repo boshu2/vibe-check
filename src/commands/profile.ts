@@ -9,12 +9,14 @@ import { formatStreak, formatWeeklyProgress } from '../gamification/streaks';
 import { formatLevel, formatXPProgress, getLevelProgress } from '../gamification/xp';
 import { LEVELS } from '../gamification/types';
 import { getAllAchievements } from '../gamification/achievements';
+import { formatPatternMemory } from '../gamification/pattern-memory';
 
 export function createProfileCommand(): Command {
   const cmd = new Command('profile')
     .description('View your vibe-check profile, stats, and achievements')
     .option('--achievements', 'Show all achievements', false)
     .option('--stats', 'Show detailed stats', false)
+    .option('--patterns', 'Show spiral pattern memory (your triggers)', false)
     .option('--json', 'Output as JSON', false)
     .action(async (options) => {
       await runProfile(options);
@@ -26,6 +28,7 @@ export function createProfileCommand(): Command {
 async function runProfile(options: {
   achievements: boolean;
   stats: boolean;
+  patterns: boolean;
   json: boolean;
 }): Promise<void> {
   const profile = loadProfile();
@@ -79,6 +82,18 @@ async function runProfile(options: {
   console.log(chalk.cyan('│') + `  └─ Zero-Spiral Sessions: ${chalk.bold(spiralsAvoided.toString())}`.padEnd(52) + chalk.cyan('│'));
   console.log(chalk.cyan('│') + ''.padEnd(44) + chalk.cyan('│'));
 
+  // Pattern Memory Summary
+  const patternInfo = formatPatternMemory(profile.patternMemory || { version: '1.0.0', records: [], patternCounts: {}, componentCounts: {}, patternDurations: {}, topPatterns: [], topComponents: [], avgRecoveryTime: 0, totalSpirals: 0 });
+  if (patternInfo.hasData) {
+    console.log(chalk.cyan('│') + chalk.bold('  🧠 Spiral Triggers').padEnd(52) + chalk.cyan('│'));
+    if (patternInfo.topPatterns.length > 0) {
+      const topTrigger = patternInfo.topPatterns[0];
+      console.log(chalk.cyan('│') + `  └─ Top: ${chalk.yellow(topTrigger.displayName)} (${topTrigger.count}×)`.padEnd(52) + chalk.cyan('│'));
+    }
+    console.log(chalk.cyan('│') + `     Avg recovery: ${chalk.gray(patternInfo.avgRecoveryTime + ' min')}`.padEnd(52) + chalk.cyan('│'));
+    console.log(chalk.cyan('│') + ''.padEnd(44) + chalk.cyan('│'));
+  }
+
   // Recent achievements
   const recentAchievements = achievements.slice(-3).reverse();
   if (recentAchievements.length > 0) {
@@ -102,6 +117,11 @@ async function runProfile(options: {
   // Show detailed stats if requested
   if (options.stats) {
     showDetailedStats(profile);
+  }
+
+  // Show pattern memory if requested
+  if (options.patterns) {
+    showPatternMemory(profile.patternMemory);
   }
 }
 
@@ -168,6 +188,57 @@ function showDetailedStats(profile: any): void {
   console.log(`  Longest Streak: ${chalk.bold(streak.longest)} days`);
 
   console.log();
+}
+
+function showPatternMemory(memory: any): void {
+  const patternInfo = formatPatternMemory(memory);
+
+  console.log(chalk.bold('\n🧠 Pattern Memory - Your Spiral Triggers\n'));
+
+  if (!patternInfo.hasData) {
+    console.log(chalk.gray('  No spiral patterns recorded yet.'));
+    console.log(chalk.gray('  When spirals are detected, patterns will be tracked here.'));
+    console.log();
+    return;
+  }
+
+  // Summary
+  console.log(chalk.bold('Summary'));
+  console.log(`  ${patternInfo.summary}`);
+  console.log(`  Total spirals recorded: ${chalk.bold(patternInfo.totalSpirals.toString())}`);
+  console.log(`  Average recovery time: ${chalk.bold(patternInfo.avgRecoveryTime.toString())} minutes`);
+  console.log();
+
+  // Top patterns
+  if (patternInfo.topPatterns.length > 0) {
+    console.log(chalk.bold('Top Spiral Patterns'));
+    for (const pattern of patternInfo.topPatterns) {
+      const bar = createPatternBar(pattern.count, patternInfo.totalSpirals);
+      console.log(`  ${bar} ${chalk.yellow(pattern.displayName)} (${pattern.count}×, ${pattern.totalMinutes}m total)`);
+      console.log(chalk.gray(`      💡 ${pattern.advice}`));
+    }
+    console.log();
+  }
+
+  // Top components
+  if (patternInfo.topComponents.length > 0) {
+    console.log(chalk.bold('Top Triggering Components'));
+    for (const comp of patternInfo.topComponents) {
+      const bar = createPatternBar(comp.count, patternInfo.totalSpirals);
+      console.log(`  ${bar} ${comp.component} (${comp.count}×)`);
+    }
+    console.log();
+  }
+
+  console.log(chalk.gray('Use this data to identify recurring issues and add tracer tests.'));
+  console.log();
+}
+
+function createPatternBar(count: number, total: number): string {
+  const pct = total > 0 ? (count / total) * 100 : 0;
+  const filled = Math.round(pct / 10);
+  const empty = 10 - filled;
+  return chalk.yellow('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
 }
 
 export async function runProfile2(options: any): Promise<void> {
