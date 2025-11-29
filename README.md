@@ -22,9 +22,42 @@ npx @boshu2/vibe-check
 # Check your recent work
 vibe-check --since "1 week ago"
 
-# Simple one-liner for hooks
-vibe-check --simple
+# Watch mode - catch spirals in real-time
+vibe-check watch
 ```
+
+## Watch Mode (Real-Time Detection)
+
+Catch spirals as they happen, not after:
+
+```bash
+vibe-check watch
+```
+
+```
+VIBE-CHECK WATCH MODE
+Monitoring /path/to/repo
+Polling every 5s - Ctrl+C to stop
+
+────────────────────────────────────────────────────────────
+  09:15 fix(auth) handle token refresh
+  09:18 fix(auth) add retry logic
+  09:22 fix(auth) increase timeout
+
+  ⚠️  SPIRAL DETECTED
+      Component: auth
+      Fixes: 3 commits, 7 min
+
+      Consider:
+      • Step back and write a test
+      • Check the docs or ask for help
+      • Take a 5-minute break
+────────────────────────────────────────────────────────────
+```
+
+Options:
+- `--quiet` - Only show warnings, not all commits
+- `--interval <ms>` - Poll frequency (default: 5000ms)
 
 ## Example Output
 
@@ -135,6 +168,7 @@ Options:
   -v, --verbose        Verbose output
 
 Commands:
+  watch                Real-time spiral detection
   start --level <n>    Start session with declared level (0-5)
   profile              View your gamification profile
   init-hook            Install pre-push git hook
