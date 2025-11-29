@@ -1,0 +1,494 @@
+// Vibe-Check Dashboard Application
+class VibeDashboard {
+  constructor() {
+    this.profile = null;
+    this.charts = {};
+    this.currentPage = 'dashboard';
+  }
+
+  async init() {
+    this.setupEventListeners();
+    await this.loadProfile();
+    this.renderDashboard();
+    this.initCharts();
+  }
+
+  setupEventListeners() {
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const page = e.currentTarget.dataset.page;
+        this.navigateTo(page);
+      });
+    });
+
+    // Sidebar toggle
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', () => this.toggleSidebar());
+    }
+
+    // Refresh button
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => this.refresh());
+    }
+
+    // Chart range buttons
+    document.querySelectorAll('.chart-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const range = parseInt(e.target.dataset.range);
+        this.updateTrendChart(range);
+        document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+      });
+    });
+
+    // Achievement modal close
+    const closeModal = document.getElementById('closeAchievementModal');
+    if (closeModal) {
+      closeModal.addEventListener('click', () => this.closeModal());
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') this.closeModal();
+    });
+  }
+
+  async loadProfile() {
+    // In a real implementation, this would fetch from an API or local file
+    // For now, we'll use mock data or localStorage
+    const stored = localStorage.getItem('vibe-check-profile');
+    if (stored) {
+      this.profile = JSON.parse(stored);
+    } else {
+      this.profile = this.getMockProfile();
+    }
+  }
+
+  getMockProfile() {
+    // Mock profile for demonstration
+    return {
+      version: '1.0.0',
+      xp: {
+        total: 456,
+        level: 3,
+        levelName: 'Practitioner',
+        currentLevelXP: 156,
+        nextLevelXP: 300,
+      },
+      streak: {
+        current: 5,
+        longest: 12,
+        weeklyProgress: 3,
+        weeklyGoal: 5,
+      },
+      achievements: [
+        { id: 'first_check', name: 'First Blood', icon: '🩸', unlockedAt: '2025-11-20' },
+        { id: 'elite_vibes', name: 'Elite Vibes', icon: '✨', unlockedAt: '2025-11-25' },
+        { id: 'zen_master', name: 'Zen Master', icon: '🧘', unlockedAt: '2025-11-28' },
+      ],
+      sessions: [
+        { date: '2025-11-29', vibeScore: 89, overall: 'ELITE', commits: 14, spirals: 0 },
+        { date: '2025-11-28', vibeScore: 85, overall: 'HIGH', commits: 23, spirals: 1 },
+        { date: '2025-11-27', vibeScore: 91, overall: 'ELITE', commits: 31, spirals: 0 },
+        { date: '2025-11-26', vibeScore: 78, overall: 'HIGH', commits: 18, spirals: 2 },
+        { date: '2025-11-25', vibeScore: 82, overall: 'HIGH', commits: 27, spirals: 1 },
+        { date: '2025-11-24', vibeScore: 70, overall: 'MEDIUM', commits: 12, spirals: 3 },
+        { date: '2025-11-23', vibeScore: 88, overall: 'ELITE', commits: 35, spirals: 0 },
+      ],
+      stats: {
+        totalSessions: 45,
+        totalCommitsAnalyzed: 847,
+        avgVibeScore: 82,
+        bestVibeScore: 95,
+        spiralsAvoided: 15,
+      },
+    };
+  }
+
+  navigateTo(page) {
+    this.currentPage = page;
+
+    // Update nav
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.page === page);
+    });
+
+    // Update pages
+    document.querySelectorAll('.page').forEach(p => {
+      p.classList.toggle('active', p.id === `page-${page}`);
+    });
+
+    // Render page-specific content
+    switch (page) {
+      case 'achievements':
+        this.renderAchievements();
+        break;
+      case 'history':
+        this.renderHistory();
+        break;
+      case 'profile':
+        this.renderProfile();
+        break;
+    }
+  }
+
+  renderDashboard() {
+    this.updateProfileSummary();
+    this.updateStats();
+    this.renderRecentSessions();
+  }
+
+  updateProfileSummary() {
+    const { xp, streak } = this.profile;
+
+    // Level info
+    document.getElementById('levelIcon').textContent = this.getLevelIcon(xp.level);
+    document.getElementById('levelName').textContent = `Level ${xp.level} ${xp.levelName}`;
+    document.getElementById('xpText').textContent = `${xp.currentLevelXP}/${xp.nextLevelXP} XP`;
+
+    const progress = (xp.currentLevelXP / xp.nextLevelXP) * 100;
+    document.getElementById('xpFill').style.width = `${progress}%`;
+
+    // Streak
+    document.getElementById('streakText').textContent = `${streak.current} day streak`;
+    document.getElementById('streakDays').textContent = streak.current;
+  }
+
+  updateStats() {
+    const { sessions, stats } = this.profile;
+    const latest = sessions[0];
+
+    document.getElementById('currentScore').textContent = latest ? `${latest.vibeScore}%` : '--';
+    document.getElementById('avgScore').textContent = `${stats.avgVibeScore}%`;
+    document.getElementById('achievementCount').textContent =
+      `${this.profile.achievements.length}/24`;
+  }
+
+  renderRecentSessions() {
+    const container = document.getElementById('recentSessions');
+    const sessions = this.profile.sessions.slice(0, 5);
+
+    if (sessions.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <span class="empty-icon">📭</span>
+          <p>No sessions yet. Run <code>vibe-check --score</code> to start!</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = sessions.map(session => `
+      <div class="session-item">
+        <div class="session-date">${this.formatDate(session.date)}</div>
+        <div class="session-score">${session.vibeScore}%</div>
+        <span class="session-rating ${session.overall.toLowerCase()}">${session.overall}</span>
+      </div>
+    `).join('');
+  }
+
+  initCharts() {
+    this.initTrendChart();
+    this.initRadarChart();
+    this.initRatingsChart();
+  }
+
+  initTrendChart() {
+    const ctx = document.getElementById('trendCanvas');
+    if (!ctx) return;
+
+    const sessions = this.profile.sessions.slice().reverse();
+    const labels = sessions.map(s => this.formatDate(s.date));
+    const data = sessions.map(s => s.vibeScore);
+
+    this.charts.trend = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Vibe Score',
+          data,
+          borderColor: '#58a6ff',
+          backgroundColor: 'rgba(88, 166, 255, 0.1)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: 100,
+            grid: { color: '#30363d' },
+            ticks: { color: '#7d8590' },
+          },
+          x: {
+            grid: { display: false },
+            ticks: { color: '#7d8590' },
+          }
+        }
+      }
+    });
+  }
+
+  initRadarChart() {
+    const ctx = document.getElementById('radarCanvas');
+    if (!ctx) return;
+
+    // Mock metrics data
+    this.charts.radar = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['Trust Pass', 'Velocity', 'Flow', 'Stability', 'No Spirals'],
+        datasets: [{
+          label: 'Current',
+          data: [92, 78, 85, 88, 95],
+          borderColor: '#58a6ff',
+          backgroundColor: 'rgba(88, 166, 255, 0.2)',
+          pointBackgroundColor: '#58a6ff',
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+        },
+        scales: {
+          r: {
+            min: 0,
+            max: 100,
+            grid: { color: '#30363d' },
+            angleLines: { color: '#30363d' },
+            pointLabels: { color: '#7d8590' },
+            ticks: { display: false },
+          }
+        }
+      }
+    });
+  }
+
+  initRatingsChart() {
+    const ctx = document.getElementById('ratingsCanvas');
+    if (!ctx) return;
+
+    // Count ratings
+    const counts = { ELITE: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+    this.profile.sessions.forEach(s => counts[s.overall]++);
+
+    this.charts.ratings = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Elite', 'High', 'Medium', 'Low'],
+        datasets: [{
+          data: [counts.ELITE, counts.HIGH, counts.MEDIUM, counts.LOW],
+          backgroundColor: ['#a371f7', '#3fb950', '#d29922', '#f85149'],
+          borderWidth: 0,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#7d8590' },
+          },
+        },
+      }
+    });
+  }
+
+  updateTrendChart(days) {
+    const sessions = this.profile.sessions.slice(0, days).reverse();
+    const labels = sessions.map(s => this.formatDate(s.date));
+    const data = sessions.map(s => s.vibeScore);
+
+    this.charts.trend.data.labels = labels;
+    this.charts.trend.data.datasets[0].data = data;
+    this.charts.trend.update();
+  }
+
+  renderAchievements() {
+    const container = document.getElementById('achievementsGrid');
+    const unlocked = new Set(this.profile.achievements.map(a => a.id));
+
+    // All possible achievements
+    const allAchievements = [
+      { id: 'first_check', name: 'First Blood', icon: '🩸', description: 'Run your first vibe-check' },
+      { id: 'week_warrior', name: 'Week Warrior', icon: '⚔️', description: 'Maintain a 7-day streak' },
+      { id: 'fortnight_force', name: 'Fortnight Force', icon: '🛡️', description: 'Maintain a 14-day streak' },
+      { id: 'monthly_master', name: 'Monthly Master', icon: '👑', description: 'Maintain a 30-day streak' },
+      { id: 'elite_vibes', name: 'Elite Vibes', icon: '✨', description: 'Achieve ELITE rating' },
+      { id: 'consistent_high', name: 'High Roller', icon: '🎰', description: '5 consecutive HIGH+ sessions' },
+      { id: 'perfect_week', name: 'Perfect Week', icon: '💎', description: '7 consecutive ELITE sessions' },
+      { id: 'score_90', name: 'Ninety Club', icon: '🏅', description: 'Vibe Score ≥ 90%' },
+      { id: 'ten_sessions', name: 'Getting Started', icon: '📊', description: '10 vibe-check sessions' },
+      { id: 'fifty_sessions', name: 'Regular', icon: '📈', description: '50 vibe-check sessions' },
+      { id: 'hundred_sessions', name: 'Centurion', icon: '💯', description: '100 vibe-check sessions' },
+      { id: 'zen_master', name: 'Zen Master', icon: '🧘', description: '0 spirals in 50+ commit session' },
+      { id: 'trust_builder', name: 'Trust Builder', icon: '🏗️', description: '10 sessions with 90%+ trust' },
+      { id: 'comeback_kid', name: 'Comeback Kid', icon: '🔄', description: 'LOW → ELITE in 7 days' },
+      { id: 'early_bird', name: 'Early Bird', icon: '🌅', description: 'Session before 7 AM' },
+      { id: 'night_owl', name: 'Night Owl', icon: '🦉', description: 'Session after midnight' },
+      { id: 'thousand_commits', name: 'Thousand Strong', icon: '🎯', description: '1000 commits analyzed' },
+      // Hidden achievements shown as ???
+      { id: 'perfect_score', name: '???', icon: '❓', description: '???', hidden: true },
+      { id: 'spiral_survivor', name: '???', icon: '❓', description: '???', hidden: true },
+    ];
+
+    container.innerHTML = allAchievements.map(achievement => {
+      const isUnlocked = unlocked.has(achievement.id);
+      const unlockedAchievement = this.profile.achievements.find(a => a.id === achievement.id);
+
+      return `
+        <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
+          <div class="achievement-icon-wrapper">
+            ${isUnlocked || !achievement.hidden ? achievement.icon : '🔒'}
+          </div>
+          <div class="achievement-info">
+            <h4>${isUnlocked || !achievement.hidden ? achievement.name : '???'}</h4>
+            <p>${isUnlocked || !achievement.hidden ? achievement.description : 'Keep playing to unlock!'}</p>
+            ${isUnlocked ? `<div class="achievement-date">Unlocked ${this.formatDate(unlockedAchievement.unlockedAt)}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    document.getElementById('achievementProgress').textContent =
+      `${this.profile.achievements.length}/${allAchievements.length} unlocked`;
+  }
+
+  renderHistory() {
+    const container = document.getElementById('historyContainer');
+
+    container.innerHTML = `
+      <div class="sessions-list">
+        ${this.profile.sessions.map(session => `
+          <div class="session-item">
+            <div>
+              <div class="session-date">${this.formatDate(session.date)}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted)">
+                ${session.commits} commits · ${session.spirals} spirals
+              </div>
+            </div>
+            <div class="session-score">${session.vibeScore}%</div>
+            <span class="session-rating ${session.overall.toLowerCase()}">${session.overall}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  renderProfile() {
+    const container = document.getElementById('profileContainer');
+    const { stats, xp, streak } = this.profile;
+
+    container.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">${this.getLevelIcon(xp.level)}</div>
+          <div class="stat-content">
+            <span class="stat-value">Level ${xp.level}</span>
+            <span class="stat-label">${xp.levelName}</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-content">
+            <span class="stat-value">${xp.total}</span>
+            <span class="stat-label">Total XP</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-content">
+            <span class="stat-value">${streak.longest}</span>
+            <span class="stat-label">Longest Streak</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-content">
+            <span class="stat-value">${stats.bestVibeScore}%</span>
+            <span class="stat-label">Best Score</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="recent-section" style="margin-top: var(--spacing-xl)">
+        <h3 style="margin-bottom: var(--spacing-lg)">Lifetime Stats</h3>
+        <div class="sessions-list">
+          <div class="session-item">
+            <span>Total Sessions</span>
+            <span class="stat-value">${stats.totalSessions}</span>
+          </div>
+          <div class="session-item">
+            <span>Commits Analyzed</span>
+            <span class="stat-value">${stats.totalCommitsAnalyzed.toLocaleString()}</span>
+          </div>
+          <div class="session-item">
+            <span>Average Score</span>
+            <span class="stat-value">${stats.avgVibeScore}%</span>
+          </div>
+          <div class="session-item">
+            <span>Zero-Spiral Sessions</span>
+            <span class="stat-value">${stats.spiralsAvoided}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  }
+
+  async refresh() {
+    await this.loadProfile();
+    this.renderDashboard();
+    this.showToast('Data refreshed!');
+  }
+
+  showToast(message) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMessage').textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  closeModal() {
+    document.getElementById('achievementModal').classList.remove('show');
+  }
+
+  showAchievementModal(achievement) {
+    document.getElementById('modalAchievementIcon').textContent = achievement.icon;
+    document.getElementById('modalAchievementName').textContent = achievement.name;
+    document.getElementById('modalAchievementDesc').textContent = achievement.description;
+    document.getElementById('achievementModal').classList.add('show');
+  }
+
+  getLevelIcon(level) {
+    const icons = ['🌱', '🌿', '🌳', '🌲', '🎋', '🏔️'];
+    return icons[level - 1] || '🌱';
+  }
+
+  formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+}
+
+// Initialize dashboard
+const dashboard = new VibeDashboard();
+document.addEventListener('DOMContentLoaded', () => dashboard.init());

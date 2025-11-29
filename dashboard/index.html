@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe-Check Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="logo-icon">🎯</span>
+                    <span class="logo-text">Vibe-Check</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <span class="toggle-icon">☰</span>
+                </button>
+            </div>
+
+            <!-- Profile Summary -->
+            <div class="sidebar-profile" id="profileSummary">
+                <div class="profile-level">
+                    <span class="level-icon" id="levelIcon">🌱</span>
+                    <div class="level-info">
+                        <span class="level-name" id="levelName">Level 1 Novice</span>
+                        <div class="xp-bar">
+                            <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+                        </div>
+                        <span class="xp-text" id="xpText">0/100 XP</span>
+                    </div>
+                </div>
+                <div class="profile-streak">
+                    <span class="streak-icon">🔥</span>
+                    <span class="streak-text" id="streakText">0 day streak</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </button>
+                <button class="nav-item" data-page="history">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">History</span>
+                </button>
+                <button class="nav-item" data-page="achievements">
+                    <span class="nav-icon">🏆</span>
+                    <span class="nav-text">Achievements</span>
+                </button>
+                <button class="nav-item" data-page="profile">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">Profile</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="https://github.com/boshu2/vibe-check" target="_blank" class="sidebar-link">
+                    <span class="link-icon">📚</span>
+                    <span class="link-text">Documentation</span>
+                </a>
+                <div class="sidebar-version">v2.0.0</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <section class="page active" id="page-dashboard">
+                <header class="page-header">
+                    <h1 class="page-title">
+                        <span class="title-icon">📊</span>
+                        Dashboard
+                    </h1>
+                    <div class="header-actions">
+                        <button class="btn-refresh" id="refreshBtn" title="Refresh data">
+                            <span>🔄</span>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card highlight">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="currentScore">--</span>
+                            <span class="stat-label">Current Vibe Score</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="avgScore">--</span>
+                            <span class="stat-label">30-Day Average</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="streakDays">0</span>
+                            <span class="stat-label">Day Streak</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="achievementCount">0/24</span>
+                            <span class="stat-label">Achievements</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-card wide">
+                        <div class="chart-header">
+                            <h3>Vibe Score Trend</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn active" data-range="7">7D</button>
+                                <button class="chart-btn" data-range="30">30D</button>
+                                <button class="chart-btn" data-range="90">90D</button>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="trendChart">
+                            <div class="chart-placeholder">
+                                <canvas id="trendCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Metrics Breakdown</h3>
+                        </div>
+                        <div class="chart-container" id="radarChart">
+                            <canvas id="radarCanvas"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Session Ratings</h3>
+                        </div>
+                        <div class="chart-container" id="ratingsChart">
+                            <canvas id="ratingsCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Sessions -->
+                <div class="recent-section">
+                    <div class="section-header">
+                        <h3>Recent Sessions</h3>
+                        <a href="#history" class="view-all">View All →</a>
+                    </div>
+                    <div class="sessions-list" id="recentSessions">
+                        <div class="empty-state">
+                            <span class="empty-icon">📭</span>
+                            <p>No sessions yet. Run <code>vibe-check --score</code> to start!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History Page -->
+            <section class="page" id="page-history">
+                <header class="page-header">
+                    <h1 class="page-title">
+                        <span class="title-icon">📈</span>
+                        Session History
+                    </h1>
+                </header>
+                <div class="history-container" id="historyContainer">
+                    <!-- History content will be rendered here -->
+                </div>
+            </section>
+
+            <!-- Achievements Page -->
+            <section class="page" id="page-achievements">
+                <header class="page-header">
+                    <h1 class="page-title">
+                        <span class="title-icon">🏆</span>
+                        Achievements
+                    </h1>
+                    <div class="achievement-progress">
+                        <span id="achievementProgress">0/24 unlocked</span>
+                    </div>
+                </header>
+                <div class="achievements-grid" id="achievementsGrid">
+                    <!-- Achievements will be rendered here -->
+                </div>
+            </section>
+
+            <!-- Profile Page -->
+            <section class="page" id="page-profile">
+                <header class="page-header">
+                    <h1 class="page-title">
+                        <span class="title-icon">👤</span>
+                        Profile
+                    </h1>
+                </header>
+                <div class="profile-container" id="profileContainer">
+                    <!-- Profile content will be rendered here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✅</span>
+        <span class="toast-message" id="toastMessage">Action completed!</span>
+    </div>
+
+    <!-- Achievement Unlocked Modal -->
+    <div class="modal-overlay" id="achievementModal">
+        <div class="modal-container achievement-modal">
+            <div class="achievement-celebration">
+                <span class="achievement-icon" id="modalAchievementIcon">🏆</span>
+                <h2>Achievement Unlocked!</h2>
+                <h3 class="achievement-name" id="modalAchievementName"></h3>
+                <p class="achievement-description" id="modalAchievementDesc"></p>
+                <button class="btn-primary" id="closeAchievementModal">Awesome!</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

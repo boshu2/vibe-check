@@ -16,6 +16,8 @@ import { calculateCodeStability } from '../metrics/code-stability';
 import { calculateVibeScore } from '../score';
 import { predictWithConfidence } from '../recommend';
 import { addSample, assessOutcome } from '../calibration';
+import { recordSession, loadProfile } from '../gamification/profile';
+import { LEVELS } from '../gamification/types';
 
 export interface AnalyzeOptions {
   since?: string;
@@ -201,6 +203,61 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
     // Output result
     const output = formatOutput(resultV2, format as OutputFormat);
     console.log(output);
+
+    // Record session and show gamification (only for terminal format with score)
+    if (format === 'terminal' && resultV2.vibeScore) {
+      const spiralCount = result.fixChains.filter(fc => fc.isSpiral).length;
+      const vibeScorePercent = Math.round(resultV2.vibeScore.value * 100);
+
+      const gamificationResult = recordSession(
+        vibeScorePercent,
+        result.overall,
+        commits.length,
+        spiralCount
+      );
+
+      // Show gamification summary
+      console.log();
+      console.log(chalk.cyan('─'.repeat(64)));
+
+      const levelInfo = LEVELS.find(l => l.level === gamificationResult.profile.xp.level)!;
+      const { streak, xp } = gamificationResult.profile;
+
+      // Streak line
+      const streakFire = '🔥'.repeat(Math.min(streak.current, 5));
+      const streakText = streak.current > 0
+        ? `${streakFire} ${streak.current}-day streak${gamificationResult.streakExtended ? chalk.yellow(' (+1!)') : ''}`
+        : chalk.gray('Start a streak by running vibe-check daily!');
+      console.log(`  ${streakText}`);
+
+      // XP line
+      const xpGained = gamificationResult.xpEarned;
+      console.log(`  ${levelInfo.icon} Level ${xp.level} ${xp.levelName} ${chalk.gray(`(${xp.currentLevelXP}/${xp.nextLevelXP} XP)`)} ${chalk.green(`+${xpGained} XP`)}`);
+
+      // Level up celebration
+      if (gamificationResult.leveledUp) {
+        console.log();
+        console.log(chalk.bold.magenta(`  🎉 LEVEL UP! You are now ${gamificationResult.newLevel}!`));
+      }
+
+      // Personal best
+      if (gamificationResult.isPersonalBest) {
+        console.log(chalk.bold.yellow(`  🏆 NEW PERSONAL BEST: ${vibeScorePercent}%`));
+      }
+
+      // Achievement unlocks
+      if (gamificationResult.achievementsUnlocked.length > 0) {
+        console.log();
+        for (const ach of gamificationResult.achievementsUnlocked) {
+          console.log(chalk.bold.green(`  🏆 ACHIEVEMENT UNLOCKED: ${ach.icon} ${ach.name}`));
+          console.log(chalk.gray(`     ${ach.description}`));
+        }
+      }
+
+      console.log(chalk.cyan('─'.repeat(64)));
+      console.log(chalk.gray(`  Run ${chalk.white('vibe-check profile')} to see your full stats`));
+      console.log();
+    }
 
     // Exit with appropriate code based on overall rating
     if (result.overall === 'LOW') {
