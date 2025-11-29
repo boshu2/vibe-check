@@ -105,6 +105,47 @@ export function formatTerminal(result: VibeCheckResult | VibeCheckResultV2): str
   lines.push(`  ${chalk.bold('OVERALL:')} ${formatOverallRating(result.overall)}`);
   lines.push(chalk.bold.cyan('-'.repeat(64)));
 
+  // Quick Summary: Top strength and area to improve
+  const metricsList = [
+    { name: 'Iteration Velocity', metric: result.metrics.iterationVelocity, tip: 'Ship smaller increments more frequently' },
+    { name: 'Rework Ratio', metric: result.metrics.reworkRatio, tip: 'Use tracer tests before complex features' },
+    { name: 'Trust Pass Rate', metric: result.metrics.trustPassRate, tip: 'Review AI output more carefully before committing' },
+    { name: 'Debug Spiral Duration', metric: result.metrics.debugSpiralDuration, tip: 'Stop and write a test when stuck >15min' },
+    { name: 'Flow Efficiency', metric: result.metrics.flowEfficiency, tip: 'Reduce context switching, batch similar tasks' },
+  ];
+
+  const ratingOrder: Rating[] = ['elite', 'high', 'medium', 'low'];
+  const sorted = [...metricsList].sort(
+    (a, b) => ratingOrder.indexOf(a.metric.rating) - ratingOrder.indexOf(b.metric.rating)
+  );
+
+  const topStrength = sorted[0];
+  const topIssue = sorted[sorted.length - 1];
+
+  // Only show summary if there's variation
+  if (topStrength.metric.rating !== topIssue.metric.rating) {
+    lines.push('');
+    lines.push(chalk.green(`  ✓ Strength: ${topStrength.name} (${topStrength.metric.rating.toUpperCase()})`));
+
+    if (topIssue.metric.rating === 'low' || topIssue.metric.rating === 'medium') {
+      lines.push(chalk.yellow(`  → Focus: ${topIssue.name} (${topIssue.metric.rating.toUpperCase()})`));
+    }
+  }
+
+  // Opportunities section - actionable recommendations for low/medium metrics
+  const opportunities = metricsList.filter(
+    m => m.metric.rating === 'low' || m.metric.rating === 'medium'
+  );
+
+  if (opportunities.length > 0) {
+    lines.push('');
+    lines.push(chalk.bold.yellow('  💡 OPPORTUNITIES'));
+    for (const opp of opportunities.slice(0, 3)) { // Max 3
+      const icon = opp.metric.rating === 'low' ? '🔴' : '🟡';
+      lines.push(chalk.yellow(`  ${icon} ${opp.name}: ${opp.tip}`));
+    }
+  }
+
   // Debug spirals
   if (result.fixChains.length > 0) {
     lines.push('');
