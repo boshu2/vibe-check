@@ -1,4 +1,4 @@
 export { createAnalyzeCommand, runAnalyze, AnalyzeOptions } from './analyze';
-export { createLevelCommand } from './level';
+export { createStartCommand } from './start';
 export { createProfileCommand } from './profile';
 export { createInitHookCommand } from './init-hook';

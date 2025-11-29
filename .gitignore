@@ -2,5 +2,10 @@ node_modules/
 dist/
 *.log
 
-# vibe-check calibration data (per-repo)
+# vibe-check data (per-repo)
 .vibe-check/
+
+# Claude Code session state
+claude-progress.json
+claude-progress.txt
+feature-list.json

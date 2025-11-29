@@ -56,14 +56,6 @@ export function formatJson(result: VibeCheckResult | VibeCheckResultV2): string 
     if (result.vibeScore) {
       output.vibeScore = result.vibeScore;
     }
-    if (result.recommendation) {
-      output.recommendation = {
-        level: result.recommendation.level,
-        confidence: result.recommendation.confidence,
-        probabilities: result.recommendation.probabilities,
-        ci: result.recommendation.ci,
-      };
-    }
     if (result.semanticFreeMetrics) {
       output.semanticFreeMetrics = {
         fileChurn: {

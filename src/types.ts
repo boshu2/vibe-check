@@ -66,8 +66,6 @@ export interface CliOptions {
   repo: string;
   verbose: boolean;
   score?: boolean;
-  recommend?: boolean;
-  calibrate?: string;
 }
 
 // ============================================
@@ -112,43 +110,8 @@ export interface VibeScore {
   };
 }
 
-export interface VibeLevelRecommendation {
-  level: 0 | 1 | 2 | 3 | 4 | 5;
-  confidence: number;      // 0.0 - 1.0
-  probabilities: number[]; // [P(0), P(1), P(2), P(3), P(4), P(5)]
-  ci: [number, number];    // 95% confidence interval
-  questions: QuestionResponses;
-}
-
-export interface QuestionResponses {
-  reversibility: -2 | -1 | 0 | 1;
-  blastRadius: -2 | -1 | 0 | 1;
-  verificationCost: -2 | -1 | 0 | 1;
-  domainComplexity: -2 | -1 | 0 | 1;
-  aiTrackRecord: -2 | -1 | 0 | 1;
-}
-
-export interface CalibrationSample {
-  timestamp: Date;
-  vibeScore: number;
-  declaredLevel: 0 | 1 | 2 | 3 | 4 | 5;
-  outcome: 'correct' | 'too_high' | 'too_low';
-  features: number[];
-  modelVersion: string;
-}
-
-export interface CalibrationState {
-  samples: CalibrationSample[];
-  weights: number[];
-  thresholds: number[];
-  ece: number;
-  lastUpdated: Date;
-  version: string;
-}
-
 export interface VibeCheckResultV2 extends VibeCheckResult {
   vibeScore?: VibeScore;
-  recommendation?: VibeLevelRecommendation;
   semanticMetrics: {
     iterationVelocity: MetricResult;
     reworkRatio: MetricResult;

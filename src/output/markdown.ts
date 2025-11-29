@@ -32,13 +32,6 @@ export function formatMarkdown(result: VibeCheckResult | VibeCheckResultV2): str
     lines.push('');
   }
 
-  // V2: Level Recommendation
-  if (isV2Result(result) && result.recommendation) {
-    const rec = result.recommendation;
-    lines.push(`**Recommended Level:** ${rec.level} (${Math.round(rec.confidence * 100)}% confidence, CI: [${rec.ci[0].toFixed(1)}, ${rec.ci[1].toFixed(1)}])`);
-    lines.push('');
-  }
-
   // Metrics table
   lines.push('## Semantic Metrics');
   lines.push('');

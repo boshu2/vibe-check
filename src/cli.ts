@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { createAnalyzeCommand, createLevelCommand, createProfileCommand, createInitHookCommand, runAnalyze } from './commands';
+import { createAnalyzeCommand, createStartCommand, createProfileCommand, createInitHookCommand, runAnalyze } from './commands';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { version } = require('../package.json');
@@ -10,12 +10,12 @@ const program = new Command();
 
 program
   .name('vibe-check')
-  .description('Measure and classify vibe coding effectiveness')
+  .description('Quick check: are you building or spiraling?')
   .version(version);
 
 // Add subcommands
 program.addCommand(createAnalyzeCommand());
-program.addCommand(createLevelCommand());
+program.addCommand(createStartCommand());
 program.addCommand(createProfileCommand());
 program.addCommand(createInitHookCommand());
 
@@ -28,8 +28,6 @@ program
   .option('-r, --repo <path>', 'Repository path', process.cwd())
   .option('-v, --verbose', 'Show verbose output', false)
   .option('--score', 'Include VibeScore and code pattern metrics', false)
-  .option('--recommend', 'Include level recommendation', false)
-  .option('--calibrate <level>', 'Record calibration sample with declared level (0-5)')
   .option('-o, --output <file>', 'Write JSON results to file')
   .option('-s, --simple', 'Simplified output (fewer details)', false)
   .action(async (options) => {
@@ -41,8 +39,6 @@ program
       repo: options.repo,
       verbose: options.verbose,
       score: options.score,
-      recommend: options.recommend,
-      calibrate: options.calibrate,
       output: options.output,
       simple: options.simple,
     });

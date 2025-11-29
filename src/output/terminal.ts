@@ -78,27 +78,6 @@ export function formatTerminal(result: VibeCheckResult | VibeCheckResultV2): str
     }
   }
 
-  // V2: Level Recommendation
-  if (isV2Result(result) && result.recommendation) {
-    lines.push('');
-    lines.push(chalk.bold.yellow('  LEVEL RECOMMENDATION'));
-    lines.push(chalk.gray('  ' + '-'.repeat(50)));
-    const rec = result.recommendation;
-    const levelStr = `Level ${rec.level}`;
-
-    // Show confidence helpfully based on value
-    let confDisplay: string;
-    if (rec.confidence >= 0.6) {
-      confDisplay = chalk.green(`${Math.round(rec.confidence * 100)}% confidence`);
-    } else if (rec.confidence >= 0.4) {
-      confDisplay = chalk.yellow(`${Math.round(rec.confidence * 100)}% confidence`);
-    } else {
-      confDisplay = chalk.gray('needs more data');
-    }
-
-    lines.push(`  ${chalk.bold(levelStr)} (${confDisplay})`);
-  }
-
   // Overall rating
   lines.push('');
   lines.push(chalk.bold.cyan('-'.repeat(64)));

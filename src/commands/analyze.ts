@@ -8,18 +8,15 @@ import { formatJson } from '../output/json';
 import {
   OutputFormat,
   VibeCheckResultV2,
-  QuestionResponses,
-  CalibrationSample,
 } from '../types';
 import { calculateFileChurn } from '../metrics/file-churn';
 import { calculateTimeSpiral } from '../metrics/time-spiral';
 import { calculateVelocityAnomaly } from '../metrics/velocity-anomaly';
 import { calculateCodeStability } from '../metrics/code-stability';
 import { calculateVibeScore } from '../score';
-import { predictWithConfidence } from '../recommend';
-import { addSample, assessOutcome } from '../calibration';
-import { recordSession, loadProfile } from '../gamification/profile';
+import { recordSession } from '../gamification/profile';
 import { LEVELS } from '../gamification/types';
+import { loadSession, clearSession, LEVEL_INFO } from './start';
 
 export interface AnalyzeOptions {
   since?: string;
@@ -28,8 +25,6 @@ export interface AnalyzeOptions {
   repo: string;
   verbose: boolean;
   score: boolean;
-  recommend: boolean;
-  calibrate?: string;
   output?: string;
   simple: boolean;
 }
@@ -43,8 +38,6 @@ export function createAnalyzeCommand(): Command {
     .option('-r, --repo <path>', 'Repository path', process.cwd())
     .option('-v, --verbose', 'Show verbose output', false)
     .option('--score', 'Include VibeScore and code pattern metrics', false)
-    .option('--recommend', 'Include level recommendation', false)
-    .option('--calibrate <level>', 'Record calibration sample with declared level (0-5)')
     .option('-o, --output <file>', 'Write JSON results to file')
     .option('-s, --simple', 'Simplified output (fewer details)', false)
     .action(async (options) => {
@@ -56,7 +49,10 @@ export function createAnalyzeCommand(): Command {
 
 export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
   try {
-    const { since, until, format, repo, verbose, score, recommend, calibrate, output, simple } = options;
+    const { since, until, format, repo, verbose, score, output, simple } = options;
+
+    // Check for active session
+    const session = loadSession(repo);
 
     // Validate format
     const validFormats: OutputFormat[] = ['terminal', 'json', 'markdown'];
@@ -110,8 +106,9 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
       semanticMetrics: result.metrics,
     };
 
-    // Enhanced analysis if requested
-    if (score || recommend || calibrate !== undefined) {
+    // Enhanced analysis - always compute for session comparison
+    const needsEnhanced = score || session !== null;
+    if (needsEnhanced) {
       if (verbose) {
         console.error(chalk.gray('Computing semantic-free metrics...'));
       }
@@ -140,70 +137,6 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
         codeStability,
       });
       resultV2.vibeScore = vibeScore;
-
-      if (recommend) {
-        // Default questions (neutral for now)
-        const defaultQuestions: QuestionResponses = {
-          reversibility: 0,
-          blastRadius: 0,
-          verificationCost: 0,
-          domainComplexity: 0,
-          aiTrackRecord: 0,
-        };
-
-        const features = [
-          defaultQuestions.reversibility,
-          defaultQuestions.blastRadius,
-          defaultQuestions.verificationCost,
-          defaultQuestions.domainComplexity,
-          defaultQuestions.aiTrackRecord,
-          fileChurn.value / 100,
-          timeSpiral.value / 100,
-          velocityAnomaly.value / 100,
-          codeStability.value / 100,
-        ];
-
-        const prediction = predictWithConfidence(features);
-        resultV2.recommendation = {
-          level: prediction.level as 0 | 1 | 2 | 3 | 4 | 5,
-          confidence: Math.round(prediction.confidence * 100) / 100,
-          probabilities: prediction.probs,
-          ci: prediction.ci,
-          questions: defaultQuestions,
-        };
-      }
-
-      if (calibrate !== undefined) {
-        const declaredLevel = parseInt(calibrate, 10);
-        if (declaredLevel >= 0 && declaredLevel <= 5) {
-          const outcome = assessOutcome(vibeScore.value, declaredLevel);
-          const sample: CalibrationSample = {
-            timestamp: new Date(),
-            vibeScore: vibeScore.value,
-            declaredLevel: declaredLevel as 0 | 1 | 2 | 3 | 4 | 5,
-            outcome,
-            features: [
-              fileChurn.value / 100,
-              timeSpiral.value / 100,
-              velocityAnomaly.value / 100,
-              codeStability.value / 100,
-            ],
-            modelVersion: '2.0.0',
-          };
-          addSample(repo, sample);
-          if (verbose) {
-            console.error(
-              chalk.gray(
-                `Calibration sample recorded: Level ${declaredLevel} → Score ${vibeScore.value} (${outcome})`
-              )
-            );
-          }
-        } else {
-          console.error(
-            chalk.yellow(`Warning: Invalid calibrate level ${calibrate}, must be 0-5`)
-          );
-        }
-      }
     }
 
     // Write to file if requested (always JSON format)
@@ -218,6 +151,65 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
     // Output result to console
     const formattedOutput = formatOutput(resultV2, format as OutputFormat, { simple });
     console.log(formattedOutput);
+
+    // Session comparison (if session was active)
+    if (session && format === 'terminal' && resultV2.vibeScore) {
+      // Metrics are already in percentage form (e.g., 100 for 100%)
+      const trustPassRate = result.metrics.trustPassRate.value;
+      const reworkRatio = result.metrics.reworkRatio.value;
+      const levelInfo = LEVEL_INFO[session.level];
+
+      // Parse expectations (already in percentage form like ">65%")
+      const expectTrust = parseFloat(levelInfo.expectTrust.replace(/[><%]/g, ''));
+      const expectRework = parseFloat(levelInfo.expectRework.replace(/[<%]/g, ''));
+
+      // Calculate session duration
+      const startTime = new Date(session.startedAt);
+      const duration = Math.round((Date.now() - startTime.getTime()) / 60000);
+
+      console.log('');
+      console.log(chalk.bold.cyan('SESSION COMPLETE'));
+      console.log('');
+      console.log(`  Declared: Level ${session.level} - ${levelInfo.name} (${levelInfo.trust} trust)`);
+      console.log(`  Duration: ${duration} min, ${commits.length} commits`);
+      console.log('');
+
+      // Compare trust pass rate
+      const trustOk = trustPassRate >= expectTrust;
+      const trustIcon = trustOk ? chalk.green('✓') : chalk.yellow('⚠');
+      const trustExpect = `expected ${levelInfo.expectTrust}`;
+      console.log(`  Trust Pass:  ${Math.round(trustPassRate)}% (${trustExpect}) ${trustIcon}`);
+
+      // Compare rework ratio
+      const reworkOk = reworkRatio <= expectRework;
+      const reworkIcon = reworkOk ? chalk.green('✓') : chalk.yellow('⚠');
+      const reworkExpect = `expected ${levelInfo.expectRework}`;
+      console.log(`  Rework:      ${Math.round(reworkRatio)}% (${reworkExpect}) ${reworkIcon}`);
+
+      console.log('');
+
+      // Verdict
+      if (trustOk && reworkOk) {
+        console.log(chalk.green(`  ✓ Level ${session.level} was appropriate for this work`));
+      } else if (!trustOk && !reworkOk) {
+        const suggestedLevel = Math.max(0, session.level - 2);
+        console.log(chalk.yellow(`  ⚠ Level ${session.level} was too optimistic`));
+        console.log(chalk.gray(`    Consider Level ${suggestedLevel} for similar tasks`));
+      } else if (!trustOk) {
+        const suggestedLevel = Math.max(0, session.level - 1);
+        console.log(chalk.yellow(`  ⚠ Trust was lower than expected`));
+        console.log(chalk.gray(`    Consider Level ${suggestedLevel} for similar tasks`));
+      } else {
+        // High trust but also high rework - likely iteration pattern
+        console.log(chalk.blue(`  ℹ Good trust but high iteration`));
+        console.log(chalk.gray(`    This might be expected for exploratory work`));
+      }
+
+      console.log('');
+
+      // Clear the session
+      clearSession(repo);
+    }
 
     // Record session and show gamification (only for terminal format with score)
     if (format === 'terminal' && resultV2.vibeScore) {
