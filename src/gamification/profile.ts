@@ -16,6 +16,7 @@ import {
   updatePatternMemory,
   createInitialPatternMemory,
 } from './pattern-memory';
+import { createInitialInterventionMemory } from './intervention-memory';
 
 const PROFILE_DIR = '.vibe-check';
 const PROFILE_FILE = 'profile.json';
@@ -297,6 +298,11 @@ function migrateProfile(profile: UserProfile): UserProfile {
   // Initialize pattern memory if not present (v1.4.0+)
   if (!profile.patternMemory) {
     profile.patternMemory = createInitialPatternMemory();
+  }
+
+  // Initialize intervention memory if not present (v1.4.0+)
+  if (!profile.interventionMemory) {
+    profile.interventionMemory = createInitialInterventionMemory();
   }
 
   return profile;

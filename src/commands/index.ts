@@ -3,3 +3,4 @@ export { createStartCommand } from './start';
 export { createProfileCommand } from './profile';
 export { createInitHookCommand } from './init-hook';
 export { createWatchCommand } from './watch';
+export { createInterveneCommand } from './intervene';

@@ -10,6 +10,7 @@ import { formatLevel, formatXPProgress, getLevelProgress } from '../gamification
 import { LEVELS } from '../gamification/types';
 import { getAllAchievements } from '../gamification/achievements';
 import { formatPatternMemory } from '../gamification/pattern-memory';
+import { formatInterventionMemory } from '../gamification/intervention-memory';
 
 export function createProfileCommand(): Command {
   const cmd = new Command('profile')
@@ -17,6 +18,7 @@ export function createProfileCommand(): Command {
     .option('--achievements', 'Show all achievements', false)
     .option('--stats', 'Show detailed stats', false)
     .option('--patterns', 'Show spiral pattern memory (your triggers)', false)
+    .option('--interventions', 'Show intervention memory (what breaks spirals)', false)
     .option('--json', 'Output as JSON', false)
     .action(async (options) => {
       await runProfile(options);
@@ -29,6 +31,7 @@ async function runProfile(options: {
   achievements: boolean;
   stats: boolean;
   patterns: boolean;
+  interventions: boolean;
   json: boolean;
 }): Promise<void> {
   const profile = loadProfile();
@@ -94,6 +97,17 @@ async function runProfile(options: {
     console.log(chalk.cyan('│') + ''.padEnd(44) + chalk.cyan('│'));
   }
 
+  // Intervention Memory Summary
+  const interventionInfo = formatInterventionMemory(profile.interventionMemory);
+  if (interventionInfo.hasData) {
+    console.log(chalk.cyan('│') + chalk.bold('  🛠️  What Breaks Spirals').padEnd(52) + chalk.cyan('│'));
+    if (interventionInfo.topInterventions.length > 0) {
+      const top = interventionInfo.topInterventions[0];
+      console.log(chalk.cyan('│') + `  └─ Go-to: ${chalk.green(top.icon + ' ' + top.name)} (${top.count}×)`.padEnd(52) + chalk.cyan('│'));
+    }
+    console.log(chalk.cyan('│') + ''.padEnd(44) + chalk.cyan('│'));
+  }
+
   // Recent achievements
   const recentAchievements = achievements.slice(-3).reverse();
   if (recentAchievements.length > 0) {
@@ -122,6 +136,11 @@ async function runProfile(options: {
   // Show pattern memory if requested
   if (options.patterns) {
     showPatternMemory(profile.patternMemory);
+  }
+
+  // Show intervention memory if requested
+  if (options.interventions) {
+    showInterventionMemory(profile.interventionMemory);
   }
 }
 
@@ -239,6 +258,55 @@ function createPatternBar(count: number, total: number): string {
   const filled = Math.round(pct / 10);
   const empty = 10 - filled;
   return chalk.yellow('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
+}
+
+function createInterventionBar(count: number, total: number): string {
+  const pct = total > 0 ? (count / total) * 100 : 0;
+  const filled = Math.round(pct / 10);
+  const empty = 10 - filled;
+  return chalk.green('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
+}
+
+function showInterventionMemory(memory: any): void {
+  const interventionInfo = formatInterventionMemory(memory);
+
+  console.log(chalk.bold('\n🛠️  Intervention Memory - What Breaks Your Spirals\n'));
+
+  if (!interventionInfo.hasData) {
+    console.log(chalk.gray('  No interventions recorded yet.'));
+    console.log(chalk.gray('  When you break out of a spiral, record what helped:'));
+    console.log(chalk.gray('  vibe-check intervene TRACER_TEST --pattern SECRETS_AUTH'));
+    console.log();
+    return;
+  }
+
+  // Summary
+  console.log(chalk.bold('Summary'));
+  console.log(`  ${interventionInfo.summary}`);
+  console.log(`  Average spiral duration: ${chalk.bold(interventionInfo.avgTimeToIntervene.toString())} minutes`);
+  console.log();
+
+  // Top interventions
+  if (interventionInfo.topInterventions.length > 0) {
+    console.log(chalk.bold('Your Go-To Interventions'));
+    for (const int of interventionInfo.topInterventions) {
+      const bar = createInterventionBar(int.count, interventionInfo.totalInterventions);
+      console.log(`  ${int.icon} ${int.name.padEnd(15)} ${bar} ${int.count}×`);
+    }
+    console.log();
+  }
+
+  // Pattern-specific recommendations
+  if (interventionInfo.patternRecommendations.length > 0) {
+    console.log(chalk.bold('What Works by Pattern'));
+    for (const rec of interventionInfo.patternRecommendations) {
+      console.log(`  ${chalk.yellow(rec.pattern)}: ${rec.interventions.join(', ')}`);
+    }
+    console.log();
+  }
+
+  console.log(chalk.gray('Keep recording what breaks your spirals to build your playbook!'));
+  console.log();
 }
 
 export async function runProfile2(options: any): Promise<void> {

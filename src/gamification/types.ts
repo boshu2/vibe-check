@@ -57,6 +57,9 @@ export interface UserProfile {
   // Pattern memory - tracks spiral triggers over time
   patternMemory?: PatternMemory;
 
+  // Intervention memory - tracks what breaks spirals
+  interventionMemory?: InterventionMemory;
+
   // Preferences
   preferences: {
     weeklyGoal: number;
@@ -103,6 +106,45 @@ export interface PatternMemory {
   topComponents: string[];     // top 3 components by frequency
   avgRecoveryTime: number;     // average spiral duration in minutes
   totalSpirals: number;        // total spirals ever recorded
+}
+
+// ============================================
+// INTERVENTION TRACKING (v1.4.0)
+// ============================================
+
+// Types of interventions that can break spirals
+export type InterventionType =
+  | 'TRACER_TEST'    // Wrote a test to validate assumptions
+  | 'BREAK'          // Took a break (detected via commit gap)
+  | 'DOCS'           // Consulted documentation
+  | 'REFACTOR'       // Changed approach
+  | 'HELP'           // Asked for help (human or AI)
+  | 'ROLLBACK'       // Reverted to known good state
+  | 'OTHER';         // Custom intervention
+
+// Individual intervention record
+export interface InterventionRecord {
+  type: InterventionType;
+  spiralPattern?: string;     // The pattern that was being debugged
+  spiralComponent?: string;   // The component involved
+  spiralDuration: number;     // How long the spiral lasted (minutes)
+  date: string;               // ISO date
+  notes?: string;             // Optional user notes
+}
+
+// Aggregated intervention memory
+export interface InterventionMemory {
+  version: string;
+  records: InterventionRecord[];  // Historical records (last 100)
+
+  // Aggregated statistics
+  typeCounts: Record<string, number>;           // intervention type -> count
+  effectiveByPattern: Record<string, string[]>; // pattern -> [intervention types that worked]
+
+  // Computed insights
+  topInterventions: string[];    // top 3 most used intervention types
+  avgTimeToIntervene: number;    // average spiral duration before intervention
+  totalInterventions: number;
 }
 
 // Level progression
