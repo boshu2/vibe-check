@@ -1,8 +1,10 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { writeFileSync } from 'fs';
 import { getCommits, isGitRepo, getFileStats } from '../git';
 import { analyzeCommits } from '../metrics';
 import { formatOutput } from '../output';
+import { formatJson } from '../output/json';
 import {
   OutputFormat,
   VibeCheckResultV2,
@@ -28,6 +30,7 @@ export interface AnalyzeOptions {
   score: boolean;
   recommend: boolean;
   calibrate?: string;
+  output?: string;
 }
 
 export function createAnalyzeCommand(): Command {
@@ -41,6 +44,7 @@ export function createAnalyzeCommand(): Command {
     .option('--score', 'Include VibeScore (semantic-free metrics)', false)
     .option('--recommend', 'Include level recommendation', false)
     .option('--calibrate <level>', 'Record calibration sample with declared level (0-5)')
+    .option('-o, --output <file>', 'Write JSON results to file')
     .action(async (options) => {
       await runAnalyze(options);
     });
@@ -50,7 +54,7 @@ export function createAnalyzeCommand(): Command {
 
 export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
   try {
-    const { since, until, format, repo, verbose, score, recommend, calibrate } = options;
+    const { since, until, format, repo, verbose, score, recommend, calibrate, output } = options;
 
     // Validate format
     const validFormats: OutputFormat[] = ['terminal', 'json', 'markdown'];
@@ -200,9 +204,18 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
       }
     }
 
-    // Output result
-    const output = formatOutput(resultV2, format as OutputFormat);
-    console.log(output);
+    // Write to file if requested (always JSON format)
+    if (output) {
+      const jsonOutput = formatJson(resultV2);
+      writeFileSync(output, jsonOutput);
+      if (verbose) {
+        console.error(chalk.gray(`Results written to: ${output}`));
+      }
+    }
+
+    // Output result to console
+    const formattedOutput = formatOutput(resultV2, format as OutputFormat);
+    console.log(formattedOutput);
 
     // Record session and show gamification (only for terminal format with score)
     if (format === 'terminal' && resultV2.vibeScore) {

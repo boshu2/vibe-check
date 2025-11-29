@@ -29,6 +29,7 @@ program
   .option('--score', 'Include VibeScore (semantic-free metrics)', false)
   .option('--recommend', 'Include level recommendation', false)
   .option('--calibrate <level>', 'Record calibration sample with declared level (0-5)')
+  .option('-o, --output <file>', 'Write JSON results to file')
   .action(async (options) => {
     // Default action runs analyze (backwards compatibility)
     await runAnalyze({
@@ -40,6 +41,7 @@ program
       score: options.score,
       recommend: options.recommend,
       calibrate: options.calibrate,
+      output: options.output,
     });
   });
 

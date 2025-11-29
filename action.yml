@@ -1,0 +1,270 @@
+name: 'Vibe Check'
+description: 'Analyze git commit patterns and post vibe coding metrics to PR comments'
+author: 'boshu2'
+branding:
+  icon: 'activity'
+  color: 'purple'
+
+inputs:
+  github-token:
+    description: 'GitHub token for posting PR comments'
+    required: true
+    default: ${{ github.token }}
+  since:
+    description: 'Start date for analysis (e.g., "1 week ago", or leave empty for PR commits only)'
+    required: false
+    default: ''
+  threshold:
+    description: 'Minimum overall rating to pass (elite, solid, needs-work, struggling)'
+    required: false
+    default: ''
+  include-score:
+    description: 'Include VibeScore in output'
+    required: false
+    default: 'true'
+  include-recommendation:
+    description: 'Include level recommendation in output'
+    required: false
+    default: 'true'
+  output-file:
+    description: 'Path to write JSON results (optional)'
+    required: false
+    default: ''
+  comment-on-pr:
+    description: 'Post results as PR comment'
+    required: false
+    default: 'true'
+
+outputs:
+  overall:
+    description: 'Overall rating (elite, solid, needs-work, struggling)'
+    value: ${{ steps.vibe-check.outputs.overall }}
+  vibe-score:
+    description: 'Numeric vibe score (0-100)'
+    value: ${{ steps.vibe-check.outputs.vibe-score }}
+  json:
+    description: 'Full JSON results'
+    value: ${{ steps.vibe-check.outputs.json }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install vibe-check
+      shell: bash
+      run: npm install -g @boshu2/vibe-check
+
+    - name: Fetch full git history
+      shell: bash
+      run: |
+        git fetch --unshallow 2>/dev/null || true
+        git fetch origin ${{ github.base_ref }} 2>/dev/null || true
+
+    - name: Run vibe-check
+      id: vibe-check
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        # Determine the date range
+        if [ -n "${{ inputs.since }}" ]; then
+          SINCE_ARG="--since \"${{ inputs.since }}\""
+        elif [ "${{ github.event_name }}" = "pull_request" ]; then
+          # For PRs, analyze commits since the base branch
+          BASE_SHA=$(git merge-base origin/${{ github.base_ref }} HEAD 2>/dev/null || echo "")
+          if [ -n "$BASE_SHA" ]; then
+            BASE_DATE=$(git show -s --format=%ci $BASE_SHA)
+            SINCE_ARG="--since \"$BASE_DATE\""
+          else
+            SINCE_ARG="--since \"1 week ago\""
+          fi
+        else
+          SINCE_ARG="--since \"1 week ago\""
+        fi
+
+        # Build command
+        CMD="vibe-check"
+        [ "${{ inputs.include-score }}" = "true" ] && CMD="$CMD --score"
+        [ "${{ inputs.include-recommendation }}" = "true" ] && CMD="$CMD --recommend"
+
+        # Run with JSON output
+        echo "Running: $CMD $SINCE_ARG --format json"
+        RESULT=$(eval "$CMD $SINCE_ARG --format json" 2>&1) || true
+
+        # Parse results
+        if echo "$RESULT" | jq . > /dev/null 2>&1; then
+          OVERALL=$(echo "$RESULT" | jq -r '.overall')
+          VIBE_SCORE=$(echo "$RESULT" | jq -r '.vibeScore // "N/A"')
+
+          echo "overall=$OVERALL" >> $GITHUB_OUTPUT
+          echo "vibe-score=$VIBE_SCORE" >> $GITHUB_OUTPUT
+
+          # Save JSON (escape for multiline)
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "json<<$EOF" >> $GITHUB_OUTPUT
+          echo "$RESULT" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+
+          # Write to file if requested
+          if [ -n "${{ inputs.output-file }}" ]; then
+            echo "$RESULT" > "${{ inputs.output-file }}"
+            echo "Results written to ${{ inputs.output-file }}"
+          fi
+        else
+          echo "overall=error" >> $GITHUB_OUTPUT
+          echo "vibe-score=0" >> $GITHUB_OUTPUT
+          echo "json={\"error\": \"Failed to parse vibe-check output\"}" >> $GITHUB_OUTPUT
+          echo "::warning::vibe-check output was not valid JSON: $RESULT"
+        fi
+
+    - name: Generate markdown comment
+      id: markdown
+      if: inputs.comment-on-pr == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      run: |
+        JSON='${{ steps.vibe-check.outputs.json }}'
+
+        # Parse metrics
+        OVERALL=$(echo "$JSON" | jq -r '.overall')
+        COMMITS=$(echo "$JSON" | jq -r '.commits')
+        VIBE_SCORE=$(echo "$JSON" | jq -r '.vibeScore // "N/A"')
+
+        # Get individual metrics
+        VELOCITY=$(echo "$JSON" | jq -r '.metrics.iterationVelocity.value')
+        VELOCITY_RATING=$(echo "$JSON" | jq -r '.metrics.iterationVelocity.rating')
+        REWORK=$(echo "$JSON" | jq -r '.metrics.reworkRatio.value')
+        REWORK_RATING=$(echo "$JSON" | jq -r '.metrics.reworkRatio.rating')
+        TRUST=$(echo "$JSON" | jq -r '.metrics.trustPassRate.value')
+        TRUST_RATING=$(echo "$JSON" | jq -r '.metrics.trustPassRate.rating')
+        SPIRAL=$(echo "$JSON" | jq -r '.metrics.debugSpiralDuration.value')
+        SPIRAL_RATING=$(echo "$JSON" | jq -r '.metrics.debugSpiralDuration.rating')
+        FLOW=$(echo "$JSON" | jq -r '.metrics.flowEfficiency.value')
+        FLOW_RATING=$(echo "$JSON" | jq -r '.metrics.flowEfficiency.rating')
+
+        # Map ratings to emoji
+        rating_emoji() {
+          case "$1" in
+            elite) echo "🟢" ;;
+            solid) echo "🔵" ;;
+            needs-work) echo "🟡" ;;
+            struggling) echo "🔴" ;;
+            *) echo "⚪" ;;
+          esac
+        }
+
+        # Overall emoji
+        case "$OVERALL" in
+          elite) OVERALL_EMOJI="🚀" ;;
+          solid) OVERALL_EMOJI="✅" ;;
+          needs-work) OVERALL_EMOJI="⚠️" ;;
+          struggling) OVERALL_EMOJI="🔴" ;;
+          *) OVERALL_EMOJI="❓" ;;
+        esac
+
+        # Build comment
+        COMMENT="## $OVERALL_EMOJI Vibe Check: **${OVERALL^^}**
+
+**Commits analyzed:** $COMMITS"
+
+        [ "$VIBE_SCORE" != "N/A" ] && [ "$VIBE_SCORE" != "null" ] && COMMENT="$COMMENT | **VibeScore:** $VIBE_SCORE/100"
+
+        COMMENT="$COMMENT
+
+| Metric | Value | Rating |
+|--------|-------|--------|
+| Iteration Velocity | ${VELOCITY}/hr | $(rating_emoji $VELOCITY_RATING) $VELOCITY_RATING |
+| Rework Ratio | ${REWORK}% | $(rating_emoji $REWORK_RATING) $REWORK_RATING |
+| Trust Pass Rate | ${TRUST}% | $(rating_emoji $TRUST_RATING) $TRUST_RATING |
+| Debug Spiral Duration | ${SPIRAL}m | $(rating_emoji $SPIRAL_RATING) $SPIRAL_RATING |
+| Flow Efficiency | ${FLOW}% | $(rating_emoji $FLOW_RATING) $FLOW_RATING |
+
+<details>
+<summary>What do these metrics mean?</summary>
+
+- **Iteration Velocity**: Commits per active hour (higher = faster iteration)
+- **Rework Ratio**: Percentage of commits that are fixes (lower = cleaner first attempts)
+- **Trust Pass Rate**: Commits without immediate follow-up fixes (higher = more reliable)
+- **Debug Spiral Duration**: Average time stuck in fix chains (lower = faster recovery)
+- **Flow Efficiency**: Time building vs debugging (higher = more productive)
+
+</details>
+
+---
+*Generated by [vibe-check](https://github.com/boshu2/vibe-check)*"
+
+        # Save comment for next step
+        EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+        echo "comment<<$EOF" >> $GITHUB_OUTPUT
+        echo "$COMMENT" >> $GITHUB_OUTPUT
+        echo "$EOF" >> $GITHUB_OUTPUT
+
+    - name: Post PR comment
+      if: inputs.comment-on-pr == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const comment = `${{ steps.markdown.outputs.comment }}`;
+
+          // Find existing vibe-check comment
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+
+          const existingComment = comments.find(c =>
+            c.body.includes('Generated by [vibe-check]')
+          );
+
+          if (existingComment) {
+            // Update existing comment
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existingComment.id,
+              body: comment
+            });
+            console.log('Updated existing vibe-check comment');
+          } else {
+            // Create new comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+            console.log('Created new vibe-check comment');
+          }
+
+    - name: Check threshold
+      if: inputs.threshold != ''
+      shell: bash
+      run: |
+        OVERALL="${{ steps.vibe-check.outputs.overall }}"
+        THRESHOLD="${{ inputs.threshold }}"
+
+        # Rating order (higher = better)
+        rating_to_num() {
+          case "$1" in
+            elite) echo 4 ;;
+            solid) echo 3 ;;
+            needs-work) echo 2 ;;
+            struggling) echo 1 ;;
+            *) echo 0 ;;
+          esac
+        }
+
+        ACTUAL=$(rating_to_num "$OVERALL")
+        REQUIRED=$(rating_to_num "$THRESHOLD")
+
+        if [ "$ACTUAL" -lt "$REQUIRED" ]; then
+          echo "::error::Vibe check failed: $OVERALL is below threshold $THRESHOLD"
+          exit 1
+        else
+          echo "Vibe check passed: $OVERALL meets threshold $THRESHOLD"
+        fi

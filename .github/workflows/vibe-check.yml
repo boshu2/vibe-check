@@ -1,0 +1,31 @@
+# Example workflow for using vibe-check GitHub Action
+# Copy this to your repo's .github/workflows/vibe-check.yml
+
+name: Vibe Check
+
+on:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  vibe-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history needed for analysis
+
+      - name: Run Vibe Check
+        uses: boshu2/vibe-check@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          include-score: true
+          include-recommendation: true
+          # Optional: fail if below threshold
+          # threshold: 'solid'
+          # Optional: save results to file
+          # output-file: 'vibe-check-results.json'

@@ -128,8 +128,95 @@ When vibe-check detects 3+ consecutive fix commits on the same component, it fla
 --until <date>       End date (default: now)
 -f, --format <type>  Output: terminal, json, markdown
 -r, --repo <path>    Repository path (default: current directory)
+-o, --output <file>  Write JSON results to file
 -v, --verbose        Show detailed output
+--score              Include VibeScore (semantic-free metrics)
+--recommend          Include level recommendation
 -h, --help           Display help
+```
+
+### Save Results to JSON
+
+```bash
+# Write JSON to file while showing terminal output
+vibe-check --since "1 week ago" --score -o results.json
+
+# Combine with other formats
+vibe-check --format markdown -o results.json  # Terminal gets markdown, file gets JSON
+```
+
+## GitHub Action
+
+Add automated vibe-check to your PRs:
+
+```yaml
+# .github/workflows/vibe-check.yml
+name: Vibe Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  vibe-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Vibe Check
+        uses: boshu2/vibe-check@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Action Inputs
+
+| Input | Description | Default |
+|-------|-------------|---------|
+| `github-token` | GitHub token for PR comments | `${{ github.token }}` |
+| `since` | Start date for analysis | PR base commit |
+| `threshold` | Minimum rating to pass (elite, solid, needs-work) | none |
+| `include-score` | Include VibeScore | `true` |
+| `include-recommendation` | Include level recommendation | `true` |
+| `output-file` | Path to write JSON results | none |
+| `comment-on-pr` | Post results as PR comment | `true` |
+
+### Action Outputs
+
+| Output | Description |
+|--------|-------------|
+| `overall` | Overall rating (elite, solid, needs-work, struggling) |
+| `vibe-score` | Numeric score (0-100) |
+| `json` | Full JSON results |
+
+### Example: Fail PR if Below Threshold
+
+```yaml
+- uses: boshu2/vibe-check@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    threshold: 'solid'  # Fails if below solid
+```
+
+### Example: Save Results to File
+
+```yaml
+- uses: boshu2/vibe-check@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    output-file: 'vibe-check-results.json'
+
+- name: Upload results
+  uses: actions/upload-artifact@v4
+  with:
+    name: vibe-check-results
+    path: vibe-check-results.json
 ```
 
 ## Requirements
