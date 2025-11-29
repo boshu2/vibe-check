@@ -98,7 +98,7 @@ export function getDaysUntilExpiry(streak: StreakState): number {
 }
 
 /**
- * Format streak for display
+ * Format streak for display with visual progression
  */
 export function formatStreak(streak: StreakState): string {
   if (streak.current === 0) {
@@ -106,15 +106,50 @@ export function formatStreak(streak: StreakState): string {
   }
 
   const isPersonalBest = streak.current === streak.longest && streak.current > 1;
-  const fire = '🔥'.repeat(Math.min(streak.current, 5));
 
-  let text = `${fire} ${streak.current}-day streak`;
+  // Visual progression: 🔥 (1-5) → 🌟 (6-14) → 👑 (15+)
+  let icon: string;
+  if (streak.current >= 15) {
+    icon = '👑';
+  } else if (streak.current >= 6) {
+    icon = '🌟';
+  } else {
+    icon = '🔥';
+  }
+
+  // Multiple icons for emphasis
+  const repeatCount = Math.min(Math.ceil(streak.current / 5), 3);
+  const icons = icon.repeat(repeatCount);
+
+  let text = `${icons} ${streak.current}-day streak`;
 
   if (isPersonalBest && streak.current > 7) {
-    text += ' (Personal best!)';
+    text += ' 🏆 (Personal Best!)';
   }
 
   return text;
+}
+
+/**
+ * Format streak with risk indicator
+ */
+export function formatStreakWithRisk(streak: StreakState): string {
+  const base = formatStreak(streak);
+  const daysUntil = getDaysUntilExpiry(streak);
+
+  if (streak.current > 0 && daysUntil <= 1) {
+    return `${base}\n⚠️  Streak at risk! Check in today to keep it alive`;
+  }
+
+  return base;
+}
+
+/**
+ * Format freezes display
+ */
+export function formatFreezes(streak: StreakState): string {
+  const freezeIcon = '❄️';
+  return `${freezeIcon} ${streak.freezesRemaining} freeze${streak.freezesRemaining !== 1 ? 's' : ''} available`;
 }
 
 /**

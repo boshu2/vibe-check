@@ -209,7 +209,7 @@ describe('Streaks', () => {
       expect(formatted).toContain('3-day streak');
     });
 
-    it('caps fire emoji at 5', () => {
+    it('uses star emoji for 6-14 day streaks', () => {
       const streak: StreakState = {
         current: 10,
         longest: 10,
@@ -220,7 +220,8 @@ describe('Streaks', () => {
       };
 
       const formatted = formatStreak(streak);
-      expect(formatted.match(/🔥/g)?.length).toBe(5);
+      expect(formatted).toContain('🌟');
+      expect(formatted).toContain('10-day streak');
     });
 
     it('shows personal best for 7+ day record', () => {
@@ -234,7 +235,7 @@ describe('Streaks', () => {
       };
 
       const formatted = formatStreak(streak);
-      expect(formatted).toContain('Personal best');
+      expect(formatted).toContain('Personal Best');
     });
   });
 

@@ -5,12 +5,18 @@ import {
   getAchievementCounts,
   getRecentSessions,
 } from '../gamification/profile';
-import { formatStreak, formatWeeklyProgress } from '../gamification/streaks';
+import { formatStreak, formatStreakWithRisk, formatFreezes, formatWeeklyProgress } from '../gamification/streaks';
 import { formatLevel, formatXPProgress, getLevelProgress } from '../gamification/xp';
-import { LEVELS } from '../gamification/types';
+import { LEVELS, PRESTIGE_TIERS } from '../gamification/types';
 import { getAllAchievements } from '../gamification/achievements';
 import { formatPatternMemory } from '../gamification/pattern-memory';
 import { formatInterventionMemory } from '../gamification/intervention-memory';
+import { getCurrentChallenges, formatChallenges, Challenge } from '../gamification/challenges';
+import { loadLeaderboards, formatLeaderboard } from '../gamification/leaderboards';
+import { getHallOfFame, formatHallOfFame } from '../gamification/hall-of-fame';
+import { getWeeklyStats, formatWeeklyStats } from '../gamification/stats';
+import { getCurrentBadge, getNextBadge, formatBadge } from '../gamification/badges';
+import { createShareableProfile, formatShareText, formatShareJSON } from '../gamification/share';
 
 export function createProfileCommand(): Command {
   const cmd = new Command('profile')
@@ -19,6 +25,12 @@ export function createProfileCommand(): Command {
     .option('--stats', 'Show detailed stats', false)
     .option('--patterns', 'Show spiral pattern memory (your triggers)', false)
     .option('--interventions', 'Show intervention memory (what breaks spirals)', false)
+    .option('--challenges', 'Show weekly challenges', false)
+    .option('--leaderboard', 'Show personal leaderboard', false)
+    .option('--hall-of-fame', 'Show Hall of Fame records', false)
+    .option('--weekly', 'Show this week stats', false)
+    .option('--share', 'Output shareable profile text', false)
+    .option('--share-json', 'Output shareable profile as JSON', false)
     .option('--json', 'Output as JSON', false)
     .action(async (options) => {
       await runProfile(options);
@@ -32,9 +44,28 @@ async function runProfile(options: {
   stats: boolean;
   patterns: boolean;
   interventions: boolean;
+  challenges: boolean;
+  leaderboard: boolean;
+  'hall-of-fame': boolean;
+  weekly: boolean;
+  share: boolean;
+  'share-json': boolean;
   json: boolean;
 }): Promise<void> {
   const profile = loadProfile();
+
+  // Handle share options first (standalone output)
+  if (options.share) {
+    const shareable = createShareableProfile(profile);
+    console.log(formatShareText(shareable));
+    return;
+  }
+
+  if (options['share-json']) {
+    const shareable = createShareableProfile(profile);
+    console.log(formatShareJSON(shareable));
+    return;
+  }
 
   if (options.json) {
     console.log(JSON.stringify(profile, null, 2));
@@ -46,81 +77,122 @@ async function runProfile(options: {
   const achievementCounts = getAchievementCounts(profile);
   const recentSessions = getRecentSessions(profile, 30);
 
+  // Get badge
+  const badge = getCurrentBadge(stats.totalSessions, streak.longest, xp.total);
+  const nextBadge = getNextBadge(stats.totalSessions, streak.longest, xp.total);
+
   // Header
   console.log();
-  console.log(chalk.cyan('╭─────────────────────────────────────────────╮'));
-  console.log(chalk.cyan('│') + chalk.bold.white('           Your Vibe Profile                 ') + chalk.cyan('│'));
-  console.log(chalk.cyan('├─────────────────────────────────────────────┤'));
+  console.log(chalk.cyan('╭─────────────────────────────────────────────────────────╮'));
 
-  // Level
+  // Title with prestige and badge
+  const prestigeStr = xp.prestigeTier ? ` ${PRESTIGE_TIERS[xp.prestigeTier - 1].icon}` : '';
+  const badgeStr = badge ? `  ${badge.icon} ${badge.name}` : '';
+  const titleLine = `${levelInfo.icon}${prestigeStr} ${xp.levelName}${badgeStr}`;
+  console.log(chalk.cyan('│') + chalk.bold.white(`  ${titleLine}`).padEnd(66) + chalk.cyan('│'));
+  console.log(chalk.cyan('├─────────────────────────────────────────────────────────┤'));
+
+  // Level/XP
   const levelBar = createProgressBar(getLevelProgress(xp), 20);
-  console.log(chalk.cyan('│') + `  ${levelInfo.icon} ${chalk.bold(`Level ${xp.level} ${xp.levelName}`)}`.padEnd(52) + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + `  ${levelBar}  ${chalk.gray(`${xp.currentLevelXP}/${xp.nextLevelXP} XP`)}`.padEnd(60) + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + ''.padEnd(44) + chalk.cyan('│'));
+  const xpDisplay = xp.nextLevelXP === Infinity ? `${xp.total} XP (MAX)` : `${xp.currentLevelXP}/${xp.nextLevelXP} XP`;
+  console.log(chalk.cyan('│') + `  ${levelBar}  ${chalk.gray(xpDisplay)}`.padEnd(66) + chalk.cyan('│'));
+  console.log(chalk.cyan('│') + ''.padEnd(56) + chalk.cyan('│'));
 
-  // Streak
-  const streakDisplay = streak.current > 0
-    ? `🔥 Current Streak: ${chalk.bold(streak.current.toString())} days${streak.current === streak.longest ? chalk.yellow(' (Best!)') : ''}`
-    : '🔥 No active streak';
-  console.log(chalk.cyan('│') + `  ${streakDisplay}`.padEnd(52) + chalk.cyan('│'));
+  // Streak with enhanced display
+  const streakDisplay = formatStreak(streak);
+  console.log(chalk.cyan('│') + `  ${streakDisplay}`.padEnd(66) + chalk.cyan('│'));
+
+  // Freezes
+  const freezeDisplay = formatFreezes(streak);
+  console.log(chalk.cyan('│') + `  ${freezeDisplay}`.padEnd(66) + chalk.cyan('│'));
 
   const weeklyBar = createProgressBar((streak.weeklyProgress / streak.weeklyGoal) * 100, 5);
-  console.log(chalk.cyan('│') + `  📅 Weekly Goal: ${streak.weeklyProgress}/${streak.weeklyGoal} ${weeklyBar}`.padEnd(52) + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + `  🏆 Achievements: ${achievementCounts.unlocked}/${achievementCounts.total} unlocked`.padEnd(52) + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + ''.padEnd(44) + chalk.cyan('│'));
+  console.log(chalk.cyan('│') + `  📅 Weekly Goal: ${streak.weeklyProgress}/${streak.weeklyGoal} ${weeklyBar}`.padEnd(66) + chalk.cyan('│'));
+  console.log(chalk.cyan('│') + `  🏆 Achievements: ${achievementCounts.unlocked}/${achievementCounts.total} unlocked`.padEnd(66) + chalk.cyan('│'));
+  console.log(chalk.cyan('│') + ''.padEnd(56) + chalk.cyan('│'));
+
+  // Weekly Challenges Section
+  const challenges = getCurrentChallenges(profile);
+  if (challenges.length > 0) {
+    console.log(chalk.cyan('├─────────────────────────────────────────────────────────┤'));
+    console.log(chalk.cyan('│') + chalk.bold.yellow('  WEEKLY CHALLENGES').padEnd(66) + chalk.cyan('│'));
+    for (const c of challenges) {
+      const progressBar = createChallengeBar(c.progress, c.target, 10);
+      const status = c.completed
+        ? chalk.green(`✓ COMPLETE (+${c.reward} XP)`)
+        : `${c.progress}/${c.target}`;
+      console.log(chalk.cyan('│') + `  ${c.icon} ${c.name}: ${progressBar} ${status}`.padEnd(66) + chalk.cyan('│'));
+    }
+    console.log(chalk.cyan('│') + ''.padEnd(56) + chalk.cyan('│'));
+  }
+
+  // Weekly Stats Section
+  const weeklyStats = getWeeklyStats(profile.sessions);
+  if (weeklyStats.sessions > 0) {
+    console.log(chalk.cyan('├─────────────────────────────────────────────────────────┤'));
+    console.log(chalk.cyan('│') + chalk.bold('  📅 THIS WEEK').padEnd(66) + chalk.cyan('│'));
+    console.log(chalk.cyan('│') + `     Avg Score: ${weeklyStats.avgScore}% ${weeklyStats.trend.emoji}`.padEnd(66) + chalk.cyan('│'));
+    console.log(chalk.cyan('│') + `     Sessions: ${weeklyStats.sessions} | XP: ${weeklyStats.xpEarned}`.padEnd(66) + chalk.cyan('│'));
+    if (weeklyStats.sparkline) {
+      console.log(chalk.cyan('│') + `     Trend: ${weeklyStats.sparkline}`.padEnd(66) + chalk.cyan('│'));
+    }
+    console.log(chalk.cyan('│') + ''.padEnd(56) + chalk.cyan('│'));
+  }
 
   // 30-Day Stats
-  console.log(chalk.cyan('│') + chalk.bold('  📊 30-Day Stats').padEnd(52) + chalk.cyan('│'));
+  console.log(chalk.cyan('├─────────────────────────────────────────────────────────┤'));
+  console.log(chalk.cyan('│') + chalk.bold('  📊 30-Day Stats').padEnd(66) + chalk.cyan('│'));
 
   const avgScore = recentSessions.length > 0
     ? Math.round(recentSessions.reduce((sum, s) => sum + s.vibeScore, 0) / recentSessions.length)
     : 0;
   const totalCommits = recentSessions.reduce((sum, s) => sum + s.commits, 0);
 
-  console.log(chalk.cyan('│') + `  ├─ Avg Vibe Score: ${chalk.bold(avgScore.toString())}%`.padEnd(52) + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + `  ├─ Sessions: ${chalk.bold(recentSessions.length.toString())}`.padEnd(52) + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + `  ├─ Commits Analyzed: ${chalk.bold(totalCommits.toString())}`.padEnd(52) + chalk.cyan('│'));
+  console.log(chalk.cyan('│') + `  ├─ Avg Vibe Score: ${chalk.bold(avgScore.toString())}%`.padEnd(66) + chalk.cyan('│'));
+  console.log(chalk.cyan('│') + `  ├─ Sessions: ${chalk.bold(recentSessions.length.toString())}`.padEnd(66) + chalk.cyan('│'));
+  console.log(chalk.cyan('│') + `  ├─ Commits Analyzed: ${chalk.bold(totalCommits.toString())}`.padEnd(66) + chalk.cyan('│'));
 
   const spiralsAvoided = recentSessions.filter(s => s.spirals === 0 && s.commits >= 10).length;
-  console.log(chalk.cyan('│') + `  └─ Zero-Spiral Sessions: ${chalk.bold(spiralsAvoided.toString())}`.padEnd(52) + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + ''.padEnd(44) + chalk.cyan('│'));
+  console.log(chalk.cyan('│') + `  └─ Zero-Spiral Sessions: ${chalk.bold(spiralsAvoided.toString())}`.padEnd(66) + chalk.cyan('│'));
+  console.log(chalk.cyan('│') + ''.padEnd(56) + chalk.cyan('│'));
 
   // Pattern Memory Summary
   const patternInfo = formatPatternMemory(profile.patternMemory || { version: '1.0.0', records: [], patternCounts: {}, componentCounts: {}, patternDurations: {}, topPatterns: [], topComponents: [], avgRecoveryTime: 0, totalSpirals: 0 });
   if (patternInfo.hasData) {
-    console.log(chalk.cyan('│') + chalk.bold('  🧠 Spiral Triggers').padEnd(52) + chalk.cyan('│'));
+    console.log(chalk.cyan('│') + chalk.bold('  🧠 Spiral Triggers').padEnd(66) + chalk.cyan('│'));
     if (patternInfo.topPatterns.length > 0) {
       const topTrigger = patternInfo.topPatterns[0];
-      console.log(chalk.cyan('│') + `  └─ Top: ${chalk.yellow(topTrigger.displayName)} (${topTrigger.count}×)`.padEnd(52) + chalk.cyan('│'));
+      console.log(chalk.cyan('│') + `  └─ Top: ${chalk.yellow(topTrigger.displayName)} (${topTrigger.count}×)`.padEnd(66) + chalk.cyan('│'));
     }
-    console.log(chalk.cyan('│') + `     Avg recovery: ${chalk.gray(patternInfo.avgRecoveryTime + ' min')}`.padEnd(52) + chalk.cyan('│'));
-    console.log(chalk.cyan('│') + ''.padEnd(44) + chalk.cyan('│'));
+    console.log(chalk.cyan('│') + `     Avg recovery: ${chalk.gray(patternInfo.avgRecoveryTime + ' min')}`.padEnd(66) + chalk.cyan('│'));
+    console.log(chalk.cyan('│') + ''.padEnd(56) + chalk.cyan('│'));
   }
 
   // Intervention Memory Summary
   const interventionInfo = formatInterventionMemory(profile.interventionMemory);
   if (interventionInfo.hasData) {
-    console.log(chalk.cyan('│') + chalk.bold('  🛠️  What Breaks Spirals').padEnd(52) + chalk.cyan('│'));
+    console.log(chalk.cyan('│') + chalk.bold('  🛠️  What Breaks Spirals').padEnd(66) + chalk.cyan('│'));
     if (interventionInfo.topInterventions.length > 0) {
       const top = interventionInfo.topInterventions[0];
-      console.log(chalk.cyan('│') + `  └─ Go-to: ${chalk.green(top.icon + ' ' + top.name)} (${top.count}×)`.padEnd(52) + chalk.cyan('│'));
+      console.log(chalk.cyan('│') + `  └─ Go-to: ${chalk.green(top.icon + ' ' + top.name)} (${top.count}×)`.padEnd(66) + chalk.cyan('│'));
     }
-    console.log(chalk.cyan('│') + ''.padEnd(44) + chalk.cyan('│'));
+    console.log(chalk.cyan('│') + ''.padEnd(56) + chalk.cyan('│'));
   }
 
   // Recent achievements
   const recentAchievements = achievements.slice(-3).reverse();
   if (recentAchievements.length > 0) {
-    console.log(chalk.cyan('│') + chalk.bold('  Recent Achievements:').padEnd(52) + chalk.cyan('│'));
+    console.log(chalk.cyan('├─────────────────────────────────────────────────────────┤'));
+    console.log(chalk.cyan('│') + chalk.bold('  Recent Achievements:').padEnd(66) + chalk.cyan('│'));
     for (const ach of recentAchievements) {
       const dateStr = ach.unlockedAt
         ? new Date(ach.unlockedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
         : '';
-      console.log(chalk.cyan('│') + `  ${ach.icon} ${ach.name} ${chalk.gray(`(${dateStr})`)}`.padEnd(52) + chalk.cyan('│'));
+      console.log(chalk.cyan('│') + `  ${ach.icon} ${ach.name} ${chalk.gray(`(${dateStr})`)}`.padEnd(66) + chalk.cyan('│'));
     }
   }
 
-  console.log(chalk.cyan('╰─────────────────────────────────────────────╯'));
+  console.log(chalk.cyan('╰─────────────────────────────────────────────────────────╯'));
   console.log();
 
   // Show all achievements if requested
@@ -142,12 +214,70 @@ async function runProfile(options: {
   if (options.interventions) {
     showInterventionMemory(profile.interventionMemory);
   }
+
+  // Show challenges if requested
+  if (options.challenges) {
+    showChallenges(challenges);
+  }
+
+  // Show leaderboard if requested
+  if (options.leaderboard) {
+    const leaderboards = loadLeaderboards();
+    console.log(chalk.bold('\n🏆 Personal Leaderboard\n'));
+    console.log(formatLeaderboard(leaderboards));
+    console.log();
+  }
+
+  // Show Hall of Fame if requested
+  if (options['hall-of-fame']) {
+    const leaderboards = loadLeaderboards();
+    const records = getHallOfFame(leaderboards);
+    console.log('\n' + formatHallOfFame(records));
+  }
+
+  // Show weekly stats if requested
+  if (options.weekly) {
+    console.log(chalk.bold('\n📅 Weekly Statistics\n'));
+    console.log(formatWeeklyStats(weeklyStats));
+    console.log();
+  }
 }
 
 function createProgressBar(percent: number, length: number): string {
   const filled = Math.round((percent / 100) * length);
   const empty = length - filled;
   return chalk.green('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
+}
+
+function createChallengeBar(current: number, total: number, length: number): string {
+  const pct = Math.min(current / total, 1);
+  const filled = Math.round(pct * length);
+  const empty = length - filled;
+  return chalk.yellow('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
+}
+
+function showChallenges(challenges: Challenge[]): void {
+  console.log(chalk.bold('\n🎯 Weekly Challenges\n'));
+
+  if (challenges.length === 0) {
+    console.log(chalk.gray('  No challenges available this week.'));
+    console.log();
+    return;
+  }
+
+  for (const c of challenges) {
+    const progressBar = createChallengeBar(c.progress, c.target, 15);
+    const pct = Math.round((c.progress / c.target) * 100);
+    const status = c.completed
+      ? chalk.green('✓ COMPLETE')
+      : chalk.gray(`${pct}%`);
+
+    console.log(`  ${c.icon} ${chalk.bold(c.name)}`);
+    console.log(`     ${c.description}`);
+    console.log(`     ${progressBar} ${c.progress}/${c.target} ${status}`);
+    console.log(`     Reward: ${chalk.yellow(`+${c.reward} XP`)}`);
+    console.log();
+  }
 }
 
 function showAllAchievements(unlockedAchievements: { id: string; name: string; icon: string; unlockedAt?: string }[]): void {

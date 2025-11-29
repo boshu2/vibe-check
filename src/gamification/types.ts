@@ -1,5 +1,7 @@
 // Gamification Types for Vibe-Check
 
+import { Challenge } from './challenges';
+
 export interface StreakState {
   current: number;           // Current consecutive days
   longest: number;           // Personal best
@@ -17,6 +19,8 @@ export interface XPState {
   currentLevelXP: number;    // XP in current level
   nextLevelXP: number;       // XP needed for next level
   lastSessionXP: number;     // XP earned in last session
+  prestigeTier?: number;     // Prestige tier (0 = none, 1-5 = Archmage to Legendary)
+  prestigeName?: string;     // Prestige tier name
 }
 
 export interface Achievement {
@@ -76,6 +80,9 @@ export interface UserProfile {
     totalSpiralsDetected: number;
     spiralsAvoided: number;    // Sessions with 0 spirals
   };
+
+  // Weekly challenges (v1.5.0)
+  challenges?: Challenge[];
 }
 
 // ============================================
@@ -147,14 +154,23 @@ export interface InterventionMemory {
   totalInterventions: number;
 }
 
-// Level progression
+// Level progression (including prestige)
 export const LEVELS = [
   { level: 1, name: 'Novice', icon: '🌱', minXP: 0, maxXP: 100 },
   { level: 2, name: 'Apprentice', icon: '🌿', minXP: 100, maxXP: 300 },
   { level: 3, name: 'Practitioner', icon: '🌳', minXP: 300, maxXP: 600 },
   { level: 4, name: 'Expert', icon: '🌲', minXP: 600, maxXP: 1000 },
   { level: 5, name: 'Master', icon: '🎋', minXP: 1000, maxXP: 2000 },
-  { level: 6, name: 'Grandmaster', icon: '🏔️', minXP: 2000, maxXP: Infinity },
+  { level: 6, name: 'Grandmaster', icon: '🏔️', minXP: 2000, maxXP: 5000 },
+] as const;
+
+// Prestige tiers (after Grandmaster)
+export const PRESTIGE_TIERS = [
+  { tier: 1, name: 'Archmage', icon: '🔮', minXP: 5000, maxXP: 10000 },
+  { tier: 2, name: 'Sage', icon: '📿', minXP: 10000, maxXP: 20000 },
+  { tier: 3, name: 'Zenmester', icon: '☯️', minXP: 20000, maxXP: 40000 },
+  { tier: 4, name: 'Transcendent', icon: '🌟', minXP: 40000, maxXP: 80000 },
+  { tier: 5, name: 'Legendary', icon: '💫', minXP: 80000, maxXP: Infinity },
 ] as const;
 
 // XP rewards

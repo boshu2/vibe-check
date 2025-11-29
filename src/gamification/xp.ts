@@ -1,4 +1,4 @@
-import { XPState, LEVELS, XP_REWARDS, SessionRecord, StreakState } from './types';
+import { XPState, LEVELS, PRESTIGE_TIERS, XP_REWARDS, SessionRecord, StreakState } from './types';
 
 /**
  * Create initial XP state
@@ -60,32 +60,67 @@ export function calculateSessionXP(
 /**
  * Add XP and handle level ups
  */
-export function addXP(currentXP: XPState, earnedXP: number): { xp: XPState; leveledUp: boolean; newLevel?: typeof LEVELS[number] } {
+export function addXP(currentXP: XPState, earnedXP: number): {
+  xp: XPState;
+  leveledUp: boolean;
+  newLevel?: typeof LEVELS[number];
+  prestigedUp?: boolean;
+  newPrestige?: typeof PRESTIGE_TIERS[number];
+} {
   const newTotal = currentXP.total + earnedXP;
-  const { level, levelInfo } = getLevelForXP(newTotal);
+  const { level, levelInfo, prestigeTier, prestigeInfo } = getLevelForXP(newTotal);
 
   const leveledUp = level > currentXP.level;
+  const prestigedUp = prestigeTier !== undefined &&
+    (currentXP.prestigeTier === undefined || prestigeTier > currentXP.prestigeTier);
+
+  const maxXP = prestigeInfo ? prestigeInfo.maxXP : levelInfo.maxXP;
+  const minXP = prestigeInfo ? prestigeInfo.minXP : levelInfo.minXP;
 
   const newXP: XPState = {
     total: newTotal,
     level,
-    levelName: levelInfo.name,
-    currentLevelXP: newTotal - levelInfo.minXP,
-    nextLevelXP: levelInfo.maxXP - levelInfo.minXP,
+    levelName: prestigeInfo ? prestigeInfo.name : levelInfo.name,
+    currentLevelXP: newTotal - minXP,
+    nextLevelXP: maxXP === Infinity ? Infinity : maxXP - minXP,
     lastSessionXP: earnedXP,
+    prestigeTier,
+    prestigeName: prestigeInfo?.name,
   };
 
   return {
     xp: newXP,
     leveledUp,
     newLevel: leveledUp ? levelInfo : undefined,
+    prestigedUp,
+    newPrestige: prestigedUp ? prestigeInfo : undefined,
   };
 }
 
 /**
- * Get level for given XP amount
+ * Get level for given XP amount (including prestige)
  */
-export function getLevelForXP(xp: number): { level: number; levelInfo: typeof LEVELS[number] } {
+export function getLevelForXP(xp: number): {
+  level: number;
+  levelInfo: typeof LEVELS[number];
+  prestigeTier?: number;
+  prestigeInfo?: typeof PRESTIGE_TIERS[number];
+} {
+  // Check prestige tiers first
+  if (xp >= 5000) {
+    for (let i = PRESTIGE_TIERS.length - 1; i >= 0; i--) {
+      if (xp >= PRESTIGE_TIERS[i].minXP) {
+        return {
+          level: 6,
+          levelInfo: LEVELS[5],
+          prestigeTier: PRESTIGE_TIERS[i].tier,
+          prestigeInfo: PRESTIGE_TIERS[i],
+        };
+      }
+    }
+  }
+
+  // Regular levels
   for (let i = LEVELS.length - 1; i >= 0; i--) {
     if (xp >= LEVELS[i].minXP) {
       return { level: LEVELS[i].level, levelInfo: LEVELS[i] };

@@ -125,6 +125,16 @@ export function formatTerminal(result: VibeCheckResult | VibeCheckResultV2): str
     }
   }
 
+  // Near-miss psychology - motivational close calls
+  const nearMisses = getNearMisses(result, metricsList);
+  if (nearMisses.length > 0) {
+    lines.push('');
+    lines.push(chalk.bold.magenta('  🎯 SO CLOSE!'));
+    for (const miss of nearMisses) {
+      lines.push(chalk.magenta(`  ${miss}`));
+    }
+  }
+
   // Debug spirals
   if (result.fixChains.length > 0) {
     lines.push('');
@@ -241,4 +251,43 @@ function getOverallColor(rating: OverallRating): (text: string) => string {
     case 'MEDIUM': return chalk.yellow.bold;
     case 'LOW': return chalk.red.bold;
   }
+}
+
+/**
+ * Find near-miss motivational messages
+ */
+function getNearMisses(
+  result: VibeCheckResult | VibeCheckResultV2,
+  metrics: { name: string; metric: { rating: string; value: number }; tip: string }[]
+): string[] {
+  const misses: string[] = [];
+
+  // Check for near-ELITE overall
+  if (result.overall === 'HIGH') {
+    const eliteCount = metrics.filter(m => m.metric.rating === 'elite').length;
+    if (eliteCount >= 3) {
+      misses.push('Just 1-2 metrics away from ELITE overall!');
+    }
+  }
+
+  // Check for near-90% score
+  if (isV2Result(result) && result.vibeScore) {
+    const score = result.vibeScore.value * 100;
+    if (score >= 85 && score < 90) {
+      misses.push(`${Math.round(score)}% vibe score - just ${90 - Math.round(score)}% from the Ninety Club!`);
+    }
+  }
+
+  // Check for near-perfect trust
+  const trust = result.metrics.trustPassRate;
+  if (trust.value >= 90 && trust.value < 100 && trust.rating !== 'elite') {
+    misses.push(`${trust.value}% trust - ${100 - trust.value}% from Perfect Trust!`);
+  }
+
+  // Check for near-zero spirals
+  if (result.fixChains.length === 1 && result.commits.total >= 20) {
+    misses.push('Only 1 spiral! Next time could be Zen Master territory.');
+  }
+
+  return misses.slice(0, 2); // Max 2 near-misses
 }
