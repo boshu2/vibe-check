@@ -60,8 +60,12 @@ while read local_ref local_sha remote_ref remote_sha; do
     echo -e "Analyzing ${GREEN}$COMMIT_COUNT${NC} commit(s) on ${CYAN}$local_ref${NC}"
     echo
 
-    # Build vibe-check command
-    VIBE_CMD="npx @boshu2/vibe-check"
+    # Build vibe-check command (use local if available, otherwise npx)
+    if command -v vibe-check &> /dev/null; then
+        VIBE_CMD="vibe-check"
+    else
+        VIBE_CMD="npx --yes @boshu2/vibe-check"
+    fi
 
     if [ "$VIBE_CHECK_SIMPLE" = "true" ]; then
         VIBE_CMD="$VIBE_CMD --simple"
