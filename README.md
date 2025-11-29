@@ -228,6 +228,11 @@ jobs:
 
 Use it for self-reflection, not external judgment.
 
+## Learn More
+
+- **[The Vibe-Coding Ecosystem](docs/VIBE-ECOSYSTEM.md)** - Complete methodology guide
+- **[Changelog](CHANGELOG.md)** - Version history
+
 ## License
 
 MIT
