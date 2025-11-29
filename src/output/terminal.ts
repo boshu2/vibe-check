@@ -212,3 +212,54 @@ function formatVibeScore(score: number): string {
   if (score >= 0.50) return chalk.yellow.bold(`${pct}%`);
   return chalk.red.bold(`${pct}%`);
 }
+
+/**
+ * Simple/compact terminal output - just the essentials
+ */
+export function formatTerminalSimple(result: VibeCheckResult | VibeCheckResultV2): string {
+  const lines: string[] = [];
+
+  // One-line summary
+  const fromStr = format(result.period.from, 'MMM d');
+  const toStr = format(result.period.to, 'MMM d');
+  const overallColor = getOverallColor(result.overall);
+
+  lines.push('');
+  lines.push(chalk.bold.cyan('VIBE-CHECK') + chalk.gray(` ${fromStr} - ${toStr}`));
+  lines.push('');
+
+  // Overall rating - the main info
+  lines.push(`  ${chalk.bold('Rating:')} ${overallColor(result.overall)}`);
+
+  // Key metrics on one line each
+  const trust = result.metrics.trustPassRate;
+  const rework = result.metrics.reworkRatio;
+  lines.push(`  ${chalk.bold('Trust:')} ${trust.value}${trust.unit} ${formatRating(trust.rating)}`);
+  lines.push(`  ${chalk.bold('Rework:')} ${rework.value}${rework.unit} ${formatRating(rework.rating)}`);
+
+  // VibeScore if available
+  if (isV2Result(result) && result.vibeScore) {
+    lines.push(`  ${chalk.bold('Score:')} ${formatVibeScore(result.vibeScore.value)}`);
+  }
+
+  // Spirals - only if any detected
+  if (result.fixChains.length > 0) {
+    lines.push('');
+    lines.push(chalk.yellow(`  ⚠ ${result.fixChains.length} debug spiral${result.fixChains.length > 1 ? 's' : ''} detected`));
+  }
+
+  lines.push('');
+  lines.push(chalk.gray(`  Run without --simple for full details`));
+  lines.push('');
+
+  return lines.join('\n');
+}
+
+function getOverallColor(rating: OverallRating): (text: string) => string {
+  switch (rating) {
+    case 'ELITE': return chalk.green.bold;
+    case 'HIGH': return chalk.blue.bold;
+    case 'MEDIUM': return chalk.yellow.bold;
+    case 'LOW': return chalk.red.bold;
+  }
+}

@@ -80,21 +80,80 @@ node dist/cli.js --format markdown
 
 ```
 src/
-├── cli.ts           # CLI entry point (Commander.js)
-├── git.ts           # Git operations (simple-git)
-├── types.ts         # TypeScript interfaces
+├── cli.ts              # CLI entry point (Commander.js)
+├── git.ts              # Git operations (simple-git)
+├── types.ts            # TypeScript interfaces
+├── commands/
+│   ├── index.ts        # Command exports
+│   ├── analyze.ts      # Main analyze command
+│   ├── level.ts        # Level recommendation command
+│   └── profile.ts      # Profile/stats command
 ├── metrics/
-│   ├── index.ts     # Orchestrates all metrics
-│   ├── velocity.ts  # Iteration velocity calculation
-│   ├── rework.ts    # Rework ratio calculation
-│   ├── trust.ts     # Trust pass rate calculation
-│   ├── spirals.ts   # Debug spiral detection
-│   └── flow.ts      # Flow efficiency calculation
+│   ├── index.ts        # Orchestrates all metrics
+│   ├── velocity.ts     # Iteration velocity
+│   ├── rework.ts       # Rework ratio
+│   ├── trust.ts        # Trust pass rate
+│   ├── spirals.ts      # Debug spiral detection
+│   ├── flow.ts         # Flow efficiency
+│   ├── file-churn.ts   # File churn patterns
+│   ├── time-spiral.ts  # Time-based spirals
+│   ├── velocity-anomaly.ts # Velocity anomaly detection
+│   └── code-stability.ts   # Code stability metrics
+├── gamification/
+│   ├── index.ts        # Gamification exports
+│   ├── types.ts        # XP, levels, achievements types
+│   ├── xp.ts           # XP calculation and levels
+│   ├── streaks.ts      # Daily/weekly streak tracking
+│   ├── achievements.ts # Achievement definitions and checks
+│   └── profile.ts      # Profile persistence (.vibe-check/)
+├── calibration/
+│   ├── index.ts        # Calibration orchestration
+│   ├── ece.ts          # Expected calibration error
+│   └── storage.ts      # Calibration data persistence
+├── recommend/
+│   ├── index.ts        # Recommendation orchestration
+│   ├── ordered-logistic.ts # Ordinal logistic regression
+│   └── questions.ts    # Assessment questions
+├── score/
+│   ├── index.ts        # VibeScore calculation
+│   └── weights.ts      # Metric weights
 └── output/
-    ├── index.ts     # Output format router
-    ├── terminal.ts  # Colored terminal output
-    ├── json.ts      # JSON output
-    └── markdown.ts  # Markdown output
+    ├── index.ts        # Output format router
+    ├── terminal.ts     # Colored terminal output
+    ├── json.ts         # JSON output
+    └── markdown.ts     # Markdown output
+
+dashboard/              # Static HTML dashboard
+├── index.html          # Dashboard UI
+├── app.js              # Dashboard JavaScript
+└── styles.css          # Dashboard styles
+
+.vibe-check/            # Local profile data (per-repo)
+├── profile.json        # XP, streaks, achievements
+└── calibration.json    # Calibration samples
+```
+
+## Commands
+
+### Main Command (analyze)
+```bash
+vibe-check [options]           # Analyze git history
+vibe-check --since "1 week"    # Time-bounded analysis
+vibe-check --score --recommend # Full analysis with recommendations
+```
+
+### Profile Command
+```bash
+vibe-check profile             # View your profile
+vibe-check profile --achievements  # List all achievements
+vibe-check profile --stats     # Detailed statistics
+vibe-check profile --json      # Machine-readable output
+```
+
+### Level Command
+```bash
+vibe-check level               # Get level recommendation
+vibe-check level --calibrate 3 # Record calibration sample
 ```
 
 ## The 5 Metrics

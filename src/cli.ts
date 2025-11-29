@@ -30,6 +30,7 @@ program
   .option('--recommend', 'Include level recommendation', false)
   .option('--calibrate <level>', 'Record calibration sample with declared level (0-5)')
   .option('-o, --output <file>', 'Write JSON results to file')
+  .option('-s, --simple', 'Simplified output (fewer details)', false)
   .action(async (options) => {
     // Default action runs analyze (backwards compatibility)
     await runAnalyze({
@@ -42,6 +43,7 @@ program
       recommend: options.recommend,
       calibrate: options.calibrate,
       output: options.output,
+      simple: options.simple,
     });
   });
 

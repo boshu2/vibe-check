@@ -132,7 +132,57 @@ When vibe-check detects 3+ consecutive fix commits on the same component, it fla
 -v, --verbose        Show detailed output
 --score              Include VibeScore (semantic-free metrics)
 --recommend          Include level recommendation
+--simple             Show simplified output (less verbose)
 -h, --help           Display help
+```
+
+## Gamification
+
+vibe-check tracks your progress over time with XP, levels, streaks, and achievements.
+
+### Levels
+
+| Level | Name | XP Required |
+|-------|------|-------------|
+| 1 | Newbie | 0 |
+| 2 | Regular | 100 |
+| 3 | Committed | 300 |
+| 4 | Dedicated | 600 |
+| 5 | Expert | 1000 |
+| 6 | Master | 1500 |
+| 7 | Grandmaster | 2100 |
+| 8 | Guru | 2800 |
+| 9 | Sage | 3600 |
+| 10 | Legend | 4500 |
+
+### Achievements
+
+Unlock achievements by hitting milestones:
+
+- 🩸 **First Blood** - Run your first vibe-check
+- ⚔️ **Week Warrior** - Maintain a 7-day streak
+- 👑 **Monthly Master** - Maintain a 30-day streak
+- ✨ **Elite Vibes** - Achieve ELITE rating
+- 🏅 **Ninety Club** - Vibe Score of 90%+
+- 🧘 **Zen Master** - 50+ commits, 0 debug spirals
+- ...and 12 more, including 2 hidden achievements!
+
+### Profile Command
+
+View your stats, achievements, and progress:
+
+```bash
+# View your profile
+vibe-check profile
+
+# See all achievements
+vibe-check profile --achievements
+
+# Detailed statistics
+vibe-check profile --stats
+
+# JSON output
+vibe-check profile --json
 ```
 
 ### Save Results to JSON

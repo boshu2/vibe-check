@@ -31,6 +31,7 @@ export interface AnalyzeOptions {
   recommend: boolean;
   calibrate?: string;
   output?: string;
+  simple: boolean;
 }
 
 export function createAnalyzeCommand(): Command {
@@ -45,6 +46,7 @@ export function createAnalyzeCommand(): Command {
     .option('--recommend', 'Include level recommendation', false)
     .option('--calibrate <level>', 'Record calibration sample with declared level (0-5)')
     .option('-o, --output <file>', 'Write JSON results to file')
+    .option('-s, --simple', 'Simplified output (fewer details)', false)
     .action(async (options) => {
       await runAnalyze(options);
     });
@@ -54,7 +56,7 @@ export function createAnalyzeCommand(): Command {
 
 export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
   try {
-    const { since, until, format, repo, verbose, score, recommend, calibrate, output } = options;
+    const { since, until, format, repo, verbose, score, recommend, calibrate, output, simple } = options;
 
     // Validate format
     const validFormats: OutputFormat[] = ['terminal', 'json', 'markdown'];
@@ -214,7 +216,7 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
     }
 
     // Output result to console
-    const formattedOutput = formatOutput(resultV2, format as OutputFormat);
+    const formattedOutput = formatOutput(resultV2, format as OutputFormat, { simple });
     console.log(formattedOutput);
 
     // Record session and show gamification (only for terminal format with score)
