@@ -14,9 +14,15 @@ import { calculateTimeSpiral } from '../metrics/time-spiral';
 import { calculateVelocityAnomaly } from '../metrics/velocity-anomaly';
 import { calculateCodeStability } from '../metrics/code-stability';
 import { calculateVibeScore } from '../score';
-import { recordSession } from '../gamification/profile';
+import { recordSession as recordGamificationSession } from '../gamification/profile';
 import { LEVELS } from '../gamification/types';
 import { loadSession, clearSession, LEVEL_INFO } from './start';
+import {
+  detectSessionBoundary,
+  recordSession as recordSessionHistory,
+  compareToBaseline,
+  loadSessionHistory,
+} from '../sessions';
 
 export interface AnalyzeOptions {
   since?: string;
@@ -152,11 +158,13 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
     const formattedOutput = formatOutput(resultV2, format as OutputFormat, { simple });
     console.log(formattedOutput);
 
-    // Session comparison (if session was active)
-    if (session && format === 'terminal' && resultV2.vibeScore) {
-      // Metrics are already in percentage form (e.g., 100 for 100%)
-      const trustPassRate = result.metrics.trustPassRate.value;
-      const reworkRatio = result.metrics.reworkRatio.value;
+    // Get metrics for session tracking
+    const trustPassRate = result.metrics.trustPassRate.value;
+    const reworkRatio = result.metrics.reworkRatio.value;
+    const spiralCount = result.fixChains.filter(fc => fc.isSpiral).length;
+
+    // Session comparison (if manual session was active via `start`)
+    if (session && format === 'terminal') {
       const levelInfo = LEVEL_INFO[session.level];
 
       // Parse expectations (already in percentage form like ">65%")
@@ -211,12 +219,78 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
       clearSession(repo);
     }
 
+    // Automatic session detection and baseline comparison (if no manual session)
+    if (!session && format === 'terminal' && commits.length >= 3) {
+      // Detect session boundary
+      const sessionInfo = detectSessionBoundary(commits, repo);
+
+      // Calculate duration
+      const sessionDuration = Math.round(
+        (result.period.to.getTime() - sessionInfo.sessionStart.getTime()) / 60000
+      );
+
+      // Record this session to history
+      recordSessionHistory(
+        repo,
+        sessionInfo.sessionStart,
+        result.period.to,
+        commits.length,
+        trustPassRate,
+        reworkRatio,
+        spiralCount,
+        resultV2.vibeScore?.value
+      );
+
+      // Compare to baseline
+      const comparison = compareToBaseline(
+        repo,
+        trustPassRate,
+        reworkRatio,
+        commits.length,
+        sessionDuration
+      );
+
+      // Show baseline comparison
+      if (comparison.hasBaseline && comparison.comparison) {
+        console.log('');
+        console.log(chalk.bold.cyan('VS YOUR BASELINE'));
+        console.log('');
+
+        const trustDelta = comparison.comparison.trustDelta;
+        const reworkDelta = comparison.comparison.reworkDelta;
+
+        const trustSign = trustDelta >= 0 ? '+' : '';
+        const reworkSign = reworkDelta >= 0 ? '+' : '';
+
+        const trustColor = trustDelta >= 0 ? chalk.green : chalk.yellow;
+        const reworkColor = reworkDelta <= 0 ? chalk.green : chalk.yellow;
+
+        console.log(`  Trust:  ${Math.round(trustPassRate)}% ${trustColor(`(${trustSign}${Math.round(trustDelta)}% vs avg ${comparison.baseline!.trustPassRate}%)`)}`);
+        console.log(`  Rework: ${Math.round(reworkRatio)}% ${reworkColor(`(${reworkSign}${Math.round(reworkDelta)}% vs avg ${comparison.baseline!.reworkRatio}%)`)}`);
+        console.log('');
+
+        const verdictColor = comparison.comparison.verdict === 'above' ? chalk.green :
+                            comparison.comparison.verdict === 'below' ? chalk.yellow :
+                            chalk.gray;
+        console.log(verdictColor(`  ${comparison.comparison.message}`));
+        console.log('');
+      } else {
+        // Building baseline
+        const history = loadSessionHistory(repo);
+        const sessionsNeeded = 5 - history.sessions.length;
+        if (sessionsNeeded > 0) {
+          console.log('');
+          console.log(chalk.gray(`  Building your baseline... ${history.sessions.length}/5 sessions recorded`));
+          console.log('');
+        }
+      }
+    }
+
     // Record session and show gamification (only for terminal format with score)
     if (format === 'terminal' && resultV2.vibeScore) {
-      const spiralCount = result.fixChains.filter(fc => fc.isSpiral).length;
       const vibeScorePercent = Math.round(resultV2.vibeScore.value * 100);
 
-      const gamificationResult = recordSession(
+      const gamificationResult = recordGamificationSession(
         vibeScorePercent,
         result.overall,
         commits.length,

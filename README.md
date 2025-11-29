@@ -71,9 +71,28 @@ VIBE-CHECK Nov 21 - Nov 28
   Run without --simple for full details
 ```
 
-## Session Workflow
+## Automatic Baseline Comparison
 
-Declare your trust level before starting, then check if reality matched:
+vibe-check learns YOUR patterns and compares each session to your baseline:
+
+```bash
+vibe-check --since "1 hour ago"
+```
+
+```
+VS YOUR BASELINE
+
+  Trust:  92% (+7% vs avg 85%)
+  Rework: 18% (-4% vs avg 22%)
+
+  Better than your usual - nice flow!
+```
+
+After 5+ sessions, you get automatic feedback without declaring anything.
+
+## Manual Session Workflow (Optional)
+
+For explicit level tracking, declare before starting:
 
 ```bash
 # Before work: declare your expectation
@@ -84,8 +103,6 @@ vibe-check start --level 3
 # After work: compare reality vs expectation
 vibe-check --since "1 hour ago"
 ```
-
-Output:
 
 ```
 SESSION COMPLETE
