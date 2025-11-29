@@ -18,10 +18,21 @@ export function calculateVelocityAnomaly(
   const activeHours = calculateActiveHours(commits);
   const currentVelocity = activeHours > 0 ? commits.length / activeHours : 0;
 
-  // Default baseline if not provided (will be calibrated over time)
+  /**
+   * Default baseline when no historical data exists.
+   *
+   * Rationale:
+   * - 3 commits/hour assumes ~20 min work cycles
+   * - 1.5 stdDev allows 0-6 commits/hour as "normal" (±2σ)
+   *
+   * These are PLACEHOLDER values. The model learns your actual
+   * baseline from calibration samples over time.
+   *
+   * NOT empirically validated across developer populations.
+   */
   const defaultBaseline: Baseline = {
-    mean: 3.0,   // 3 commits/hour is "normal"
-    stdDev: 1.5, // 1.5 std dev
+    mean: 3.0,
+    stdDev: 1.5,
   };
   const base = baseline || defaultBaseline;
 

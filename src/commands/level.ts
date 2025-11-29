@@ -237,7 +237,13 @@ function displayResult(result: LevelResult): void {
 
   // Model info
   if (result.source === 'ml') {
-    console.log(chalk.green(`  ✓ Using ML model with ${result.sampleCount || 0} calibration samples`));
+    const sampleCount = result.sampleCount || 0;
+    if (sampleCount < 20) {
+      console.log(chalk.yellow(`  ⚠ Limited calibration data (${sampleCount} samples)`));
+      console.log(chalk.gray(`    Recommendation requires 20+ samples for reliability`));
+    } else {
+      console.log(chalk.green(`  ✓ Using ML model with ${sampleCount} calibration samples`));
+    }
     if (result.ece !== undefined && result.ece > 0) {
       console.log(chalk.gray(`    ECE: ${(result.ece * 100).toFixed(1)}%`));
     }

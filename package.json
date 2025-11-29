@@ -1,7 +1,7 @@
 {
   "name": "@boshu2/vibe-check",
   "version": "1.0.2",
-  "description": "Measure vibe coding effectiveness with git commit analysis",
+  "description": "Track git commit patterns during AI-assisted coding (experimental)",
   "main": "dist/cli.js",
   "bin": {
     "vibe-check": "bin/vibe-check.js"
@@ -31,6 +31,7 @@
     "chalk": "^4.1.2",
     "commander": "^12.1.0",
     "date-fns": "^3.6.0",
+    "enquirer": "^2.4.1",
     "simple-git": "^3.27.0"
   },
   "devDependencies": {

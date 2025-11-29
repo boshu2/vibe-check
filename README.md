@@ -1,6 +1,8 @@
 # vibe-check
 
-**Stop guessing if AI coding is working. Start measuring.**
+> ⚠️ **Experimental** - Metrics correlations with actual productivity outcomes have not been independently validated. Use as a directional signal, not ground truth.
+
+**Track patterns in your AI-assisted coding workflow.**
 
 ## The Problem
 
@@ -90,12 +92,14 @@ vibe-check --repo /path/to/repo
 | **Debug Spiral Duration** | Avg time stuck in fix chains | <15m | 15-30m | >30m |
 | **Flow Efficiency** | % time building vs debugging | >90% | 75-90% | <75% |
 
-### What the ratings mean
+### What the ratings suggest
 
-- **ELITE**: Your AI collaboration is working excellently
-- **HIGH**: Good effectiveness, minor improvements possible
-- **MEDIUM**: Room for improvement—check which metrics are lagging
-- **LOW**: Process issues—you're debugging more than building
+- **ELITE**: Commit patterns suggest smooth workflow
+- **HIGH**: Generally healthy patterns, some areas to watch
+- **MEDIUM**: Mixed signals—review individual metrics
+- **LOW**: Commit patterns suggest friction—investigate causes
+
+*Note: These ratings reflect commit patterns, not actual code quality or productivity.*
 
 ## Debug Spiral Detection
 
@@ -133,6 +137,43 @@ When vibe-check detects 3+ consecutive fix commits on the same component, it fla
 - Node.js >= 18.0.0
 - Git repository with commit history
 - Conventional commits recommended (but not required)
+
+## Limitations & Caveats
+
+### What This Tool Does NOT Measure
+
+| Claim | Reality |
+|-------|---------|
+| Code quality | Measures commit patterns, not code correctness |
+| Actual productivity | Measures velocity signals, not shipped value |
+| AI effectiveness | Measures workflow patterns, not AI contribution |
+
+### Known Limitations
+
+1. **No ground truth validation**: The correlation between these metrics and actual productivity outcomes has not been independently validated.
+
+2. **Threshold sensitivity**: Magic numbers (5 min spiral threshold, 3-file churn) are based on practitioner intuition, not empirical studies.
+
+3. **Goodhart's Law risk**: Once you know the metrics, you may unconsciously optimize for them rather than actual outcomes.
+
+4. **Cold start**: New repositories have no calibration data. Default model weights are educated guesses.
+
+5. **Sample size**: The ML model requires 20+ calibration samples for meaningful learning. Results with fewer samples are unreliable.
+
+### When NOT to Use
+
+- As a performance review metric (easily gamed)
+- To compare across teams or developers (different baselines)
+- As the sole indicator of AI tool effectiveness
+- Without understanding what each metric actually measures
+
+### Recommended Use
+
+Use vibe-check as **one signal among many**:
+- Combine with code review feedback
+- Track alongside deployment success rates
+- Use for self-reflection, not external judgment
+- Treat as directional, not precise
 
 ## License
 

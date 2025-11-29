@@ -1,8 +1,12 @@
-import { VibeCheckResult } from '../types';
+import { VibeCheckResult, VibeCheckResultV2 } from '../types';
 
-export function formatJson(result: VibeCheckResult): string {
+function isV2Result(result: VibeCheckResult | VibeCheckResultV2): result is VibeCheckResultV2 {
+  return 'semanticMetrics' in result;
+}
+
+export function formatJson(result: VibeCheckResult | VibeCheckResultV2): string {
   // Create a JSON-friendly version with ISO date strings
-  const output = {
+  const output: Record<string, unknown> = {
     period: {
       from: result.period.from.toISOString(),
       to: result.period.to.toISOString(),
@@ -46,6 +50,58 @@ export function formatJson(result: VibeCheckResult): string {
     patterns: result.patterns,
     overall: result.overall,
   };
+
+  // Add v2 fields if present
+  if (isV2Result(result)) {
+    if (result.vibeScore) {
+      output.vibeScore = result.vibeScore;
+    }
+    if (result.recommendation) {
+      output.recommendation = {
+        level: result.recommendation.level,
+        confidence: result.recommendation.confidence,
+        probabilities: result.recommendation.probabilities,
+        ci: result.recommendation.ci,
+      };
+    }
+    if (result.semanticFreeMetrics) {
+      output.semanticFreeMetrics = {
+        fileChurn: {
+          value: result.semanticFreeMetrics.fileChurn.value,
+          unit: result.semanticFreeMetrics.fileChurn.unit,
+          rating: result.semanticFreeMetrics.fileChurn.rating,
+          description: result.semanticFreeMetrics.fileChurn.description,
+          churnedFiles: result.semanticFreeMetrics.fileChurn.churnedFiles,
+          totalFiles: result.semanticFreeMetrics.fileChurn.totalFiles,
+        },
+        timeSpiral: {
+          value: result.semanticFreeMetrics.timeSpiral.value,
+          unit: result.semanticFreeMetrics.timeSpiral.unit,
+          rating: result.semanticFreeMetrics.timeSpiral.rating,
+          description: result.semanticFreeMetrics.timeSpiral.description,
+          spiralCommits: result.semanticFreeMetrics.timeSpiral.spiralCommits,
+          totalCommits: result.semanticFreeMetrics.timeSpiral.totalCommits,
+        },
+        velocityAnomaly: {
+          value: result.semanticFreeMetrics.velocityAnomaly.value,
+          unit: result.semanticFreeMetrics.velocityAnomaly.unit,
+          rating: result.semanticFreeMetrics.velocityAnomaly.rating,
+          description: result.semanticFreeMetrics.velocityAnomaly.description,
+          currentVelocity: result.semanticFreeMetrics.velocityAnomaly.currentVelocity,
+          baselineMean: result.semanticFreeMetrics.velocityAnomaly.baselineMean,
+          zScore: result.semanticFreeMetrics.velocityAnomaly.zScore,
+        },
+        codeStability: {
+          value: result.semanticFreeMetrics.codeStability.value,
+          unit: result.semanticFreeMetrics.codeStability.unit,
+          rating: result.semanticFreeMetrics.codeStability.rating,
+          description: result.semanticFreeMetrics.codeStability.description,
+          linesAdded: result.semanticFreeMetrics.codeStability.linesAdded,
+          linesSurviving: result.semanticFreeMetrics.codeStability.linesSurviving,
+        },
+      };
+    }
+  }
 
   return JSON.stringify(output, null, 2);
 }

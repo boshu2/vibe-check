@@ -88,14 +88,14 @@ export async function getFileStats(
   const filesPerCommit = new Map<string, string[]>();
   const lineStats: { additions: number; deletions: number }[] = [];
 
-  // Build options for git log with stat
-  const options: string[] = ['--stat', '--name-only'];
-  if (since) options.push(`--since=${since}`);
-  if (until) options.push(`--until=${until}`);
+  // Build options for git log
+  const logOptions: Record<string, string | number | boolean> = {};
+  if (since) logOptions['--since'] = since;
+  if (until) logOptions['--until'] = until;
 
   try {
     // Get log with file names
-    const log = await git.log(options as Record<string, string | number | boolean>);
+    const log = await git.log(logOptions);
 
     for (const commit of log.all) {
       const hash = commit.hash.substring(0, 7);
@@ -129,9 +129,8 @@ export async function getFileStats(
         lineStats.push({ additions: 0, deletions: 0 });
       }
     }
-  } catch (error) {
-    // Return empty stats on error
-    console.error('Failed to get file stats:', error);
+  } catch {
+    // Return empty stats on error - silent fail
   }
 
   return { filesPerCommit, lineStats };

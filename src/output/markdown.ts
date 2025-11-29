@@ -1,7 +1,11 @@
-import { VibeCheckResult } from '../types';
+import { VibeCheckResult, VibeCheckResultV2 } from '../types';
 import { format } from 'date-fns';
 
-export function formatMarkdown(result: VibeCheckResult): string {
+function isV2Result(result: VibeCheckResult | VibeCheckResultV2): result is VibeCheckResultV2 {
+  return 'semanticMetrics' in result;
+}
+
+export function formatMarkdown(result: VibeCheckResult | VibeCheckResultV2): string {
   const lines: string[] = [];
 
   // Header
@@ -21,8 +25,22 @@ export function formatMarkdown(result: VibeCheckResult): string {
   lines.push(`**Overall Rating:** ${result.overall}`);
   lines.push('');
 
+  // V2: VibeScore
+  if (isV2Result(result) && result.vibeScore) {
+    const pct = Math.round(result.vibeScore.value * 100);
+    lines.push(`**VibeScore:** ${pct}%`);
+    lines.push('');
+  }
+
+  // V2: Level Recommendation
+  if (isV2Result(result) && result.recommendation) {
+    const rec = result.recommendation;
+    lines.push(`**Recommended Level:** ${rec.level} (${Math.round(rec.confidence * 100)}% confidence, CI: [${rec.ci[0].toFixed(1)}, ${rec.ci[1].toFixed(1)}])`);
+    lines.push('');
+  }
+
   // Metrics table
-  lines.push('## Metrics');
+  lines.push('## Semantic Metrics');
   lines.push('');
   lines.push('| Metric | Value | Rating | Description |');
   lines.push('|--------|-------|--------|-------------|');
@@ -42,6 +60,29 @@ export function formatMarkdown(result: VibeCheckResult): string {
     );
   }
   lines.push('');
+
+  // V2: Semantic-free metrics table
+  if (isV2Result(result) && result.semanticFreeMetrics) {
+    lines.push('## Semantic-Free Metrics (v2.0)');
+    lines.push('');
+    lines.push('| Metric | Value | Rating | Description |');
+    lines.push('|--------|-------|--------|-------------|');
+
+    const sfMetrics = [
+      { name: 'File Churn', metric: result.semanticFreeMetrics.fileChurn },
+      { name: 'Time Spiral', metric: result.semanticFreeMetrics.timeSpiral },
+      { name: 'Velocity Anomaly', metric: result.semanticFreeMetrics.velocityAnomaly },
+      { name: 'Code Stability', metric: result.semanticFreeMetrics.codeStability },
+    ];
+
+    for (const { name, metric } of sfMetrics) {
+      const rating = metric.rating.toUpperCase();
+      lines.push(
+        `| ${name} | ${metric.value}${metric.unit} | ${rating} | ${metric.description} |`
+      );
+    }
+    lines.push('');
+  }
 
   // Debug spirals
   if (result.fixChains.length > 0) {

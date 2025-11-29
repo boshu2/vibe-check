@@ -1,9 +1,9 @@
-import { VibeCheckResult, OutputFormat } from '../types';
+import { VibeCheckResult, VibeCheckResultV2, OutputFormat } from '../types';
 import { formatTerminal } from './terminal';
 import { formatJson } from './json';
 import { formatMarkdown } from './markdown';
 
-export function formatOutput(result: VibeCheckResult, format: OutputFormat): string {
+export function formatOutput(result: VibeCheckResult | VibeCheckResultV2, format: OutputFormat): string {
   switch (format) {
     case 'json':
       return formatJson(result);

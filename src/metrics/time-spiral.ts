@@ -1,6 +1,17 @@
 import { Commit, TimeSpiralResult, Rating } from '../types';
 
-const SPIRAL_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+/**
+ * Spiral threshold: commits < 5 minutes apart suggest frustrated iteration.
+ *
+ * Rationale: Based on practitioner observation that commits faster than
+ * "think → code → test → commit" cycle (~5-10 min) often indicate:
+ * - Quick fixes to previous commit
+ * - Debugging iterations
+ * - "Oops forgot to save" patterns
+ *
+ * NOT empirically validated. Adjust based on your workflow.
+ */
+const SPIRAL_THRESHOLD_MS = 5 * 60 * 1000;
 
 /**
  * Calculate time spiral score.

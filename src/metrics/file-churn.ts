@@ -1,7 +1,19 @@
 import { Commit, FileChurnResult, Rating } from '../types';
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
-const CHURN_THRESHOLD = 3; // 3+ touches = churn
+
+/**
+ * Churn threshold: 3+ touches to same file within 1 hour suggests thrashing.
+ *
+ * Rationale: Healthy development typically touches a file 1-2 times per
+ * feature. Returning to the same file 3+ times in an hour often indicates:
+ * - Incomplete understanding before starting
+ * - Cascading changes from unexpected dependencies
+ * - Debugging loops
+ *
+ * NOT empirically validated. Your mileage may vary.
+ */
+const CHURN_THRESHOLD = 3;
 
 /**
  * Calculate file churn score.

@@ -1,8 +1,12 @@
 import chalk from 'chalk';
-import { VibeCheckResult, Rating, OverallRating } from '../types';
+import { VibeCheckResult, VibeCheckResultV2, Rating, OverallRating } from '../types';
 import { format } from 'date-fns';
 
-export function formatTerminal(result: VibeCheckResult): string {
+function isV2Result(result: VibeCheckResult | VibeCheckResultV2): result is VibeCheckResultV2 {
+  return 'semanticMetrics' in result;
+}
+
+export function formatTerminal(result: VibeCheckResult | VibeCheckResultV2): string {
   const lines: string[] = [];
 
   // Header
@@ -24,7 +28,7 @@ export function formatTerminal(result: VibeCheckResult): string {
     )
   );
 
-  // Metrics table
+  // Metrics table (semantic metrics)
   lines.push('');
   lines.push(chalk.bold.white('  METRIC                      VALUE      RATING'));
   lines.push(chalk.gray('  ' + '-'.repeat(50)));
@@ -41,6 +45,45 @@ export function formatTerminal(result: VibeCheckResult): string {
     const valueStr = `${metric.value}${metric.unit}`.padEnd(10);
     const ratingStr = formatRating(metric.rating);
     lines.push(`  ${name.padEnd(26)} ${valueStr} ${ratingStr}`);
+  }
+
+  // V2: Semantic-free metrics and VibeScore
+  if (isV2Result(result) && result.semanticFreeMetrics) {
+    lines.push('');
+    lines.push(chalk.bold.magenta('  SEMANTIC-FREE METRICS (v2.0)'));
+    lines.push(chalk.gray('  ' + '-'.repeat(50)));
+
+    const sfMetrics = [
+      { name: 'File Churn', metric: result.semanticFreeMetrics.fileChurn },
+      { name: 'Time Spiral', metric: result.semanticFreeMetrics.timeSpiral },
+      { name: 'Velocity Anomaly', metric: result.semanticFreeMetrics.velocityAnomaly },
+      { name: 'Code Stability', metric: result.semanticFreeMetrics.codeStability },
+    ];
+
+    for (const { name, metric } of sfMetrics) {
+      const valueStr = `${metric.value}${metric.unit}`.padEnd(10);
+      const ratingStr = formatRating(metric.rating);
+      lines.push(`  ${name.padEnd(26)} ${valueStr} ${ratingStr}`);
+    }
+
+    if (result.vibeScore) {
+      lines.push('');
+      lines.push(
+        chalk.bold.cyan(`  VIBE SCORE: ${formatVibeScore(result.vibeScore.value)}`)
+      );
+    }
+  }
+
+  // V2: Level Recommendation
+  if (isV2Result(result) && result.recommendation) {
+    lines.push('');
+    lines.push(chalk.bold.yellow('  LEVEL RECOMMENDATION'));
+    lines.push(chalk.gray('  ' + '-'.repeat(50)));
+    const rec = result.recommendation;
+    const levelStr = `Level ${rec.level}`;
+    const confStr = `${Math.round(rec.confidence * 100)}% confidence`;
+    const ciStr = `CI: [${rec.ci[0].toFixed(1)}, ${rec.ci[1].toFixed(1)}]`;
+    lines.push(`  ${chalk.bold(levelStr)} (${confStr}, ${ciStr})`);
   }
 
   // Overall rating
@@ -106,4 +149,12 @@ function formatOverallRating(rating: OverallRating): string {
     case 'LOW':
       return chalk.red.bold('LOW');
   }
+}
+
+function formatVibeScore(score: number): string {
+  const pct = Math.round(score * 100);
+  if (score >= 0.85) return chalk.green.bold(`${pct}%`);
+  if (score >= 0.70) return chalk.blue.bold(`${pct}%`);
+  if (score >= 0.50) return chalk.yellow.bold(`${pct}%`);
+  return chalk.red.bold(`${pct}%`);
 }

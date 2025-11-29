@@ -7,9 +7,23 @@ import { calculateECE, inferTrueLevel } from './ece';
 const CALIBRATION_DIR = '.vibe-check';
 const CALIBRATION_FILE = 'calibration.json';
 
-// Retraining triggers
-const RETRAIN_SAMPLE_INTERVAL = 10;  // Retrain every N samples
-const RETRAIN_ECE_THRESHOLD = 0.15;  // Retrain if ECE exceeds this
+/**
+ * Retraining triggers for the calibration model.
+ *
+ * RETRAIN_SAMPLE_INTERVAL (10): Retrain every 10 samples to incorporate
+ * new data. Balances learning speed vs. computational cost.
+ *
+ * RETRAIN_ECE_THRESHOLD (0.15): If Expected Calibration Error exceeds 15%,
+ * the model's predictions are poorly calibrated. 15% chosen as "noticeable
+ * but not catastrophic" miscalibration.
+ *
+ * Note: With 14 parameters (9 weights + 5 thresholds), even 10 samples is
+ * severely underfitting. 20+ samples recommended for reliability.
+ *
+ * These values are NOT empirically optimized.
+ */
+const RETRAIN_SAMPLE_INTERVAL = 10;
+const RETRAIN_ECE_THRESHOLD = 0.15;
 
 /**
  * Get calibration file path for a repository.
