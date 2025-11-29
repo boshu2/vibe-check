@@ -232,17 +232,32 @@ function displayResult(result: LevelResult): void {
   console.log('');
   console.log(`  ${chalk.gray('Trust:')}  ${desc.trust}`);
   console.log(`  ${chalk.gray('Verify:')} ${desc.verify}`);
-  console.log(`  ${chalk.gray('Confidence:')} ${(result.confidence * 100).toFixed(0)}%`);
+
+  // Show confidence appropriately based on value
+  if (result.confidence >= 0.6) {
+    console.log(`  ${chalk.gray('Confidence:')} ${chalk.green((result.confidence * 100).toFixed(0) + '%')}`);
+  } else if (result.confidence >= 0.4) {
+    console.log(`  ${chalk.gray('Confidence:')} ${chalk.yellow((result.confidence * 100).toFixed(0) + '% (building...)')}`);
+  } else {
+    // Low confidence - explain why and what to do
+    const sampleCount = result.sampleCount || 0;
+    const needed = Math.max(0, 20 - sampleCount);
+    console.log(`  ${chalk.gray('Confidence:')} ${chalk.gray('Low (needs more data)')}`);
+    if (needed > 0) {
+      console.log(chalk.gray(`              Run ${needed} more sessions to improve accuracy`));
+    }
+  }
   console.log('');
 
   // Model info
   if (result.source === 'ml') {
     const sampleCount = result.sampleCount || 0;
+    const sampleWord = sampleCount === 1 ? 'sample' : 'samples';
     if (sampleCount < 20) {
-      console.log(chalk.yellow(`  ⚠ Limited calibration data (${sampleCount} samples)`));
+      console.log(chalk.yellow(`  ⚠ Limited calibration data (${sampleCount} ${sampleWord})`));
       console.log(chalk.gray(`    Recommendation requires 20+ samples for reliability`));
     } else {
-      console.log(chalk.green(`  ✓ Using ML model with ${sampleCount} calibration samples`));
+      console.log(chalk.green(`  ✓ Using ML model with ${sampleCount} calibration ${sampleWord}`));
     }
     if (result.ece !== undefined && result.ece > 0) {
       console.log(chalk.gray(`    ECE: ${(result.ece * 100).toFixed(1)}%`));

@@ -41,7 +41,7 @@ export function createAnalyzeCommand(): Command {
     .option('-f, --format <type>', 'Output format: terminal, json, markdown', 'terminal')
     .option('-r, --repo <path>', 'Repository path', process.cwd())
     .option('-v, --verbose', 'Show verbose output', false)
-    .option('--score', 'Include VibeScore (semantic-free metrics)', false)
+    .option('--score', 'Include VibeScore and code pattern metrics', false)
     .option('--recommend', 'Include level recommendation', false)
     .option('--calibrate <level>', 'Record calibration sample with declared level (0-5)')
     .option('-o, --output <file>', 'Write JSON results to file')

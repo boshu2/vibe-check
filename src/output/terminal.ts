@@ -15,12 +15,16 @@ export function formatTerminal(result: VibeCheckResult | VibeCheckResultV2): str
   lines.push(chalk.bold.cyan('                    VIBE-CHECK RESULTS'));
   lines.push(chalk.bold.cyan('=' .repeat(64)));
 
-  // Period info
+  // Period info - show commit range with context
   const fromStr = format(result.period.from, 'MMM d, yyyy');
   const toStr = format(result.period.to, 'MMM d, yyyy');
+  const daySpan = Math.ceil(
+    (result.period.to.getTime() - result.period.from.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const dayContext = daySpan <= 1 ? '' : ` over ${daySpan} days`;
   lines.push('');
   lines.push(
-    chalk.gray(`  Period: ${fromStr} - ${toStr} (${result.period.activeHours}h active)`)
+    chalk.gray(`  Period: ${fromStr} - ${toStr} (${result.period.activeHours}h active${dayContext})`)
   );
   lines.push(
     chalk.gray(
@@ -47,10 +51,10 @@ export function formatTerminal(result: VibeCheckResult | VibeCheckResultV2): str
     lines.push(`  ${name.padEnd(26)} ${valueStr} ${ratingStr}`);
   }
 
-  // V2: Semantic-free metrics and VibeScore
+  // V2: Code pattern metrics and VibeScore
   if (isV2Result(result) && result.semanticFreeMetrics) {
     lines.push('');
-    lines.push(chalk.bold.magenta('  SEMANTIC-FREE METRICS (v2.0)'));
+    lines.push(chalk.bold.magenta('  CODE PATTERNS'));
     lines.push(chalk.gray('  ' + '-'.repeat(50)));
 
     const sfMetrics = [
@@ -81,9 +85,18 @@ export function formatTerminal(result: VibeCheckResult | VibeCheckResultV2): str
     lines.push(chalk.gray('  ' + '-'.repeat(50)));
     const rec = result.recommendation;
     const levelStr = `Level ${rec.level}`;
-    const confStr = `${Math.round(rec.confidence * 100)}% confidence`;
-    const ciStr = `CI: [${rec.ci[0].toFixed(1)}, ${rec.ci[1].toFixed(1)}]`;
-    lines.push(`  ${chalk.bold(levelStr)} (${confStr}, ${ciStr})`);
+
+    // Show confidence helpfully based on value
+    let confDisplay: string;
+    if (rec.confidence >= 0.6) {
+      confDisplay = chalk.green(`${Math.round(rec.confidence * 100)}% confidence`);
+    } else if (rec.confidence >= 0.4) {
+      confDisplay = chalk.yellow(`${Math.round(rec.confidence * 100)}% confidence`);
+    } else {
+      confDisplay = chalk.gray('needs more data');
+    }
+
+    lines.push(`  ${chalk.bold(levelStr)} (${confDisplay})`);
   }
 
   // Overall rating
