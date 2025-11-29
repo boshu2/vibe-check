@@ -195,6 +195,43 @@ vibe-check --since "1 week ago" --score -o results.json
 vibe-check --format markdown -o results.json  # Terminal gets markdown, file gets JSON
 ```
 
+## Git Hook
+
+Run vibe-check automatically before every push:
+
+```bash
+# Install the pre-push hook
+vibe-check init-hook
+
+# Or with blocking enabled (rejects push on LOW rating)
+vibe-check init-hook --block-low
+```
+
+### Hook Configuration
+
+Control behavior with environment variables:
+
+```bash
+# Block push on LOW rating (default: false)
+VIBE_CHECK_BLOCK_LOW=true git push
+
+# Show full output instead of simple (default: true)
+VIBE_CHECK_SIMPLE=false git push
+
+# Hide vibe score (default: true)
+VIBE_CHECK_SCORE=false git push
+```
+
+### Manual Installation
+
+If you prefer to install manually:
+
+```bash
+# Copy the hook to your repo
+curl -o .git/hooks/pre-push https://raw.githubusercontent.com/boshu2/vibe-check/main/hooks/pre-push
+chmod +x .git/hooks/pre-push
+```
+
 ## GitHub Action
 
 Add automated vibe-check to your PRs:
