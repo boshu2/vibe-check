@@ -97,13 +97,54 @@ export function saveProfile(profile: UserProfile): void {
 }
 
 /**
+ * Check if a period was already analyzed (to prevent XP gaming)
+ */
+function isPeriodDuplicate(
+  sessions: SessionRecord[],
+  periodFrom: Date,
+  periodTo: Date
+): boolean {
+  const fromTime = periodFrom.getTime();
+  const toTime = periodTo.getTime();
+
+  // Check recent sessions (last 50) for matching periods
+  const recentSessions = sessions.slice(-50);
+
+  for (const session of recentSessions) {
+    if (session.periodFrom && session.periodTo) {
+      const sessionFrom = new Date(session.periodFrom).getTime();
+      const sessionTo = new Date(session.periodTo).getTime();
+
+      // Check for exact match or significant overlap (>80%)
+      if (sessionFrom === fromTime && sessionTo === toTime) {
+        return true;
+      }
+
+      // Check for significant overlap
+      const overlapStart = Math.max(fromTime, sessionFrom);
+      const overlapEnd = Math.min(toTime, sessionTo);
+      const overlap = Math.max(0, overlapEnd - overlapStart);
+      const currentDuration = toTime - fromTime;
+
+      if (currentDuration > 0 && overlap / currentDuration > 0.8) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
  * Record a new session and update all gamification state
  */
 export function recordSession(
   vibeScore: number,
   overall: 'ELITE' | 'HIGH' | 'MEDIUM' | 'LOW',
   commits: number,
-  spirals: number
+  spirals: number,
+  periodFrom?: Date,
+  periodTo?: Date
 ): {
   profile: UserProfile;
   xpEarned: number;
@@ -112,9 +153,28 @@ export function recordSession(
   achievementsUnlocked: Achievement[];
   streakExtended: boolean;
   isPersonalBest: boolean;
+  isDuplicate: boolean;
 } {
   const profile = loadProfile();
   const now = new Date();
+
+  // Check for duplicate period (anti-gaming)
+  const isDuplicate = periodFrom && periodTo
+    ? isPeriodDuplicate(profile.sessions, periodFrom, periodTo)
+    : false;
+
+  if (isDuplicate) {
+    // Return current profile without awarding XP
+    return {
+      profile,
+      xpEarned: 0,
+      leveledUp: false,
+      achievementsUnlocked: [],
+      streakExtended: false,
+      isPersonalBest: false,
+      isDuplicate: true,
+    };
+  }
 
   // Update streak
   const oldStreak = profile.streak.current;
@@ -131,6 +191,8 @@ export function recordSession(
     spirals,
     xpEarned: 0,  // Will be updated
     achievementsUnlocked: [],
+    periodFrom: periodFrom?.toISOString(),
+    periodTo: periodTo?.toISOString(),
   };
 
   const newAchievements = checkAchievements(
@@ -185,6 +247,7 @@ export function recordSession(
     achievementsUnlocked: newAchievements,
     streakExtended,
     isPersonalBest,
+    isDuplicate: false,
   };
 }
 

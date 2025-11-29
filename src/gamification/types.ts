@@ -40,6 +40,8 @@ export interface SessionRecord {
   spirals: number;
   xpEarned: number;
   achievementsUnlocked: string[];  // Achievement IDs
+  periodFrom?: string;       // ISO datetime of analyzed period start
+  periodTo?: string;         // ISO datetime of analyzed period end
 }
 
 export interface UserProfile {

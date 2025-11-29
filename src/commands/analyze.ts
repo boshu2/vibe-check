@@ -226,7 +226,9 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
         vibeScorePercent,
         result.overall,
         commits.length,
-        spiralCount
+        spiralCount,
+        result.period.from,
+        result.period.to
       );
 
       // Show gamification summary
@@ -235,6 +237,19 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
 
       const levelInfo = LEVELS.find(l => l.level === gamificationResult.profile.xp.level)!;
       const { streak, xp } = gamificationResult.profile;
+
+      // Handle duplicate analysis (no XP awarded)
+      if (gamificationResult.isDuplicate) {
+        const streakFire = '🔥'.repeat(Math.min(streak.current, 5));
+        const streakText = streak.current > 0 ? `${streakFire} ${streak.current}-day streak` : '';
+        console.log(`  ${streakText}`);
+        console.log(`  ${levelInfo.icon} Level ${xp.level} ${xp.levelName} ${chalk.gray(`(${xp.currentLevelXP}/${xp.nextLevelXP} XP)`)}`);
+        console.log(chalk.gray(`  ℹ Already analyzed this period (no XP awarded)`));
+        console.log(chalk.gray(`  Make new commits to earn XP!`));
+        console.log(chalk.cyan('─'.repeat(64)));
+        console.log();
+        return;
+      }
 
       // Streak line
       const streakFire = '🔥'.repeat(Math.min(streak.current, 5));
