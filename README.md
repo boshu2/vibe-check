@@ -221,7 +221,7 @@ jobs:
 
 ## Requirements
 
-- Node.js >= 18.0.0
+- Node.js >= 20.0.0
 - Git repository with commit history
 - Conventional commits recommended (but not required)
 
