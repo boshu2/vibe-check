@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for vibe-check analysis
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -34,3 +36,57 @@ jobs:
 
       - name: Verify package
         run: npm pack --dry-run
+
+  # Dogfood: Run vibe-check on itself
+  dogfood:
+    runs-on: ubuntu-latest
+    needs: test  # Only run after tests pass
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install and build
+        run: |
+          npm ci
+          npm run build
+
+      - name: 'CLI: vibe-check (default)'
+        run: node dist/cli.js --since "1 month ago"
+
+      - name: 'CLI: vibe-check --format json'
+        run: node dist/cli.js --since "1 month ago" --format json | jq .
+
+      - name: 'CLI: vibe-check --format markdown'
+        run: node dist/cli.js --since "1 month ago" --format markdown
+
+      - name: 'CLI: vibe-check --score --recommend'
+        run: node dist/cli.js --since "1 month ago" --score --recommend
+
+      - name: 'CLI: vibe-check --output (JSON file)'
+        run: |
+          node dist/cli.js --since "1 month ago" --score -o vibe-check-results.json
+          echo "--- JSON Output ---"
+          cat vibe-check-results.json | jq .
+
+      - name: 'CLI: vibe-check level'
+        run: node dist/cli.js level
+
+      - name: 'CLI: vibe-check profile'
+        run: node dist/cli.js profile
+
+      - name: 'CLI: vibe-check analyze'
+        run: node dist/cli.js analyze --since "2 weeks ago"
+
+      - name: Upload vibe-check results
+        uses: actions/upload-artifact@v4
+        with:
+          name: vibe-check-dogfood-results
+          path: vibe-check-results.json
