@@ -126,3 +126,89 @@ export interface VibeCheckResultV2 extends VibeCheckResult {
     codeStability: CodeStabilityResult;
   };
 }
+
+// ============================================
+// TIMELINE TYPES (v2.1.0)
+// ============================================
+
+export interface TimelineEvent {
+  // Git data
+  hash: string;
+  timestamp: Date;
+  author: string;
+  subject: string;
+  type: Commit['type'];
+  scope: string | null;
+
+  // Session context
+  sessionId: string;
+  sessionPosition: number;
+  gapMinutes: number;
+
+  // Pattern flags
+  isRefactor: boolean;
+  spiralDepth: number;
+}
+
+export interface TimelineSession {
+  id: string;
+  start: Date;
+  end: Date;
+  duration: number; // minutes
+  commits: TimelineEvent[];
+
+  // Metrics
+  vibeScore: number | null;
+  overall: OverallRating;
+  trustPassRate: number;
+  reworkRatio: number;
+
+  // Patterns detected
+  flowState: boolean;
+  spirals: FixChain[];
+
+  // Gamification
+  xpEarned: number;
+}
+
+export interface TimelineDay {
+  date: string; // YYYY-MM-DD
+  displayDate: string; // e.g., "Thu Nov 28"
+  sessions: TimelineSession[];
+  dayScore: number | null;
+  dayRating: OverallRating;
+
+  // Aggregates
+  totalCommits: number;
+  totalDuration: number;
+  totalXp: number;
+  spiralCount: number;
+}
+
+export interface TimelineResult {
+  // Range
+  from: Date;
+  to: Date;
+  activeDays: number;
+  totalDays: number;
+
+  // Timeline data
+  days: TimelineDay[];
+  sessions: TimelineSession[];
+
+  // Aggregates
+  totalCommits: number;
+  totalActiveMinutes: number;
+  totalFeatures: number;
+  totalFixes: number;
+
+  // Patterns
+  totalSpirals: number;
+  flowStates: number;
+
+  // Gamification
+  totalXp: number;
+
+  // Trend sparkline (per-day scores)
+  trend: (number | null)[];
+}

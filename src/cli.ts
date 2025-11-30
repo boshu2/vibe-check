@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { createAnalyzeCommand, createStartCommand, createProfileCommand, createInitHookCommand, createWatchCommand, createInterveneCommand, runAnalyze } from './commands';
+import { createAnalyzeCommand, createStartCommand, createProfileCommand, createInitHookCommand, createWatchCommand, createInterveneCommand, createTimelineCommand, runAnalyze } from './commands';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { version } = require('../package.json');
@@ -11,7 +11,9 @@ const program = new Command();
 program
   .name('vibe-check')
   .description('Quick check: are you building or spiraling?')
-  .version(version);
+  .version(version)
+  .enablePositionalOptions()
+  .passThroughOptions();
 
 // Add subcommands
 program.addCommand(createAnalyzeCommand());
@@ -20,6 +22,7 @@ program.addCommand(createProfileCommand());
 program.addCommand(createInitHookCommand());
 program.addCommand(createWatchCommand());
 program.addCommand(createInterveneCommand());
+program.addCommand(createTimelineCommand());
 
 // Default behavior: if no subcommand, run analyze with passed options
 // This maintains backwards compatibility with v1.x usage

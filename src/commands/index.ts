@@ -4,3 +4,4 @@ export { createProfileCommand } from './profile';
 export { createInitHookCommand } from './init-hook';
 export { createWatchCommand } from './watch';
 export { createInterveneCommand } from './intervene';
+export { createTimelineCommand, runTimeline, TimelineOptions } from './timeline';
