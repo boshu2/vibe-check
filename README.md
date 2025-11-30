@@ -1,5 +1,7 @@
 # vibe-check
 
+[![CI](https://github.com/boshu2/vibe-check/actions/workflows/ci.yml/badge.svg)](https://github.com/boshu2/vibe-check/actions/workflows/ci.yml)
+
 **Quick check: are you building or spiraling?**
 
 Analyzes your git history to tell you if you're making progress or stuck in fix loops.
