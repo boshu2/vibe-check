@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { createAnalyzeCommand, createStartCommand, createProfileCommand, createInitHookCommand, createWatchCommand, createInterveneCommand, createTimelineCommand, createCacheCommand, runAnalyze } from './commands';
+import { createAnalyzeCommand, createStartCommand, createProfileCommand, createInitHookCommand, createWatchCommand, createInterveneCommand, createTimelineCommand, createCacheCommand, createDashboardCommand, runAnalyze } from './commands';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { version } = require('../package.json');
@@ -24,6 +24,7 @@ program.addCommand(createWatchCommand());
 program.addCommand(createInterveneCommand());
 program.addCommand(createTimelineCommand());
 program.addCommand(createCacheCommand());
+program.addCommand(createDashboardCommand());
 
 // Default behavior: if no subcommand, run analyze with passed options
 // This maintains backwards compatibility with v1.x usage

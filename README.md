@@ -1,10 +1,85 @@
 # vibe-check
 
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│     ██╗   ██╗██╗██████╗ ███████╗     ██████╗██╗  ██╗██╗  ██╗   │
+│     ██║   ██║██║██╔══██╗██╔════╝    ██╔════╝██║  ██║██║ ██╔╝   │
+│     ██║   ██║██║██████╔╝█████╗█████╗██║     ███████║█████╔╝    │
+│     ╚██╗ ██╔╝██║██╔══██╗██╔══╝╚════╝██║     ██╔══██║██╔═██╗    │
+│      ╚████╔╝ ██║██████╔╝███████╗    ╚██████╗██║  ██║██║  ██╗   │
+│       ╚═══╝  ╚═╝╚═════╝ ╚══════╝     ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   │
+│                                                                 │
+│              Are you building... or spiraling?                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+[![npm version](https://img.shields.io/npm/v/@boshu2/vibe-check.svg)](https://www.npmjs.com/package/@boshu2/vibe-check)
 [![CI](https://github.com/boshu2/vibe-check/actions/workflows/ci.yml/badge.svg)](https://github.com/boshu2/vibe-check/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Quick check: are you building or spiraling?**
+**Git-powered metrics for AI-assisted coding.** Catch debug spirals before they catch you.
 
-Analyzes your git history to tell you if you're making progress or stuck in fix loops.
+```bash
+npx @boshu2/vibe-check --since "2 hours ago"
+```
+
+```
+╭──────────────────────────────────────────────────────────────╮
+│  VIBE-CHECK                                    Nov 30, 2025  │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Rating: ELITE ✨                                            │
+│                                                              │
+│  Trust Pass Rate   ████████████████████  95%  ELITE          │
+│  Rework Ratio      ████░░░░░░░░░░░░░░░░  18%  ELITE          │
+│  Debug Spirals     None detected              ELITE          │
+│                                                              │
+│  You're in the zone. Ship it.                                │
+│                                                              │
+╰──────────────────────────────────────────────────────────────╯
+```
+
+---
+
+## Dashboard
+
+```bash
+vibe-check dashboard
+```
+
+Opens a visual dashboard with **real-time insights** about your coding patterns:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  🎯 VIBE-CHECK DASHBOARD                                         ━ ▢ ✕ │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
+│  │  🎯  89%    │  │  📈  85%    │  │  🔥  12     │  │  🏆  8/19   │    │
+│  │ Vibe Score  │  │  Average    │  │ Day Streak  │  │Achievements │    │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘    │
+│                                                                         │
+│  ┌─ Vibe Score Trend ──────────────────────────────────────────────┐   │
+│  │                                                            ●    │   │
+│  │                                          ●       ●    ●        │   │
+│  │                    ●    ●    ●    ●                            │   │
+│  │  ●    ●    ●                                                   │   │
+│  │  Mon  Tue  Wed  Thu  Fri  Sat  Sun  Mon  Tue  Wed  Thu  Fri   │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+│  ┌─ Insights ──────────────────────────────────────────────────────┐   │
+│  │  🎯 Improvement Streak: 3 weeks of declining spiral rate        │   │
+│  │  ⏰ Peak Hours: Most productive at 10am (23% of commits)        │   │
+│  │  📅 Best Day: Thursday is your power day                        │   │
+│  │  ⚠️  High-Risk: "auth" scope has 60% fix ratio                  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## Install
 
@@ -12,25 +87,27 @@ Analyzes your git history to tell you if you're making progress or stuck in fix 
 npm install -g @boshu2/vibe-check
 ```
 
-Or run directly:
-
-```bash
-npx @boshu2/vibe-check
-```
-
 ## Quick Start
 
 ```bash
-# Check your recent work
+# Analyze recent work
 vibe-check --since "1 week ago"
 
-# Watch mode - catch spirals in real-time
+# Real-time spiral detection
 vibe-check watch
+
+# Visual dashboard
+vibe-check dashboard
+
+# View your profile & achievements
+vibe-check profile
 ```
 
-## Watch Mode (Real-Time Detection)
+---
 
-Catch spirals as they happen, not after:
+## Watch Mode
+
+Catch spirals **as they happen**, not after:
 
 ```bash
 vibe-check watch
@@ -38,208 +115,176 @@ vibe-check watch
 
 ```
 VIBE-CHECK WATCH MODE
-Monitoring /path/to/repo
-Polling every 5s - Ctrl+C to stop
+Monitoring: ~/projects/my-app
+────────────────────────────────────────────────────────
 
-────────────────────────────────────────────────────────────
-  09:15 fix(auth) handle token refresh
-  09:18 fix(auth) add retry logic
-  09:22 fix(auth) increase timeout
+  09:15  fix(auth): handle token refresh
+  09:18  fix(auth): add retry logic
+  09:22  fix(auth): increase timeout
 
   ⚠️  SPIRAL DETECTED
-      Component: auth
-      Fixes: 3 commits, 7 min
+  ┌────────────────────────────────────────────────────┐
+  │  Component: auth                                   │
+  │  Fixes: 3 commits over 7 minutes                   │
+  │                                                    │
+  │  💡 Consider:                                      │
+  │     • Step back and write a test                   │
+  │     • Check the docs or ask for help               │
+  │     • Take a 5-minute break                        │
+  └────────────────────────────────────────────────────┘
 
-      Consider:
-      • Step back and write a test
-      • Check the docs or ask for help
-      • Take a 5-minute break
-────────────────────────────────────────────────────────────
+────────────────────────────────────────────────────────
 ```
 
-Options:
-- `--quiet` - Only show warnings, not all commits
-- `--interval <ms>` - Poll frequency (default: 5000ms)
-
-## Example Output
-
-```
-VIBE-CHECK Nov 21 - Nov 28
-
-  Rating: HIGH
-  Trust: 92% HIGH
-  Rework: 35% MEDIUM
-
-  Run without --simple for full details
-```
-
-## Automatic Baseline Comparison
-
-vibe-check learns YOUR patterns and compares each session to your baseline:
-
-```bash
-vibe-check --since "1 hour ago"
-```
-
-```
-VS YOUR BASELINE
-
-  Trust:  92% (+7% vs avg 85%)
-  Rework: 18% (-4% vs avg 22%)
-
-  Better than your usual - nice flow!
-```
-
-After 5+ sessions, you get automatic feedback without declaring anything.
-
-## Manual Session Workflow (Optional)
-
-For explicit level tracking, declare before starting:
-
-```bash
-# Before work: declare your expectation
-vibe-check start --level 3
-
-# ... do your work ...
-
-# After work: compare reality vs expectation
-vibe-check --since "1 hour ago"
-```
-
-```
-SESSION COMPLETE
-
-  Declared: Level 3 - Balanced (60% trust)
-  Duration: 45 min, 12 commits
-
-  Trust Pass:  85% (expected >65%) ✓
-  Rework:      20% (expected <30%) ✓
-
-  ✓ Level 3 was appropriate for this work
-```
-
-### Vibe Levels
-
-| Level | Name | Trust | When to Use |
-|-------|------|-------|-------------|
-| 5 | Full Automation | 95% | Formatting, linting |
-| 4 | High Trust | 80% | Boilerplate, CRUD |
-| 3 | Balanced | 60% | Features, tests |
-| 2 | Careful | 40% | Integrations, APIs |
-| 1 | Skeptical | 20% | Architecture, security |
-| 0 | Manual | 0% | Novel research |
-
-## The Core Metrics
-
-| Metric | What It Measures | Elite | Needs Work |
-|--------|------------------|-------|------------|
-| **Trust Pass Rate** | % commits without immediate fix | >95% | <80% |
-| **Rework Ratio** | % commits that are fixes | <30% | >50% |
-| **Debug Spiral** | Stuck in fix loops? | 0 detected | 3+ detected |
-
-## Git Hook
-
-Run automatically before every push:
-
-```bash
-vibe-check init-hook
-```
-
-Block pushes on LOW rating:
-
-```bash
-vibe-check init-hook --block-low
-```
+---
 
 ## Gamification
 
-Track progress with XP, streaks, and achievements:
+Level up your coding with XP, streaks, and achievements:
 
 ```bash
 vibe-check profile
 ```
 
 ```
-╭─────────────────────────────────────────────╮
-│           Your Vibe Profile                 │
-├─────────────────────────────────────────────┤
-│  🌲 Level 4 Expert                          │
-│  ████████████████░░░░  320/400 XP           │
-│                                             │
-│  🔥 Current Streak: 5 days                  │
-│  🏆 Achievements: 8/19 unlocked             │
-╰─────────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────╮
+│                                                     │
+│   🏔️  Level 6 Grandmaster                          │
+│   ████████████████░░░░░░░░  2140 / 5000 XP         │
+│                                                     │
+│   🔥  12 day streak (longest: 14)                   │
+│   🏆  8/19 achievements unlocked                    │
+│                                                     │
+│   Recent Unlocks:                                   │
+│   ✨ Elite Vibes    🧘 Zen Master    📊 Regular     │
+│                                                     │
+╰─────────────────────────────────────────────────────╯
 ```
 
-## CLI Options
+**19 achievements** including 2 hidden ones. Can you find them?
 
+---
+
+## The Metrics
+
+| Metric | What It Measures | 🟢 Elite | 🔴 Needs Work |
+|--------|------------------|----------|---------------|
+| **Trust Pass Rate** | % commits without immediate fix | >95% | <80% |
+| **Rework Ratio** | % commits that are fixes | <30% | >50% |
+| **Debug Spiral** | Stuck in fix loops? | 0 | 3+ |
+
+---
+
+## Vibe Levels
+
+Declare your trust level before starting work:
+
+```bash
+vibe-check start --level 3
+# ... code ...
+vibe-check --since "1 hour ago"
 ```
-vibe-check [options]
 
-Options:
-  --since <date>       Start date (e.g., "1 week ago")
-  --until <date>       End date (default: now)
-  -f, --format <type>  Output: terminal, json, markdown
-  -r, --repo <path>    Repository path
-  -o, --output <file>  Write JSON to file
-  -s, --simple         Simplified output
-  --score              Include VibeScore
-  -v, --verbose        Verbose output
+| Level | Name | Trust | Use For |
+|-------|------|-------|---------|
+| **5** | Full Auto | 95% | Formatting, linting |
+| **4** | High Trust | 80% | Boilerplate, CRUD |
+| **3** | Balanced | 60% | Features, tests |
+| **2** | Careful | 40% | Integrations, APIs |
+| **1** | Skeptical | 20% | Architecture, security |
+| **0** | Manual | 0% | Novel research |
 
-Commands:
-  watch                Real-time spiral detection
-  start --level <n>    Start session with declared level (0-5)
-  profile              View your gamification profile
-  init-hook            Install pre-push git hook
+---
+
+## Git Hook
+
+Auto-run before every push:
+
+```bash
+vibe-check init-hook           # Install hook
+vibe-check init-hook --block-low  # Block LOW pushes
 ```
+
+---
 
 ## GitHub Action
 
 ```yaml
 name: Vibe Check
-on:
-  pull_request:
-    branches: [main]
+on: [pull_request]
 
 jobs:
-  vibe-check:
+  vibe:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Run Vibe Check
-        uses: boshu2/vibe-check@v1
+      - uses: boshu2/vibe-check@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+---
+
+## All Commands
+
+```
+vibe-check [options]           Analyze git history
+vibe-check watch               Real-time spiral detection
+vibe-check dashboard           Visual dashboard + insights
+vibe-check profile             XP, streaks, achievements
+vibe-check timeline            Coding journey visualization
+vibe-check start --level <n>   Declare vibe level (0-5)
+vibe-check intervene           Record spiral intervention
+vibe-check init-hook           Install git hook
+vibe-check cache               Manage local storage
+```
+
+**Options:**
+```
+--since <date>       Start date ("1 week ago", "2024-01-01")
+--until <date>       End date (default: now)
+--score              Include VibeScore calculation
+--simple             Compact output
+--format <type>      terminal | json | markdown
+--output <file>      Save JSON to file
+--verbose            Detailed output
+```
+
+---
+
+## Philosophy
+
+**vibe-check is a mirror, not a judge.**
+
+Use it for self-reflection. Catch your own patterns. Improve your own flow.
+
+It's not a productivity metric. It's not for performance reviews. It's not measuring AI effectiveness.
+
+It's just asking: *are you building, or are you spiraling?*
+
+---
+
 ## Requirements
 
 - Node.js >= 20.0.0
-- Git repository
+- Git repository with commits
 
-## What This Is (and Isn't)
+## Docs
 
-**Is:** A quick feedback tool to catch debug spirals early
-
-**Isn't:** A productivity metric, performance review tool, or AI effectiveness measure
-
-Use it for self-reflection, not external judgment.
-
-## Learn More
-
-- **[The Vibe-Coding Ecosystem](docs/VIBE-ECOSYSTEM.md)** - Complete methodology guide
-- **[Unified Ecosystem](docs/UNIFIED-ECOSYSTEM.md)** - How vibe-check connects to AgentOps, Knowledge OS
-- **[Architecture](docs/ARCHITECTURE.md)** - Codebase structure and extension points
-- **[Gamification](docs/GAMIFICATION.md)** - XP, levels, achievements, challenges deep dive
-- **[Metrics Explained](docs/METRICS-EXPLAINED.md)** - How each metric is calculated
-- **[Contributing](CONTRIBUTING.md)** - Development setup and guidelines
-- **[Changelog](CHANGELOG.md)** - Version history
+- [Vibe-Coding Ecosystem](docs/VIBE-ECOSYSTEM.md) - Full methodology
+- [Architecture](docs/ARCHITECTURE.md) - Codebase structure
+- [Gamification](docs/GAMIFICATION.md) - XP & achievements deep dive
+- [Metrics Explained](docs/METRICS-EXPLAINED.md) - How it works
+- [Changelog](CHANGELOG.md) - Version history
 
 ## License
 
 MIT
+
+---
+
+<p align="center">
+  <i>Built for developers who vibe with AI</i>
+</p>

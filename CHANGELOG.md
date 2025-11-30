@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-11-30
+
+### Added
+- **Dashboard Command** - `vibe-check dashboard` opens a visual dashboard in your browser
+  - Score trend charts showing vibe score over time
+  - Session rating distribution (Elite/High/Medium/Low)
+  - Metrics radar chart
+  - Recent sessions list
+  - Achievement progress tracking
+- **Insight Engine** - Generates actionable insights from your data
+  - Peak productivity hours detection
+  - Best coding day analysis
+  - Improvement streak tracking
+  - Problematic scope warnings (high fix ratios)
+  - Streak risk alerts
+  - Personal best celebrations
+  - Level-up progress notifications
+  - Late night coding warnings
+  - Recent achievement highlights
+- Dashboard exports data to `dashboard-data.json` for offline viewing
+- `--no-open` flag to export data without opening browser
+- `-o, --output` flag for custom output path
+
+## [1.5.0] - 2025-11-30
+
+### Added
+- **Timeline Storage** - Persistent storage with schema versioning
+- **Cross-session Queries** - Query patterns across all historical data
+- **Regression Detection** - Detect when metrics are trending worse
+- **Spiral Pattern Memory** - Track which patterns cause the most spirals
+
+## [1.4.0] - 2025-11-29
+
+### Added
+- **Timeline Command** - `vibe-check timeline` for viewing coding journey
+- **Pattern Memory** - Tracks spiral triggers over time
+- **Intervention Memory** - Tracks what interventions break spirals
+- **Weekly Challenges** - Gamified weekly goals
+
+## [1.3.0] - 2025-11-29
+
+### Added
+- **Watch Mode** - `vibe-check watch` for real-time spiral detection
+- **Intervene Command** - `vibe-check intervene` to record what broke a spiral
+- **Cache Command** - `vibe-check cache` to manage local storage
+
 ## [1.2.0] - 2025-11-29
 
 ### Added

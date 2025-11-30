@@ -6,3 +6,4 @@ export { createWatchCommand } from './watch';
 export { createInterveneCommand } from './intervene';
 export { createTimelineCommand, runTimeline, TimelineOptions } from './timeline';
 export { createCacheCommand } from './cache';
+export { createDashboardCommand } from './dashboard';
