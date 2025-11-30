@@ -1,10 +1,11 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getCommits, isGitRepo, getCommitStats } from '../git';
+import { getCommits, isGitRepo, getCommitStats, getLatestCommitHash } from '../git';
 import { analyzeCommits } from '../metrics';
 import { formatTimelineTerminal } from '../output/timeline';
 import { formatTimelineMarkdown } from '../output/timeline-markdown';
 import { formatTimelineHtml } from '../output/timeline-html';
+import { loadStore, saveStore, updateStore, getStorePath } from '../storage';
 import {
   Commit,
   TimelineResult,
@@ -34,6 +35,8 @@ export interface TimelineOptions {
   repo: string;
   verbose: boolean;
   expand?: string;
+  noCache?: boolean;
+  insights?: boolean;
 }
 
 export function createTimelineCommand(): Command {
@@ -45,6 +48,8 @@ export function createTimelineCommand(): Command {
     .option('-r, --repo <path>', 'Repository path', process.cwd())
     .option('-v, --verbose', 'Show verbose output', false)
     .option('--expand [date]', 'Expand day details (all or specific date like "Nov-29")')
+    .option('--no-cache', 'Skip cache and fetch fresh data from git')
+    .option('--insights', 'Show compounding insights from historical data')
     .action(async (options) => {
       await runTimeline(options);
     });
@@ -54,7 +59,7 @@ export function createTimelineCommand(): Command {
 
 export async function runTimeline(options: TimelineOptions): Promise<void> {
   try {
-    const { since, until, format: outputFormat, repo, verbose, expand } = options;
+    const { since, until, format: outputFormat, repo, verbose, expand, noCache, insights } = options;
 
     // Check if repo is valid
     if (!(await isGitRepo(repo))) {
@@ -62,10 +67,17 @@ export async function runTimeline(options: TimelineOptions): Promise<void> {
       process.exit(1);
     }
 
+    // Load existing store for caching
+    const store = loadStore(repo);
+    const latestCommitHash = await getLatestCommitHash(repo);
+
     if (verbose) {
       console.error(chalk.gray(`Analyzing repository: ${repo}`));
       console.error(chalk.gray(`Since: ${since}`));
       if (until) console.error(chalk.gray(`Until: ${until}`));
+      console.error(chalk.gray(`Cache: ${getStorePath(repo)}`));
+      console.error(chalk.gray(`Last cached commit: ${store.lastCommitHash || 'none'}`));
+      console.error(chalk.gray(`Latest commit: ${latestCommitHash}`));
     }
 
     // Get commits
@@ -91,9 +103,53 @@ export async function runTimeline(options: TimelineOptions): Promise<void> {
     // Build timeline with pattern detection
     const timeline = buildTimeline(commits, commitStats.filesPerCommit, commitStats.lineStatsPerCommit);
 
+    // Update and save store (unless --no-cache)
+    if (!noCache) {
+      const updatedStore = updateStore(store, timeline, latestCommitHash);
+      saveStore(updatedStore, repo);
+
+      if (verbose) {
+        console.error(chalk.gray(`Cache updated: ${updatedStore.sessions.length} sessions, ${updatedStore.insights.length} insights`));
+      }
+    }
+
+    // Show insights if requested
+    if (insights && store.insights.length > 0) {
+      console.log('');
+      console.log(chalk.bold.magenta('═'.repeat(64)));
+      console.log(chalk.bold.magenta('  COMPOUNDING INSIGHTS'));
+      console.log(chalk.bold.magenta('═'.repeat(64)));
+      console.log('');
+
+      for (const insight of store.insights.slice(0, 5)) {
+        const icon = insight.type === 'pattern' ? '🔄' : insight.type === 'recommendation' ? '💡' : '📈';
+        console.log(`  ${icon} ${insight.message}`);
+        console.log(chalk.gray(`     (${insight.occurrences} occurrences)`));
+      }
+
+      // Show trends if available
+      if (store.trends.improvements.length > 0) {
+        console.log('');
+        console.log(chalk.bold.white('  Week-over-Week:'));
+        for (const imp of store.trends.improvements) {
+          const arrow = imp.direction === 'up' ? chalk.green('↑') : imp.direction === 'down' ? chalk.red('↓') : chalk.gray('→');
+          console.log(`  ${arrow} ${imp.metric}: ${imp.change > 0 ? '+' : ''}${imp.change}%`);
+        }
+      }
+
+      console.log('');
+    }
+
     // Output based on format
     if (outputFormat === 'json') {
-      console.log(JSON.stringify(timeline, null, 2));
+      // Include store insights in JSON output
+      const output = {
+        ...timeline,
+        storedInsights: store.insights,
+        trends: store.trends,
+        patternStats: store.patterns,
+      };
+      console.log(JSON.stringify(output, null, 2));
     } else if (outputFormat === 'markdown') {
       const output = formatTimelineMarkdown(timeline);
       console.log(output);

@@ -124,6 +124,28 @@ describe('CLI Integration', () => {
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Session');
     });
+
+    it('timeline creates cache file', () => {
+      run('timeline --since "1 week ago"');
+      expect(fs.existsSync('.vibe-check/timeline.json')).toBe(true);
+    });
+
+    it('timeline verbose shows cache info', () => {
+      const result = run('timeline --since "1 week ago" -v 2>&1');
+      expect(result.exitCode).toBe(0);
+      // Verbose output goes to stderr, captured in either stdout or stderr
+      const combined = result.stdout + result.stderr;
+      expect(combined).toMatch(/Cache:/);
+    });
+
+    it('timeline JSON includes stored insights', () => {
+      const result = run('timeline --since "1 week ago" --format json');
+      expect(result.exitCode).toBe(0);
+      const data = JSON.parse(result.stdout);
+      expect(data).toHaveProperty('storedInsights');
+      expect(data).toHaveProperty('trends');
+      expect(data).toHaveProperty('patternStats');
+    });
   });
 
   describe('error handling', () => {

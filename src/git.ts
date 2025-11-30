@@ -71,6 +71,51 @@ export async function isGitRepo(repoPath: string): Promise<boolean> {
   }
 }
 
+/**
+ * Get the latest commit hash in the repo
+ */
+export async function getLatestCommitHash(repoPath: string): Promise<string> {
+  const git: SimpleGit = simpleGit(repoPath);
+  try {
+    const log = await git.log({ n: 1 });
+    return log.latest?.hash.substring(0, 7) || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Get commits since a specific commit hash (for incremental sync)
+ */
+export async function getCommitsSince(
+  repoPath: string,
+  sinceHash: string
+): Promise<Commit[]> {
+  const git: SimpleGit = simpleGit(repoPath);
+
+  try {
+    // Get commits after the given hash
+    const log = await git.log({ from: sinceHash, to: 'HEAD' });
+    return log.all.map((entry) => parseCommit(entry));
+  } catch {
+    // If hash doesn't exist or error, return empty
+    return [];
+  }
+}
+
+/**
+ * Check if a commit hash exists in the repo
+ */
+export async function commitExists(repoPath: string, hash: string): Promise<boolean> {
+  const git: SimpleGit = simpleGit(repoPath);
+  try {
+    await git.raw(['cat-file', '-t', hash]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export interface FileStats {
   filesPerCommit: Map<string, string[]>;
   lineStats: { additions: number; deletions: number }[];
