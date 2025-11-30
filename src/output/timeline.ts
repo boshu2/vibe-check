@@ -250,6 +250,13 @@ function truncate(str: string, maxLen: number): string {
 function generateInsights(timeline: TimelineResult): string[] {
   const insights: string[] = [];
 
+  // Post-delete sprint (Phase 2) - show first as it's the killer insight
+  if (timeline.postDeleteSprint?.detected) {
+    insights.push(
+      chalk.magenta(`⚡ Post-delete sprint: ${timeline.postDeleteSprint.message}`)
+    );
+  }
+
   // Flow states
   if (timeline.flowStates > 0) {
     const avgFlowDuration = timeline.sessions
@@ -258,6 +265,20 @@ function generateInsights(timeline: TimelineResult): string[] {
     insights.push(
       `🌊 Flow states: ${timeline.flowStates} detected (avg ${Math.round(avgFlowDuration)} min)`
     );
+  }
+
+  // Thrashing (Phase 2)
+  if (timeline.thrashing?.detected) {
+    insights.push(
+      chalk.yellow(`🔄 Thrashing: ${timeline.thrashing.message}`)
+    );
+    // Show worst thrashing file
+    const worstFile = timeline.thrashing.files[0];
+    if (worstFile) {
+      insights.push(
+        chalk.gray(`   └─ ${truncate(worstFile.path, 40)}: ${worstFile.touchCount} edits, ${worstFile.efficiency}% efficiency`)
+      );
+    }
   }
 
   // Spirals
@@ -293,5 +314,45 @@ function generateInsights(timeline: TimelineResult): string[] {
     );
   }
 
+  // Recommendation based on patterns
+  const recommendation = generateRecommendation(timeline);
+  if (recommendation) {
+    insights.push('');
+    insights.push(chalk.cyan(`💡 ${recommendation}`));
+  }
+
   return insights;
+}
+
+/**
+ * Generate a recommendation based on detected patterns
+ */
+function generateRecommendation(timeline: TimelineResult): string | null {
+  // Post-delete sprint detected - reinforce the pattern
+  if (timeline.postDeleteSprint?.detected) {
+    return 'Trust simplification impulses - deletion often unlocks velocity';
+  }
+
+  // Thrashing detected - suggest stepping back
+  if (timeline.thrashing?.detected && timeline.thrashing.files.length > 2) {
+    return 'Multiple files with repeated edits - consider stepping back to design';
+  }
+
+  // Many spirals - suggest tracer tests
+  if (timeline.totalSpirals > 2) {
+    return 'Multiple debug spirals - try writing a tracer test before the next feature';
+  }
+
+  // Flow states detected - show what works
+  if (timeline.flowStates > 0) {
+    const flowSessions = timeline.sessions.filter(s => s.flowState);
+    const avgTime = flowSessions.reduce((sum, s) => {
+      const hour = s.start.getHours();
+      return sum + hour;
+    }, 0) / flowSessions.length;
+    const peakHour = Math.round(avgTime);
+    return `Flow states peak around ${peakHour}:00 - protect this time`;
+  }
+
+  return null;
 }

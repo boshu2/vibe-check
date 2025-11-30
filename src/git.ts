@@ -76,6 +76,11 @@ export interface FileStats {
   lineStats: { additions: number; deletions: number }[];
 }
 
+export interface CommitStats {
+  filesPerCommit: Map<string, string[]>;
+  lineStatsPerCommit: Map<string, { additions: number; deletions: number }>;
+}
+
 /**
  * Get file-level statistics for semantic-free metrics.
  */
@@ -134,4 +139,62 @@ export async function getFileStats(
   }
 
   return { filesPerCommit, lineStats };
+}
+
+/**
+ * Get per-commit statistics for pattern detection.
+ * Returns a map of commit hash -> stats
+ */
+export async function getCommitStats(
+  repoPath: string,
+  since?: string,
+  until?: string
+): Promise<CommitStats> {
+  const git: SimpleGit = simpleGit(repoPath);
+  const filesPerCommit = new Map<string, string[]>();
+  const lineStatsPerCommit = new Map<string, { additions: number; deletions: number }>();
+
+  // Build options for git log
+  const logOptions: Record<string, string | number | boolean> = {};
+  if (since) logOptions['--since'] = since;
+  if (until) logOptions['--until'] = until;
+
+  try {
+    const log = await git.log(logOptions);
+
+    for (const commit of log.all) {
+      const hash = commit.hash.substring(0, 7);
+
+      try {
+        const diffStat = await git.raw(['diff-tree', '--numstat', '--root', '-r', commit.hash]);
+        const lines = diffStat.trim().split('\n').filter(l => l.length > 0);
+
+        const files: string[] = [];
+        let additions = 0;
+        let deletions = 0;
+
+        for (const line of lines) {
+          const parts = line.split('\t');
+          if (parts.length >= 3) {
+            const add = parseInt(parts[0], 10) || 0;
+            const del = parseInt(parts[1], 10) || 0;
+            const file = parts[2];
+            additions += add;
+            deletions += del;
+            files.push(file);
+          }
+        }
+
+        filesPerCommit.set(hash, files);
+        lineStatsPerCommit.set(hash, { additions, deletions });
+      } catch {
+        filesPerCommit.set(hash, []);
+        lineStatsPerCommit.set(hash, { additions: 0, deletions: 0 });
+      }
+    }
+  } catch {
+    // Return empty stats on error
+  }
+
+  return { filesPerCommit, lineStatsPerCommit };
 }

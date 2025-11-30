@@ -185,6 +185,19 @@ export interface TimelineDay {
   spiralCount: number;
 }
 
+export interface PostDeleteSprintInfo {
+  detected: boolean;
+  linesDeleted: number;
+  velocityIncrease: number;
+  message: string;
+}
+
+export interface ThrashingInfo {
+  detected: boolean;
+  files: { path: string; touchCount: number; efficiency: number }[];
+  message: string;
+}
+
 export interface TimelineResult {
   // Range
   from: Date;
@@ -205,6 +218,10 @@ export interface TimelineResult {
   // Patterns
   totalSpirals: number;
   flowStates: number;
+
+  // Phase 2 patterns
+  postDeleteSprint: PostDeleteSprintInfo | null;
+  thrashing: ThrashingInfo | null;
 
   // Gamification
   totalXp: number;

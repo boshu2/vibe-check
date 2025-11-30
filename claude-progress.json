@@ -133,10 +133,10 @@
     "working_on": null,
     "blockers": [],
     "next_steps": [
-      "Implement Phase 2: flow state and post-delete sprint detection",
-      "Implement Phase 3: detour detection and insights engine",
-      "Implement Phase 4: export formats (JSON, Markdown, HTML)"
+      "Implement Phase 3: detour detection, late-night spirals, insights engine",
+      "Implement Phase 4: export formats (JSON, Markdown, HTML)",
+      "Add timeline integration tests"
     ],
-    "resume_summary": "Timeline command Phase 1 MVP complete: session detection, day grouping, terminal output with expand option. All 6 CLI flags working."
+    "resume_summary": "Timeline command Phase 2 complete: flow state, post-delete sprint, and thrashing detection. Recommendation engine generates actionable insights."
   }
 }

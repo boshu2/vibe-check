@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getCommits, isGitRepo } from '../git';
+import { getCommits, isGitRepo, getCommitStats } from '../git';
 import { analyzeCommits } from '../metrics';
 import { formatTimelineTerminal } from '../output/timeline';
 import {
@@ -10,9 +10,13 @@ import {
   TimelineSession,
   TimelineEvent,
   OverallRating,
-  FixChain,
+  PostDeleteSprintInfo,
+  ThrashingInfo,
 } from '../types';
-import { format, differenceInMinutes, differenceInDays, startOfDay, parseISO } from 'date-fns';
+import { format, differenceInMinutes, differenceInDays, parseISO } from 'date-fns';
+import { detectFlowState as detectFlowStatePattern } from '../patterns/flow-state';
+import { detectPostDeleteSprint } from '../patterns/post-delete-sprint';
+import { detectThrashing } from '../patterns/thrashing';
 
 // Session gap threshold: 60 minutes
 const SESSION_GAP_MINUTES = 60;
@@ -72,8 +76,14 @@ export async function runTimeline(options: TimelineOptions): Promise<void> {
       console.error(chalk.gray(`Found ${commits.length} commits`));
     }
 
-    // Build timeline
-    const timeline = buildTimeline(commits);
+    // Get commit stats for pattern detection
+    if (verbose) {
+      console.error(chalk.gray('Gathering file stats for pattern detection...'));
+    }
+    const commitStats = await getCommitStats(repo, since, until);
+
+    // Build timeline with pattern detection
+    const timeline = buildTimeline(commits, commitStats.filesPerCommit, commitStats.lineStatsPerCommit);
 
     // Output based on format
     if (outputFormat === 'json') {
@@ -102,7 +112,11 @@ export async function runTimeline(options: TimelineOptions): Promise<void> {
 /**
  * Build a complete timeline from commits
  */
-function buildTimeline(commits: Commit[]): TimelineResult {
+function buildTimeline(
+  commits: Commit[],
+  filesPerCommit: Map<string, string[]>,
+  lineStatsPerCommit: Map<string, { additions: number; deletions: number }>
+): TimelineResult {
   // Sort commits chronologically (oldest first)
   const sortedCommits = [...commits].sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -129,6 +143,32 @@ function buildTimeline(commits: Commit[]): TimelineResult {
   const to = sortedCommits[sortedCommits.length - 1].date;
   const totalDays = differenceInDays(to, from) + 1;
 
+  // Phase 2: Detect post-delete sprint
+  const postDeleteResult = detectPostDeleteSprint(sessions, lineStatsPerCommit);
+  const postDeleteSprint: PostDeleteSprintInfo | null = postDeleteResult.detected
+    ? {
+        detected: true,
+        linesDeleted: postDeleteResult.deleteSession?.linesDeleted || 0,
+        velocityIncrease: postDeleteResult.velocityIncrease,
+        message: postDeleteResult.message,
+      }
+    : null;
+
+  // Phase 2: Detect thrashing across all events
+  const allEvents = sessions.flatMap(s => s.commits);
+  const thrashingResult = detectThrashing(allEvents, filesPerCommit, lineStatsPerCommit);
+  const thrashing: ThrashingInfo | null = thrashingResult.detected
+    ? {
+        detected: true,
+        files: thrashingResult.files.map(f => ({
+          path: f.path,
+          touchCount: f.touchCount,
+          efficiency: f.efficiency,
+        })),
+        message: thrashingResult.message,
+      }
+    : null;
+
   return {
     from,
     to,
@@ -142,6 +182,8 @@ function buildTimeline(commits: Commit[]): TimelineResult {
     totalFixes,
     totalSpirals,
     flowStates,
+    postDeleteSprint,
+    thrashing,
     totalXp,
     trend,
   };
@@ -233,8 +275,9 @@ function buildSession(events: TimelineEvent[], sessionNum: number): TimelineSess
     }
   }
 
-  // Detect flow state: 5+ non-fix commits, no gap >30m, duration >45m
-  const flowState = detectFlowState(events, duration);
+  // Detect flow state using enhanced pattern detection
+  const flowStateResult = detectFlowStatePattern(events, duration);
+  const flowState = flowStateResult.detected;
 
   // Calculate XP (simplified - base XP on session quality)
   const xpEarned = calculateSessionXp(analysis.overall, commits.length, spirals.length);
@@ -253,17 +296,6 @@ function buildSession(events: TimelineEvent[], sessionNum: number): TimelineSess
     spirals,
     xpEarned,
   };
-}
-
-/**
- * Detect flow state in a session
- */
-function detectFlowState(events: TimelineEvent[], duration: number): boolean {
-  // Conditions: 5+ non-fix commits, no gap >30m, duration >45m
-  const nonFixCommits = events.filter(e => e.type !== 'fix').length;
-  const maxGap = Math.max(...events.map(e => e.gapMinutes));
-
-  return nonFixCommits >= 5 && maxGap <= 30 && duration >= 45;
 }
 
 /**
