@@ -24,6 +24,7 @@ import { detectPostDeleteSprint } from '../patterns/post-delete-sprint';
 import { detectThrashing } from '../patterns/thrashing';
 import { detectDetour } from '../patterns/detour';
 import { detectLateNightSpiral } from '../patterns/late-night';
+import { detectRegressions, getAllRecoveryTrends } from '../patterns/spiral-regression';
 
 // Session gap threshold: 60 minutes
 const SESSION_GAP_MINUTES = 60;
@@ -120,30 +121,68 @@ export async function runTimeline(options: TimelineOptions): Promise<void> {
     }
 
     // Show insights if requested
-    if (insights && store.insights.length > 0) {
+    if (insights) {
       console.log('');
       console.log(chalk.bold.magenta('═'.repeat(64)));
       console.log(chalk.bold.magenta('  COMPOUNDING INSIGHTS'));
       console.log(chalk.bold.magenta('═'.repeat(64)));
       console.log('');
 
-      for (const insight of store.insights.slice(0, 5)) {
-        const icon = insight.type === 'pattern' ? '🔄' : insight.type === 'recommendation' ? '💡' : '📈';
-        console.log(`  ${icon} ${insight.message}`);
-        console.log(chalk.gray(`     (${insight.occurrences} occurrences)`));
+      // Check for regressions
+      const regressionAnalysis = detectRegressions(store.trends);
+      if (regressionAnalysis.hasRegression) {
+        console.log(chalk.bold.red('  ⚠ REGRESSION ALERTS'));
+        for (const alert of regressionAnalysis.alerts) {
+          const icon = alert.severity === 'critical' ? chalk.red('🚨') : chalk.yellow('⚠');
+          console.log(`  ${icon} ${alert.message}`);
+          console.log(chalk.gray(`     ${alert.recommendation}`));
+        }
+        console.log('');
+      } else if (regressionAnalysis.improvementStreak > 0) {
+        console.log(chalk.green(`  🎯 ${regressionAnalysis.improvementStreak}-week improvement streak!`));
+        console.log('');
       }
 
-      // Show trends if available
-      if (store.trends.improvements.length > 0) {
+      // Show stored insights
+      if (store.insights.length > 0) {
+        for (const insight of store.insights.slice(0, 5)) {
+          const icon = insight.type === 'pattern' ? '🔄' : insight.type === 'recommendation' ? '💡' : '📈';
+          console.log(`  ${icon} ${insight.message}`);
+          console.log(chalk.gray(`     (${insight.occurrences} occurrences)`));
+        }
         console.log('');
+      }
+
+      // Show recovery time trends
+      const recoveryTrends = getAllRecoveryTrends(store.sessions);
+      const improvingComponents = recoveryTrends.filter(t => t.trend === 'improving');
+      const worseningComponents = recoveryTrends.filter(t => t.trend === 'worsening');
+
+      if (improvingComponents.length > 0) {
+        console.log(chalk.bold.green('  📉 Improving Recovery Times:'));
+        for (const comp of improvingComponents.slice(0, 3)) {
+          console.log(chalk.green(`     ${comp.component}: ${comp.avgTime}m → ${comp.recentTime}m`));
+        }
+        console.log('');
+      }
+
+      if (worseningComponents.length > 0) {
+        console.log(chalk.bold.yellow('  📈 Slower Recovery Times:'));
+        for (const comp of worseningComponents.slice(0, 3)) {
+          console.log(chalk.yellow(`     ${comp.component}: ${comp.avgTime}m → ${comp.recentTime}m`));
+        }
+        console.log('');
+      }
+
+      // Show week-over-week trends
+      if (store.trends.improvements.length > 0) {
         console.log(chalk.bold.white('  Week-over-Week:'));
         for (const imp of store.trends.improvements) {
           const arrow = imp.direction === 'up' ? chalk.green('↑') : imp.direction === 'down' ? chalk.red('↓') : chalk.gray('→');
           console.log(`  ${arrow} ${imp.metric}: ${imp.change > 0 ? '+' : ''}${imp.change}%`);
         }
+        console.log('');
       }
-
-      console.log('');
     }
 
     // Output based on format
