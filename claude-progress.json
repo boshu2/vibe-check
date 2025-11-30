@@ -164,11 +164,11 @@
     "working_on": null,
     "blockers": [],
     "next_steps": [
-      "npm version patch && npm publish (v1.5.1 with hardening)",
-      "Add cross-session queries (--all-time, --scope flags)",
-      "Build spiral regression detection"
+      "npm version minor && npm publish (v1.6.0 with query features)",
+      "Build spiral regression detection (Phase 3)",
+      "Add intervention effectiveness scoring"
     ],
-    "resume_summary": "Storage hardening complete: .gitignore enforcement, schema versioning fix, NDJSON error recovery, cache status/clear commands. Ready for v1.5.1 publish."
+    "resume_summary": "Phase 2 complete: cross-session queries with --all-time and --scope flags. NDJSON commit log now populated by timeline. Ready for v1.6.0 publish."
   },
   "sessions_continued": [
     {
