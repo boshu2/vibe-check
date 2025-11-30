@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import * as path from 'path';
 import {
   TimelineResult,
@@ -6,6 +5,7 @@ import {
   TimelineDay,
   TimelineEvent,
 } from '../types';
+import { atomicWriteSync, safeReadJsonSync } from './atomic';
 
 const STORE_DIR = '.vibe-check';
 const TIMELINE_FILE = 'timeline.json';
@@ -169,33 +169,24 @@ export function createInitialStore(): TimelineStore {
  */
 export function loadStore(repoPath: string = process.cwd()): TimelineStore {
   const filePath = getStorePath(repoPath);
+  const initialStore = createInitialStore();
 
-  if (fs.existsSync(filePath)) {
-    try {
-      const data = fs.readFileSync(filePath, 'utf-8');
-      const store = JSON.parse(data) as TimelineStore;
-      return migrateStore(store);
-    } catch {
-      return createInitialStore();
-    }
-  }
+  const store = safeReadJsonSync<TimelineStore>(filePath, initialStore);
 
-  return createInitialStore();
+  // Always migrate (handles both old versions and fresh stores)
+  return migrateTimelineStore(store);
 }
 
 /**
  * Save timeline store to disk
  */
 export function saveStore(store: TimelineStore, repoPath: string = process.cwd()): void {
-  const dirPath = getStoreDir(repoPath);
   const filePath = getStorePath(repoPath);
 
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-
   store.lastUpdated = new Date().toISOString();
-  fs.writeFileSync(filePath, JSON.stringify(store, null, 2));
+
+  // Use atomic write to prevent corruption
+  atomicWriteSync(filePath, JSON.stringify(store, null, 2));
 }
 
 /**
@@ -554,7 +545,7 @@ function generateInsights(store: TimelineStore, timeline: TimelineResult): void 
 /**
  * Migrate old store versions
  */
-function migrateStore(store: TimelineStore): TimelineStore {
+function migrateTimelineStore(store: TimelineStore): TimelineStore {
   if (!store.version) {
     store.version = '1.0.0';
   }
