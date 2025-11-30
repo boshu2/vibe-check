@@ -198,6 +198,31 @@ export interface ThrashingInfo {
   message: string;
 }
 
+export interface DetourInfo {
+  detected: boolean;
+  detours: {
+    scope: string;
+    filesAffected: string[];
+    linesAdded: number;
+    linesDeleted: number;
+    duration: number;
+  }[];
+  totalTimeLost: number;
+  message: string;
+}
+
+export interface LateNightSpiralInfo {
+  detected: boolean;
+  spirals: {
+    component: string;
+    duration: number;
+    fixCount: number;
+    resolved: boolean;
+  }[];
+  totalDuration: number;
+  message: string;
+}
+
 export interface TimelineResult {
   // Range
   from: Date;
@@ -222,6 +247,10 @@ export interface TimelineResult {
   // Phase 2 patterns
   postDeleteSprint: PostDeleteSprintInfo | null;
   thrashing: ThrashingInfo | null;
+
+  // Phase 3 patterns
+  detours: DetourInfo | null;
+  lateNightSpirals: LateNightSpiralInfo | null;
 
   // Gamification
   totalXp: number;

@@ -281,6 +281,27 @@ function generateInsights(timeline: TimelineResult): string[] {
     }
   }
 
+  // Phase 3: Detours (code added then deleted)
+  if (timeline.detours?.detected) {
+    insights.push(
+      chalk.yellow(timeline.detours.message)
+    );
+    // Show top detour details
+    const topDetour = timeline.detours.detours[0];
+    if (topDetour) {
+      insights.push(
+        chalk.gray(`   └─ ${topDetour.scope}: ${topDetour.linesAdded} lines built, ${topDetour.linesDeleted} deleted`)
+      );
+    }
+  }
+
+  // Phase 3: Late-night spirals
+  if (timeline.lateNightSpirals?.detected) {
+    insights.push(
+      chalk.yellow(timeline.lateNightSpirals.message)
+    );
+  }
+
   // Spirals
   if (timeline.totalSpirals > 0) {
     insights.push(
@@ -328,6 +349,19 @@ function generateInsights(timeline: TimelineResult): string[] {
  * Generate a recommendation based on detected patterns
  */
 function generateRecommendation(timeline: TimelineResult): string | null {
+  // Late-night spirals - strongest signal for behavior change
+  if (timeline.lateNightSpirals?.detected && timeline.lateNightSpirals.spirals.length > 0) {
+    const totalTime = timeline.lateNightSpirals.totalDuration;
+    if (totalTime > 30) {
+      return 'Late-night debugging is rarely efficient - sleep on it and tackle with fresh eyes';
+    }
+  }
+
+  // Detours detected - learn from experiments
+  if (timeline.detours?.detected && timeline.detours.totalTimeLost > 60) {
+    return 'Significant detour detected - try smaller experiments or spikes before committing';
+  }
+
   // Post-delete sprint detected - reinforce the pattern
   if (timeline.postDeleteSprint?.detected) {
     return 'Trust simplification impulses - deletion often unlocks velocity';

@@ -12,11 +12,15 @@ import {
   OverallRating,
   PostDeleteSprintInfo,
   ThrashingInfo,
+  DetourInfo,
+  LateNightSpiralInfo,
 } from '../types';
 import { format, differenceInMinutes, differenceInDays, parseISO } from 'date-fns';
 import { detectFlowState as detectFlowStatePattern } from '../patterns/flow-state';
 import { detectPostDeleteSprint } from '../patterns/post-delete-sprint';
 import { detectThrashing } from '../patterns/thrashing';
+import { detectDetour } from '../patterns/detour';
+import { detectLateNightSpiral } from '../patterns/late-night';
 
 // Session gap threshold: 60 minutes
 const SESSION_GAP_MINUTES = 60;
@@ -169,6 +173,39 @@ function buildTimeline(
       }
     : null;
 
+  // Phase 3: Detect detours (code added then deleted)
+  const detourResult = detectDetour(allEvents, filesPerCommit, lineStatsPerCommit);
+  const detours: DetourInfo | null = detourResult.detected
+    ? {
+        detected: true,
+        detours: detourResult.detours.map(d => ({
+          scope: d.scope,
+          filesAffected: d.filesAffected,
+          linesAdded: d.linesAdded,
+          linesDeleted: d.linesDeleted,
+          duration: d.duration,
+        })),
+        totalTimeLost: detourResult.totalTimeLost,
+        message: detourResult.message,
+      }
+    : null;
+
+  // Phase 3: Detect late-night spirals
+  const lateNightResult = detectLateNightSpiral(sessions);
+  const lateNightSpirals: LateNightSpiralInfo | null = lateNightResult.detected
+    ? {
+        detected: true,
+        spirals: lateNightResult.spirals.map(s => ({
+          component: s.component,
+          duration: s.duration,
+          fixCount: s.fixCount,
+          resolved: s.resolved,
+        })),
+        totalDuration: lateNightResult.totalDuration,
+        message: lateNightResult.message,
+      }
+    : null;
+
   return {
     from,
     to,
@@ -184,6 +221,8 @@ function buildTimeline(
     flowStates,
     postDeleteSprint,
     thrashing,
+    detours,
+    lateNightSpirals,
     totalXp,
     trend,
   };

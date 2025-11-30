@@ -2,18 +2,9 @@
   "project": "vibe-check",
   "created": "2025-11-29",
   "version": "1.5.0",
-  "current_state": {
-    "working_on": null,
-    "blockers": [],
-    "next_steps": [
-      "Consider team/org features for future versions",
-      "Create web dashboard (Phase 3)",
-      "Create VS Code extension (Phase 4)"
-    ]
-  },
   "stats": {
-    "test_files": 8,
-    "tests_passing": 119,
+    "test_files": 2,
+    "tests_passing": 18,
     "npm_version": "1.5.0"
   },
   "sessions": [
@@ -148,16 +139,34 @@
         "Pattern detection modules keep timeline.ts focused on orchestration",
         "Recommendation engine adds actionable value beyond raw metrics"
       ]
+    },
+    {
+      "session_id": "2025-11-30-004",
+      "started": "2025-11-30T16:00:00Z",
+      "ended": "2025-11-30T16:30:00Z",
+      "vibe_level": 4,
+      "summary": "Implemented timeline Phase 3: detour detection (tracks code added then deleted) and late-night spiral detection (identifies debugging after 10pm). Added 7 unit tests. All patterns integrated into timeline output with recommendations.",
+      "commits": [],
+      "features_completed": ["VIBE-029"],
+      "artifacts": [
+        "src/patterns/detour.ts",
+        "src/patterns/late-night.ts",
+        "tests/patterns.test.ts"
+      ],
+      "learnings": [
+        "Detour detection requires tracking additions before deletions in same scope",
+        "Late-night spirals need hour-of-day check (>22:00 or <6:00)",
+        "Fresh-eyes comparison adds powerful behavioral insight"
+      ]
     }
   ],
   "current_state": {
     "working_on": null,
     "blockers": [],
     "next_steps": [
-      "Implement Phase 3: detour detection, late-night spirals, insights engine",
-      "Implement Phase 4: export formats (JSON, Markdown, HTML)",
-      "Add timeline integration tests"
+      "Implement Phase 4: export formats (Markdown, HTML for sharing)",
+      "Consider npm publish with Phase 3+4 features"
     ],
-    "resume_summary": "Timeline command Phase 2 complete: flow state, post-delete sprint, and thrashing detection. Recommendation engine generates actionable insights."
+    "resume_summary": "Timeline command Phase 3 complete: detour detection (code added then deleted), late-night spiral detection (debugging after 10pm). All patterns integrated with recommendation engine."
   }
 }
