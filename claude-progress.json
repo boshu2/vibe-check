@@ -85,6 +85,26 @@
         "trust_pass_rate": 100,
         "learnings": ["Parallel Explore agents (4x) excellent for cross-domain research", "Three-layer architecture (BUILD/WORK/RUN) provides clear ecosystem mental model"]
       }
+    },
+    {
+      "session_id": "2025-11-30-001",
+      "started": "2025-11-30T08:00:00Z",
+      "ended": "2025-11-30T09:00:00Z",
+      "vibe_level": 3,
+      "summary": "Test cleanup: Created 258 unit tests (wrong approach), then deleted all and replaced with 11 integration tests. Enhanced CI workflow. Full retrospective analyzing ML detour and 12 vibe-coding failure patterns for writing.",
+      "commits": ["1aef39d", "2565d7b"],
+      "features_completed": [],
+      "retro": {
+        "failure_patterns_hit": 2,
+        "patterns": ["Tests Passing Lie", "Instruction Drift (258 unnecessary tests)"],
+        "vibe_score": 84,
+        "trust_pass_rate": 100,
+        "learnings": [
+          "Integration tests > unit tests for CLIs",
+          "258 tests that test internals ≠ confidence",
+          "11 tests that run the CLI = actual validation"
+        ]
+      }
     }
   ]
 }
