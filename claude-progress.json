@@ -164,11 +164,11 @@
     "working_on": null,
     "blockers": [],
     "next_steps": [
-      "Implement storage-hardening-and-cache-plan.md (cache command, schema fix, NDJSON recovery)",
-      "npm publish v1.6.0 with storage enhancements",
-      "Add cross-session queries (--all-time, --scope flags)"
+      "npm version patch && npm publish (v1.5.1 with hardening)",
+      "Add cross-session queries (--all-time, --scope flags)",
+      "Build spiral regression detection"
     ],
-    "resume_summary": "Storage layer enhanced with atomic writes, NDJSON commit log, schema versioning. 3-agent research identified 12 enhancement opportunities. Plan ready for cache command + hardening."
+    "resume_summary": "Storage hardening complete: .gitignore enforcement, schema versioning fix, NDJSON error recovery, cache status/clear commands. Ready for v1.5.1 publish."
   },
   "sessions_continued": [
     {
