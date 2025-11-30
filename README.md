@@ -231,6 +231,11 @@ Use it for self-reflection, not external judgment.
 ## Learn More
 
 - **[The Vibe-Coding Ecosystem](docs/VIBE-ECOSYSTEM.md)** - Complete methodology guide
+- **[Unified Ecosystem](docs/UNIFIED-ECOSYSTEM.md)** - How vibe-check connects to AgentOps, Knowledge OS
+- **[Architecture](docs/ARCHITECTURE.md)** - Codebase structure and extension points
+- **[Gamification](docs/GAMIFICATION.md)** - XP, levels, achievements, challenges deep dive
+- **[Metrics Explained](docs/METRICS-EXPLAINED.md)** - How each metric is calculated
+- **[Contributing](CONTRIBUTING.md)** - Development setup and guidelines
 - **[Changelog](CHANGELOG.md)** - Version history
 
 ## License
