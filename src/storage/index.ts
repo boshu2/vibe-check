@@ -21,7 +21,10 @@ export {
   atomicWriteSync,
   appendLineSync,
   readNdjsonSync,
+  readNdjsonWithErrors,
   safeReadJsonSync,
+  ensureGitignore,
+  NdjsonReadResult,
 } from './atomic';
 
 // Commit log (NDJSON source of truth)

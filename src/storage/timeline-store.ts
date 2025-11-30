@@ -6,12 +6,13 @@ import {
   TimelineEvent,
 } from '../types';
 import { atomicWriteSync, safeReadJsonSync } from './atomic';
+import { CURRENT_SCHEMA_VERSION, SchemaVersion } from './schema';
 
 const STORE_DIR = '.vibe-check';
 const TIMELINE_FILE = 'timeline.json';
 
 export interface TimelineStore {
-  version: string;
+  version: SchemaVersion;
   lastUpdated: string;
   lastCommitHash: string; // For incremental sync
 
@@ -136,7 +137,7 @@ export function getStorePath(repoPath: string = process.cwd()): string {
  */
 export function createInitialStore(): TimelineStore {
   return {
-    version: '1.0.0',
+    version: CURRENT_SCHEMA_VERSION,
     lastUpdated: new Date().toISOString(),
     lastCommitHash: '',
     sessions: [],
@@ -546,8 +547,10 @@ function generateInsights(store: TimelineStore, timeline: TimelineResult): void 
  * Migrate old store versions
  */
 function migrateTimelineStore(store: TimelineStore): TimelineStore {
-  if (!store.version) {
-    store.version = '1.0.0';
+  // Handle missing or old versions
+  if (!store.version || store.version === '1.0.0') {
+    // Migrate from 1.0.0 to current
+    store.version = CURRENT_SCHEMA_VERSION;
   }
 
   if (!store.insights) {
@@ -561,6 +564,9 @@ function migrateTimelineStore(store: TimelineStore): TimelineStore {
   if (!store.trends) {
     store.trends = createInitialStore().trends;
   }
+
+  // Ensure version is current after all migrations
+  store.version = CURRENT_SCHEMA_VERSION;
 
   return store;
 }
