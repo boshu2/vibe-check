@@ -36,6 +36,8 @@ program
   .option('--score', 'Include VibeScore and code pattern metrics', false)
   .option('-o, --output <file>', 'Write JSON results to file')
   .option('-s, --simple', 'Simplified output (fewer details)', false)
+  .option('--all-time', 'Analyze all commits from cache (ignores --since/--until)')
+  .option('--scope <scope>', 'Filter analysis to specific scope (e.g., "auth", "api")')
   .action(async (options) => {
     // Default action runs analyze (backwards compatibility)
     await runAnalyze({
@@ -47,6 +49,8 @@ program
       score: options.score,
       output: options.output,
       simple: options.simple,
+      allTime: options.allTime,
+      scope: options.scope,
     });
   });
 

@@ -5,7 +5,7 @@ import { analyzeCommits } from '../metrics';
 import { formatTimelineTerminal } from '../output/timeline';
 import { formatTimelineMarkdown } from '../output/timeline-markdown';
 import { formatTimelineHtml } from '../output/timeline-html';
-import { loadStore, saveStore, updateStore, getStorePath } from '../storage';
+import { loadStore, saveStore, updateStore, getStorePath, appendCommits } from '../storage';
 import {
   Commit,
   TimelineResult,
@@ -105,6 +105,12 @@ export async function runTimeline(options: TimelineOptions): Promise<void> {
 
     // Update and save store (unless --no-cache)
     if (!noCache) {
+      // Append commits to NDJSON log (source of truth)
+      const appendedCount = appendCommits(commits, repo);
+      if (verbose && appendedCount > 0) {
+        console.error(chalk.gray(`Appended ${appendedCount} new commits to log`));
+      }
+
       const updatedStore = updateStore(store, timeline, latestCommitHash);
       saveStore(updatedStore, repo);
 

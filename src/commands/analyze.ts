@@ -23,6 +23,12 @@ import {
   compareToBaseline,
   loadSessionHistory,
 } from '../sessions';
+import {
+  loadAllCommits,
+  queryCommits,
+  getCrossSessionSummary,
+  analyzeScopeDetail,
+} from '../analysis';
 
 export interface AnalyzeOptions {
   since?: string;
@@ -33,6 +39,8 @@ export interface AnalyzeOptions {
   score: boolean;
   output?: string;
   simple: boolean;
+  allTime?: boolean;
+  scope?: string;
 }
 
 export function createAnalyzeCommand(): Command {
@@ -46,6 +54,8 @@ export function createAnalyzeCommand(): Command {
     .option('--score', 'Include VibeScore and code pattern metrics', false)
     .option('-o, --output <file>', 'Write JSON results to file')
     .option('-s, --simple', 'Simplified output (fewer details)', false)
+    .option('--all-time', 'Analyze all commits from cache (ignores --since/--until)')
+    .option('--scope <scope>', 'Filter analysis to specific scope (e.g., "auth", "api")')
     .action(async (options) => {
       await runAnalyze(options);
     });
@@ -55,7 +65,7 @@ export function createAnalyzeCommand(): Command {
 
 export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
   try {
-    const { since, until, format, repo, verbose, score, output, simple } = options;
+    const { since, until, format, repo, verbose, score, output, simple, allTime, scope } = options;
 
     // Check for active session
     const session = loadSession(repo);
@@ -74,14 +84,29 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
       process.exit(1);
     }
 
+    // Handle --all-time flag: use cached commits instead of git
+    if (allTime) {
+      await runAllTimeAnalysis(options);
+      return;
+    }
+
     if (verbose) {
       console.error(chalk.gray(`Analyzing repository: ${repo}`));
       if (since) console.error(chalk.gray(`Since: ${since}`));
       if (until) console.error(chalk.gray(`Until: ${until}`));
+      if (scope) console.error(chalk.gray(`Scope filter: ${scope}`));
     }
 
     // Get commits
-    const commits = await getCommits(repo, since, until);
+    let commits = await getCommits(repo, since, until);
+
+    // Apply scope filter if specified
+    if (scope) {
+      commits = commits.filter(c => c.scope === scope);
+      if (verbose) {
+        console.error(chalk.gray(`Filtered to ${commits.length} commits in scope "${scope}"`));
+      }
+    }
 
     if (commits.length === 0) {
       if (format === 'terminal') {
@@ -371,4 +396,104 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
     }
     process.exit(1);
   }
+}
+
+/**
+ * Run analysis on all cached commits (--all-time mode)
+ */
+async function runAllTimeAnalysis(options: AnalyzeOptions): Promise<void> {
+  const { format, repo, verbose, scope } = options;
+
+  // Load all commits from cache
+  let commits = loadAllCommits(repo);
+
+  if (commits.length === 0) {
+    console.log(chalk.yellow('\nNo cached commits found.'));
+    console.log(chalk.gray('Run `vibe-check timeline` first to build the commit cache.\n'));
+    return;
+  }
+
+  // Apply scope filter if specified
+  if (scope) {
+    commits = commits.filter(c => c.scope === scope);
+  }
+
+  if (verbose) {
+    console.error(chalk.gray(`Loaded ${commits.length} commits from cache`));
+  }
+
+  // Get cross-session summary
+  const summary = getCrossSessionSummary(commits);
+
+  if (format === 'json') {
+    console.log(JSON.stringify(summary, null, 2));
+    return;
+  }
+
+  // Terminal output
+  console.log('');
+  console.log(chalk.bold.cyan('═'.repeat(64)));
+  console.log(chalk.bold.cyan('  ALL-TIME ANALYSIS'));
+  console.log(chalk.bold.cyan('═'.repeat(64)));
+  console.log('');
+
+  // Date range
+  if (summary.dateRange) {
+    const from = summary.dateRange.from.toLocaleDateString();
+    const to = summary.dateRange.to.toLocaleDateString();
+    console.log(chalk.white(`  Period: ${from} - ${to}`));
+  }
+  console.log(chalk.white(`  Total commits: ${summary.totalCommits}`));
+  console.log('');
+
+  // By type
+  console.log(chalk.bold.white('  By Type:'));
+  const typeEntries = Object.entries(summary.byType).sort((a, b) => b[1] - a[1]);
+  for (const [type, count] of typeEntries) {
+    const pct = ((count / summary.totalCommits) * 100).toFixed(0);
+    const bar = '█'.repeat(Math.round(count / summary.totalCommits * 20));
+    console.log(`    ${type.padEnd(10)} ${String(count).padStart(4)} (${pct.padStart(2)}%) ${chalk.cyan(bar)}`);
+  }
+  console.log('');
+
+  // By scope (top 10)
+  if (summary.byScope.length > 0) {
+    console.log(chalk.bold.white('  Top Scopes:'));
+    for (const scopeStats of summary.byScope.slice(0, 10)) {
+      const spiralPct = (scopeStats.spiralRatio * 100).toFixed(0);
+      const riskIcon = scopeStats.spiralRatio >= 0.5 ? chalk.red('⚠') :
+                       scopeStats.spiralRatio >= 0.3 ? chalk.yellow('●') :
+                       chalk.green('●');
+      console.log(`    ${riskIcon} ${scopeStats.scope.padEnd(20)} ${String(scopeStats.commitCount).padStart(4)} commits, ${spiralPct}% fixes`);
+    }
+    console.log('');
+  }
+
+  // Peak hours
+  console.log(chalk.bold.white('  Peak Hours:'));
+  const peakHours = Object.entries(summary.byHour)
+    .map(([h, c]) => ({ hour: parseInt(h), count: c }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+  for (const { hour, count } of peakHours) {
+    const hourStr = hour < 12 ? `${hour}am` : hour === 12 ? '12pm' : `${hour - 12}pm`;
+    const bar = '█'.repeat(Math.round(count / summary.totalCommits * 30));
+    console.log(`    ${hourStr.padEnd(5)} ${String(count).padStart(4)} ${chalk.cyan(bar)}`);
+  }
+  console.log('');
+
+  // Problematic scopes warning
+  const problematic = summary.byScope.filter(s => s.commitCount >= 3 && s.spiralRatio >= 0.5);
+  if (problematic.length > 0) {
+    console.log(chalk.bold.yellow('  ⚠ High-Risk Scopes (>50% fixes):'));
+    for (const scopeStats of problematic.slice(0, 5)) {
+      const spiralPct = (scopeStats.spiralRatio * 100).toFixed(0);
+      console.log(chalk.yellow(`    ${scopeStats.scope}: ${spiralPct}% fixes (${scopeStats.fixCount}/${scopeStats.commitCount})`));
+    }
+    console.log(chalk.gray('    Consider adding tracer tests for these areas.'));
+    console.log('');
+  }
+
+  console.log(chalk.gray('  Use --scope <name> to drill into a specific scope'));
+  console.log('');
 }
