@@ -1,10 +1,10 @@
 # vibe-check
 
-![Vibe-Check Dashboard](docs/images/dashboard.png)
-
 [![npm version](https://img.shields.io/npm/v/@boshu2/vibe-check.svg)](https://www.npmjs.com/package/@boshu2/vibe-check)
 [![CI](https://github.com/boshu2/vibe-check/actions/workflows/ci.yml/badge.svg)](https://github.com/boshu2/vibe-check/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+![Vibe-Check Dashboard](docs/images/dashboard.png)
 
 **Git-powered metrics for AI-assisted coding.** Catch debug spirals before they catch you.
 
