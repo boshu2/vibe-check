@@ -3,6 +3,8 @@ import chalk from 'chalk';
 import { getCommits, isGitRepo, getCommitStats } from '../git';
 import { analyzeCommits } from '../metrics';
 import { formatTimelineTerminal } from '../output/timeline';
+import { formatTimelineMarkdown } from '../output/timeline-markdown';
+import { formatTimelineHtml } from '../output/timeline-html';
 import {
   Commit,
   TimelineResult,
@@ -39,7 +41,7 @@ export function createTimelineCommand(): Command {
     .description('View your coding journey as a timeline with sessions and patterns')
     .option('--since <date>', 'Start date for analysis (default: "1 week ago")', '1 week ago')
     .option('--until <date>', 'End date for analysis (default: now)')
-    .option('-f, --format <type>', 'Output format: terminal, json, markdown', 'terminal')
+    .option('-f, --format <type>', 'Output format: terminal, json, markdown, html', 'terminal')
     .option('-r, --repo <path>', 'Repository path', process.cwd())
     .option('-v, --verbose', 'Show verbose output', false)
     .option('--expand [date]', 'Expand day details (all or specific date like "Nov-29")')
@@ -93,8 +95,11 @@ export async function runTimeline(options: TimelineOptions): Promise<void> {
     if (outputFormat === 'json') {
       console.log(JSON.stringify(timeline, null, 2));
     } else if (outputFormat === 'markdown') {
-      // TODO: Implement markdown output in Phase 4
-      console.log(JSON.stringify(timeline, null, 2));
+      const output = formatTimelineMarkdown(timeline);
+      console.log(output);
+    } else if (outputFormat === 'html') {
+      const output = formatTimelineHtml(timeline);
+      console.log(output);
     } else {
       // Terminal output
       const output = formatTimelineTerminal(timeline, { expand });

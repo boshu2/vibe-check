@@ -85,6 +85,47 @@ describe('CLI Integration', () => {
     });
   });
 
+  describe('timeline command', () => {
+    it('runs timeline with default format', () => {
+      const result = run('timeline --since "1 week ago"');
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('VIBE-CHECK TIMELINE');
+    });
+
+    it('outputs timeline as JSON', () => {
+      const result = run('timeline --since "1 week ago" --format json');
+      expect(result.exitCode).toBe(0);
+      const data = JSON.parse(result.stdout);
+      expect(data).toHaveProperty('days');
+      expect(data).toHaveProperty('sessions');
+      expect(data).toHaveProperty('detours');
+      expect(data).toHaveProperty('lateNightSpirals');
+    });
+
+    it('outputs timeline as Markdown', () => {
+      const result = run('timeline --since "1 week ago" --format markdown');
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('# Vibe-Check Timeline Report');
+      expect(result.stdout).toContain('## Summary');
+      expect(result.stdout).toContain('## Daily Breakdown');
+      expect(result.stdout).toContain('## Insights');
+    });
+
+    it('outputs timeline as HTML', () => {
+      const result = run('timeline --since "1 week ago" --format html');
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('<!DOCTYPE html>');
+      expect(result.stdout).toContain('VIBE-CHECK TIMELINE');
+      expect(result.stdout).toContain('class="day"');
+    });
+
+    it('timeline --expand shows session details', () => {
+      const result = run('timeline --since "1 week ago" --expand');
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('Session');
+    });
+  });
+
   describe('error handling', () => {
     it('--help works', () => {
       const result = run('--help');
