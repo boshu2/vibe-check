@@ -259,6 +259,52 @@ NEXT SESSION COULD:
 
 ================================================================================
 
+--- 2025-11-30 11:00 - Blog Post Enhancement & Timeline Feature Research ---
+
+VIBE LEVEL: 4 (Research & planning, high trust)
+
+COMPLETED:
+- Updated vibe-check-ecosystem.mdx blog post with real git timestamps
+  - Changed fake timestamps (16:05, 16:15, etc.) to real ones from git log
+  - Updated "ML Pivot" section to "ML Detour" with Day 1/Day 2 narrative
+  - Added "The Numbers" table (5h 18m building ML, 21h 31m before deletion)
+- Created BuildTimeline component for personal-website
+  - Visual timeline with color-coded events (feat/deleted/shipped/milestone)
+  - Stats bar showing duration, commits, features, deleted lines
+  - Added to MDXComponents for blog use
+- Cleaned up personal/CLAUDE.md from 1,145 → 130 lines
+  - Created .claude/context/ with 6 JIT reference files
+  - Converted from monolithic to router architecture
+- Ran 3-agent parallel research for timeline feature:
+  - Agent 1: Git data analysis (session detection, commit patterns)
+  - Agent 2: Pattern detection (spirals, flow states, detours)
+  - Agent 3: UX/visualization (terminal formatting, export formats)
+
+ARTIFACTS CREATED:
+- personal-website/src/components/blog/BuildTimeline.tsx
+- personal/.claude/context/repository-map.md
+- personal/.claude/context/cross-repo-workflows.md
+- personal/.claude/context/navigation-guides.md
+- personal/.claude/context/commands-reference.md
+- personal/.claude/context/workspace-status.md
+- personal/.claude/context/workspace-settings.md
+- .agents/bundles/timeline-feature-research-complete-2025-11-30.md
+- .agents/plans/timeline-feature-plan.md
+
+KEY FINDINGS FROM RESEARCH:
+- 1-hour gap threshold optimal for session detection (69% gaps <30m)
+- Active coding: ~10 hours vs 45 hours wall clock
+- Peak productivity: 12pm-2pm (42% of commits)
+- Post-delete sprint: 5 features in 1h 58m - killer insight
+- New patterns to detect: flow states, post-delete sprints, detours, thrashing
+
+NEXT SESSION SHOULD:
+- Implement vibe-check timeline command (Phase 1: MVP)
+- Add flow state and post-delete sprint detection
+- Create export formats (JSON, Markdown, HTML)
+
+================================================================================
+
 --- 2025-11-29 13:00 - Documentation, Tests & npm Publish Session ---
 
 VIBE LEVEL: 3 (Features with verification)
