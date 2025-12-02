@@ -162,13 +162,13 @@
   ],
   "current_state": {
     "phase": "implementation",
-    "working_on": "Lessons Database - Completed",
+    "working_on": "Session Integration - Completed",
     "blockers": [],
     "next_steps": [
-      "Implement session-integration-plan-2025-12-02.md (session metrics export)",
-      "Consider npm publish for v1.7.0 with learning system"
+      "Consider npm publish for v1.7.0 with learning system + session integration",
+      "Dashboard improvements (pending changes in dashboard/*)"
     ],
-    "resume_summary": "Implemented full lessons database: synthesis from pattern+intervention memory, surfacing during analyze, lesson command with --list/--stats/--apply/--dismiss. Commits bd3e7df, c925164."
+    "resume_summary": "Implemented session lifecycle integration: `vibe-check session start/end/status` commands with baseline capture, failure pattern detection, auto-learnings generation, and JSON output compatible with claude-progress.json. Commit 0a2198f."
   },
   "sessions_continued": [
     {
