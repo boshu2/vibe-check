@@ -162,14 +162,13 @@
   ],
   "current_state": {
     "phase": "implementation",
-    "working_on": "Automatic Learning Cadence - Completed",
+    "working_on": "Lessons Database - Completed",
     "blockers": [],
     "next_steps": [
       "Implement session-integration-plan-2025-12-02.md (session metrics export)",
-      "Then implement ml-learning-loop-complete-plan-2025-11-28.md",
-      "Consider npm publish for v1.7.0"
+      "Consider npm publish for v1.7.0 with learning system"
     ],
-    "resume_summary": "Implemented automatic learning cadence: 6 new files in src/learning/, learn command with --status/--retro/--pattern, nudge display after gamification. Commit bd3e7df."
+    "resume_summary": "Implemented full lessons database: synthesis from pattern+intervention memory, surfacing during analyze, lesson command with --list/--stats/--apply/--dismiss. Commits bd3e7df, c925164."
   },
   "sessions_continued": [
     {
