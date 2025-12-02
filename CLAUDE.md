@@ -72,7 +72,37 @@ Most users have `^` (caret) in their package.json, meaning they'll auto-update t
 
 ## Development Workflow
 
-### Running Locally
+### Makefile Commands
+
+All commands are available via `make`. Run `make help` for full list.
+
+```bash
+# Build & Run
+make build            # Compile TypeScript
+make dev              # Run with ts-node
+make test             # Run all tests
+make test-coverage    # Tests with coverage
+
+# Vibe-Check
+make dashboard        # Open visual dashboard
+make analyze          # Analyze last week
+make profile          # Show XP, streaks, achievements
+make watch            # Real-time spiral detection
+
+# Session Integration
+make session-start    # Start session (prompts for level)
+make session-end      # End session and get metrics
+make session-status   # Show active session info
+
+# Publishing
+make publish          # Build, test, publish to npm
+make version-patch    # Bump patch version
+make version-minor    # Bump minor version
+```
+
+See [Makefile](./Makefile) for all available targets.
+
+### Running Locally (npm)
 
 ```bash
 npm run dev           # Run with ts-node
@@ -110,7 +140,10 @@ src/
 ├── commands/
 │   ├── index.ts        # Command exports
 │   ├── analyze.ts      # Main analyze command
-│   ├── level.ts        # Level recommendation command
+│   ├── session.ts      # Session start/end/status commands
+│   ├── dashboard.ts    # Visual dashboard command
+│   ├── learn.ts        # Learning extraction command
+│   ├── lesson.ts       # Lessons database command
 │   └── profile.ts      # Profile/stats command
 ├── metrics/
 │   ├── index.ts        # Orchestrates all metrics
@@ -129,7 +162,19 @@ src/
 │   ├── xp.ts           # XP calculation and levels
 │   ├── streaks.ts      # Daily/weekly streak tracking
 │   ├── achievements.ts # Achievement definitions and checks
+│   ├── pattern-memory.ts # Track spiral triggers over time
+│   ├── intervention-memory.ts # Track what breaks spirals
 │   └── profile.ts      # Profile persistence (.vibe-check/)
+├── learning/
+│   ├── index.ts        # Learning system exports
+│   ├── types.ts        # Learning/lesson types
+│   ├── storage.ts      # Learnings persistence
+│   ├── cadence.ts      # Automatic learning cadence
+│   ├── synthesis.ts    # Lesson synthesis from patterns
+│   ├── surfacing.ts    # Surface lessons during analyze
+│   └── lessons-storage.ts # Lessons database
+├── sessions/
+│   └── index.ts        # Session tracking and baseline comparison
 ├── calibration/
 │   ├── index.ts        # Calibration orchestration
 │   ├── ece.ts          # Expected calibration error
@@ -178,6 +223,33 @@ vibe-check profile --json      # Machine-readable output
 ```bash
 vibe-check level               # Get level recommendation
 vibe-check level --calibrate 3 # Record calibration sample
+```
+
+### Session Commands (AgentOps Integration)
+```bash
+vibe-check session start --level 3   # Start session, capture baseline
+vibe-check session status            # Show active session
+vibe-check session end --format json # End session, get metrics + patterns
+```
+
+Output includes failure pattern detection for `/session-end` integration:
+```json
+{
+  "metrics": { "trust_pass_rate": 92, "rework_ratio": 11, ... },
+  "retro": {
+    "failure_patterns_hit": [],
+    "failure_patterns_avoided": ["Debug Spiral", "Context Amnesia"],
+    "learnings": ["Test-first approach prevented spirals"]
+  }
+}
+```
+
+### Learning Commands
+```bash
+vibe-check learn               # Extract patterns from sessions
+vibe-check lesson --list       # List synthesized lessons
+vibe-check lesson --stats      # Lesson statistics
+vibe-check lesson --apply <id> # Apply a lesson
 ```
 
 ## The 5 Metrics
