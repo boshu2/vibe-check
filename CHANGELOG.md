@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Session Integration** - New `vibe-check session` command suite for Claude Code integration
+  - `session start` - Capture baseline metrics at session start
+  - `session end` - Get session metrics with failure pattern detection
+  - `session status` - Show active session info
+  - JSON output compatible with `claude-progress.json` format
+  - Automatic failure pattern detection (Debug Spiral, Context Amnesia, Velocity Crash, Trust Erosion, Flow Disruption)
+  - Auto-generated learnings based on metrics and patterns
+  - Baseline comparison with last 7 days
+- **Learning System** - New learning and lessons database
+  - `learn` command - Extract patterns from sessions
+  - `lesson` command - Manage synthesized lessons with `--list`, `--stats`, `--apply`, `--dismiss`
+  - Automatic synthesis from pattern + intervention memory
+  - Lessons surface during analyze when relevant spirals detected
+
 ## [1.6.0] - 2025-11-30
 
 ### Added

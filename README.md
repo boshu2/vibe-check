@@ -191,6 +191,34 @@ jobs:
 
 ---
 
+## Session Integration
+
+Integrate with Claude Code's `/session-start` and `/session-end` commands:
+
+```bash
+# At session start - capture baseline
+vibe-check session start --level 3
+
+# At session end - get metrics for claude-progress.json
+vibe-check session end --format json
+```
+
+Output includes failure pattern detection:
+```json
+{
+  "metrics": { "trust_pass_rate": 92, "rework_ratio": 11, ... },
+  "retro": {
+    "failure_patterns_hit": [],
+    "failure_patterns_avoided": ["Debug Spiral", "Context Amnesia"],
+    "learnings": ["Test-first approach prevented spirals"]
+  }
+}
+```
+
+Used by the [AgentOps session-management plugin](https://github.com/boshu2/agentops).
+
+---
+
 ## All Commands
 
 ```
@@ -200,7 +228,12 @@ vibe-check dashboard           Visual dashboard + insights
 vibe-check profile             XP, streaks, achievements
 vibe-check timeline            Coding journey visualization
 vibe-check start --level <n>   Declare vibe level (0-5)
+vibe-check session start       Capture baseline for session
+vibe-check session end         Get session metrics + patterns
+vibe-check session status      Show active session info
 vibe-check intervene           Record spiral intervention
+vibe-check learn               Extract learnings from patterns
+vibe-check lesson              Manage synthesized lessons
 vibe-check init-hook           Install git hook
 vibe-check cache               Manage local storage
 ```
