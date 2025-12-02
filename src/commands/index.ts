@@ -7,3 +7,4 @@ export { createTimelineCommand, runTimeline, TimelineOptions } from './timeline'
 export { createCacheCommand } from './cache';
 export { createDashboardCommand } from './dashboard';
 export { createSessionCommand, SessionMetricsOutput } from './session';
+export { createInsightsCommand } from './insights';
