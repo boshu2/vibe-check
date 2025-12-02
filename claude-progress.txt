@@ -3,6 +3,42 @@ Created: 2025-11-29
 
 ## Session Log
 
+--- 2025-12-02 - Automatic Learning Cadence Research & Planning ---
+
+VIBE LEVEL: 4 (Research/Planning, exploratory)
+
+COMPLETED:
+- Research on automatic learning integration:
+  - Mapped 6 existing learning mechanisms in vibe-check
+  - Identified 4 natural trigger points (session boundary, streak, timeline, dashboard)
+  - Researched FSRS algorithm, behavioral nudges, retrospective tools
+- Created comprehensive implementation plan:
+  - 6 new files in src/learning/ module
+  - New `vibe-check learn` command (--retro, --status, --pattern)
+  - Auto-nudges displayed after gamification output
+  - Weekly retro reminders, pattern warnings, level-up hints
+- Added VIBE-032 to feature-list.json (planned, not implemented)
+
+COMMITS: None (planning session)
+
+ARTIFACTS:
+- .agents/bundles/automatic-learning-cadence-research-2025-12-02.md
+- .agents/bundles/automatic-learning-cadence-plan-2025-12-02.md
+
+REMAINING:
+- /implement automatic-learning-cadence-plan-2025-12-02.md
+- Test learn command and nudge display
+- Then implement ml-learning-loop-complete-plan-2025-11-28.md
+
+NEXT SESSION SHOULD:
+- Run /implement automatic-learning-cadence-plan-2025-12-02.md
+- Create 6 files: types.ts, storage.ts, cadence.ts, nudges.ts, retrospective.ts, index.ts
+- Add learn command to CLI
+- Integrate with recordSession() and analyze output
+- npm test && npm run dev learn --status
+
+================================================================================
+
 --- 2025-11-30 12:00 - Storage Enhancement Session ---
 
 VIBE LEVEL: 5 (Infrastructure, high trust)

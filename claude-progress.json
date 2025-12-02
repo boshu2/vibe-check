@@ -161,14 +161,16 @@
     }
   ],
   "current_state": {
-    "working_on": null,
+    "phase": "planning",
+    "working_on": "Automatic Learning & Retrospective Cadence",
     "blockers": [],
     "next_steps": [
-      "Implement insight-dashboard-plan-2025-11-30.md (vibe-check dashboard command)",
-      "npm version minor && npm publish (v1.6.0)",
-      "Consider multi-repo aggregation for v2.0"
+      "Approve and implement automatic-learning-cadence-plan-2025-12-02.md",
+      "Test learn command and nudge display",
+      "Implement session-integration-plan-2025-12-02.md (session metrics export)",
+      "Then implement ml-learning-loop-complete-plan-2025-11-28.md"
     ],
-    "resume_summary": "Storage hardening + cross-session queries + regression detection complete. Research + plan done for insight engine and dashboard. Ready to implement dashboard command."
+    "resume_summary": "Plan ready for automatic learning cadence. Run /implement automatic-learning-cadence-plan-2025-12-02.md to create 6 new files in src/learning/, add learn command, and integrate with recordSession()."
   },
   "sessions_continued": [
     {
