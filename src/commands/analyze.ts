@@ -29,6 +29,7 @@ import {
   getCrossSessionSummary,
   analyzeScopeDetail,
 } from '../analysis';
+import { appendSpiral } from '../storage/spiral-history';
 
 export interface AnalyzeOptions {
   since?: string;
@@ -187,6 +188,16 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
     const trustPassRate = result.metrics.trustPassRate.value;
     const reworkRatio = result.metrics.reworkRatio.value;
     const spiralCount = result.fixChains.filter(fc => fc.isSpiral).length;
+
+    // Record detected spirals to history for personalized coaching
+    for (const chain of result.fixChains.filter(fc => fc.isSpiral)) {
+      appendSpiral(
+        chain.pattern || 'OTHER',
+        chain.component,
+        chain.duration,
+        chain.commits
+      );
+    }
 
     // Session comparison (if manual session was active via `start`)
     if (session && format === 'terminal') {

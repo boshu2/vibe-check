@@ -10,6 +10,7 @@ import { calculateVelocityAnomaly } from '../metrics/velocity-anomaly';
 import { calculateCodeStability } from '../metrics/code-stability';
 import { calculateVibeScore } from '../score';
 import { loadSessionHistory, compareToBaseline } from '../sessions';
+import { appendSpiral } from '../storage/spiral-history';
 
 // Session file stored in .vibe-check/active-session.json
 const ACTIVE_SESSION_FILE = '.vibe-check/active-session.json';
@@ -351,6 +352,16 @@ async function runSessionEnd(options: {
   const result = analyzeCommits(commits);
   const spiralCount = result.fixChains.filter(fc => fc.isSpiral).length;
 
+  // Record detected spirals to history for personalized coaching
+  for (const chain of result.fixChains.filter(fc => fc.isSpiral)) {
+    appendSpiral(
+      chain.pattern || 'OTHER',
+      chain.component,
+      chain.duration,
+      chain.commits
+    );
+  }
+
   // Get enhanced metrics if possible
   let vibeScoreValue: number | undefined;
   try {
@@ -559,6 +570,16 @@ export async function runSessionEndCli(options: {
 
   const result = analyzeCommits(commits);
   const spiralCount = result.fixChains.filter(fc => fc.isSpiral).length;
+
+  // Record detected spirals to history for personalized coaching
+  for (const chain of result.fixChains.filter(fc => fc.isSpiral)) {
+    appendSpiral(
+      chain.pattern || 'OTHER',
+      chain.component,
+      chain.duration,
+      chain.commits
+    );
+  }
 
   let vibeScoreValue: number | undefined;
   try {
