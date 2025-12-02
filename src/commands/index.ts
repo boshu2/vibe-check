@@ -9,3 +9,4 @@ export { createCacheCommand } from './cache';
 export { createDashboardCommand } from './dashboard';
 export { createLearnCommand } from './learn';
 export { createLessonCommand } from './lesson';
+export { createSessionCommand, SessionMetricsOutput } from './session';
