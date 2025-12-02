@@ -138,19 +138,6 @@ session-status:
 	node dist/cli.js session status
 
 # ============================================
-# Learning Commands
-# ============================================
-
-learn:
-	node dist/cli.js learn
-
-lessons:
-	node dist/cli.js lesson --list
-
-lesson-stats:
-	node dist/cli.js lesson --stats
-
-# ============================================
 # Shortcuts
 # ============================================
 

@@ -142,8 +142,8 @@ src/
 │   ├── analyze.ts      # Main analyze command
 │   ├── session.ts      # Session start/end/status commands
 │   ├── dashboard.ts    # Visual dashboard command
-│   ├── learn.ts        # Learning extraction command
-│   ├── lesson.ts       # Lessons database command
+│   ├── watch.ts        # Real-time monitoring
+│   ├── timeline.ts     # Session history
 │   └── profile.ts      # Profile/stats command
 ├── metrics/
 │   ├── index.ts        # Orchestrates all metrics
@@ -162,17 +162,8 @@ src/
 │   ├── xp.ts           # XP calculation and levels
 │   ├── streaks.ts      # Daily/weekly streak tracking
 │   ├── achievements.ts # Achievement definitions and checks
-│   ├── pattern-memory.ts # Track spiral triggers over time
-│   ├── intervention-memory.ts # Track what breaks spirals
+│   ├── stats.ts        # Weekly statistics
 │   └── profile.ts      # Profile persistence (.vibe-check/)
-├── learning/
-│   ├── index.ts        # Learning system exports
-│   ├── types.ts        # Learning/lesson types
-│   ├── storage.ts      # Learnings persistence
-│   ├── cadence.ts      # Automatic learning cadence
-│   ├── synthesis.ts    # Lesson synthesis from patterns
-│   ├── surfacing.ts    # Surface lessons during analyze
-│   └── lessons-storage.ts # Lessons database
 ├── sessions/
 │   └── index.ts        # Session tracking and baseline comparison
 ├── calibration/
@@ -238,18 +229,9 @@ Output includes failure pattern detection for `/session-end` integration:
   "metrics": { "trust_pass_rate": 92, "rework_ratio": 11, ... },
   "retro": {
     "failure_patterns_hit": [],
-    "failure_patterns_avoided": ["Debug Spiral", "Context Amnesia"],
-    "learnings": ["Test-first approach prevented spirals"]
+    "failure_patterns_avoided": ["Debug Spiral", "Context Amnesia"]
   }
 }
-```
-
-### Learning Commands
-```bash
-vibe-check learn               # Extract patterns from sessions
-vibe-check lesson --list       # List synthesized lessons
-vibe-check lesson --stats      # Lesson statistics
-vibe-check lesson --apply <id> # Apply a lesson
 ```
 
 ## The 5 Metrics
