@@ -71,10 +71,16 @@
             <!-- Dashboard Page -->
             <section class="page active" id="page-dashboard">
                 <header class="page-header">
-                    <h1 class="page-title">
-                        <span class="title-icon">📊</span>
-                        Dashboard
-                    </h1>
+                    <div class="page-title-group">
+                        <h1 class="page-title">
+                            <span class="title-icon">📊</span>
+                            Dashboard
+                        </h1>
+                        <div class="repo-name" id="repoName">
+                            <span class="repo-icon">📁</span>
+                            <span class="repo-path">Loading...</span>
+                        </div>
+                    </div>
                     <div class="header-actions">
                         <button class="btn-refresh" id="refreshBtn" title="Refresh data">
                             <span>🔄</span>
@@ -85,17 +91,19 @@
                 <!-- Stats Cards -->
                 <div class="stats-grid">
                     <div class="stat-card highlight">
-                        <div class="stat-icon">🎯</div>
+                        <div class="stat-icon">⚡</div>
                         <div class="stat-content">
-                            <span class="stat-value" id="currentScore">--</span>
-                            <span class="stat-label">Current Vibe Score</span>
+                            <span class="stat-value rating-badge" id="codeHealthRating">--</span>
+                            <span class="stat-label">Code Health</span>
+                            <span class="stat-hint clickable" id="codeHealthHelp" title="Click for details">Quality Grade</span>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">📈</div>
+                        <div class="stat-icon">🎯</div>
                         <div class="stat-content">
-                            <span class="stat-value" id="avgScore">--</span>
-                            <span class="stat-label">30-Day Average</span>
+                            <span class="stat-value" id="currentScore">--</span>
+                            <span class="stat-label">Pattern Score</span>
+                            <span class="stat-hint clickable" id="patternScoreHelp" title="Click for details">Workflow Health</span>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -126,9 +134,7 @@
                             </div>
                         </div>
                         <div class="chart-container" id="trendChart">
-                            <div class="chart-placeholder">
-                                <canvas id="trendCanvas"></canvas>
-                            </div>
+                            <canvas id="trendCanvas"></canvas>
                         </div>
                     </div>
 
@@ -187,6 +193,63 @@
                         Session History
                     </h1>
                 </header>
+
+                <!-- History Controls -->
+                <div class="history-controls">
+                    <div class="filter-group">
+                        <label>Rating</label>
+                        <select id="filterRating" class="filter-select">
+                            <option value="all">All Ratings</option>
+                            <option value="ELITE">Elite Only</option>
+                            <option value="HIGH">High+</option>
+                            <option value="MEDIUM">Medium+</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Sort By</label>
+                        <select id="sortBy" class="filter-select">
+                            <option value="date-desc">Newest First</option>
+                            <option value="date-asc">Oldest First</option>
+                            <option value="score-desc">Highest Score</option>
+                            <option value="score-asc">Lowest Score</option>
+                            <option value="commits-desc">Most Commits</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Time Range</label>
+                        <select id="filterRange" class="filter-select">
+                            <option value="all">All Time</option>
+                            <option value="7">Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                        </select>
+                    </div>
+                    <div class="history-stats">
+                        <span id="historyCount">0 sessions</span>
+                        <span id="historyAvg">Avg: --%</span>
+                    </div>
+                </div>
+
+                <!-- History Charts -->
+                <div class="history-charts">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Activity Heatmap</h3>
+                        </div>
+                        <div class="heatmap-container" id="heatmapContainer">
+                            <!-- Heatmap will be rendered here -->
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Scope Health</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="scopeHealthCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="history-container" id="historyContainer">
                     <!-- History content will be rendered here -->
                 </div>
@@ -242,7 +305,69 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Session Detail Modal -->
+    <div class="modal-overlay" id="sessionModal">
+        <div class="modal-container session-modal">
+            <div class="modal-header">
+                <h2>Session Details</h2>
+                <button class="modal-close" id="closeSessionModal">&times;</button>
+            </div>
+            <div class="session-detail-content">
+                <div class="session-detail-hero">
+                    <div class="detail-score-ring">
+                        <span class="detail-score" id="detailScore">--</span>
+                        <span class="detail-rating" id="detailRating">--</span>
+                    </div>
+                    <div class="detail-meta">
+                        <div class="detail-date" id="detailDate">--</div>
+                        <div class="detail-xp">+<span id="detailXP">0</span> XP earned</div>
+                    </div>
+                </div>
+                <div class="detail-metrics-grid">
+                    <div class="detail-metric">
+                        <span class="metric-icon">📝</span>
+                        <span class="metric-value" id="detailCommits">0</span>
+                        <span class="metric-label">Commits</span>
+                    </div>
+                    <div class="detail-metric">
+                        <span class="metric-icon">🌀</span>
+                        <span class="metric-value" id="detailSpirals">0</span>
+                        <span class="metric-label">Spirals</span>
+                    </div>
+                    <div class="detail-metric">
+                        <span class="metric-icon">⚡</span>
+                        <span class="metric-value" id="detailVelocity">--</span>
+                        <span class="metric-label">Velocity</span>
+                    </div>
+                    <div class="detail-metric">
+                        <span class="metric-icon">🛡️</span>
+                        <span class="metric-value" id="detailTrust">--</span>
+                        <span class="metric-label">Trust Rate</span>
+                    </div>
+                </div>
+                <div class="detail-chart-container">
+                    <h4>Session Metrics</h4>
+                    <canvas id="detailRadarCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics Help Modal -->
+    <div class="modal-overlay" id="metricsModal">
+        <div class="modal-container metrics-modal">
+            <div class="modal-header">
+                <h2 id="metricsModalTitle">Understanding Your Scores</h2>
+                <button class="modal-close" id="closeMetricsModal">&times;</button>
+            </div>
+            <div class="metrics-help-content" id="metricsHelpContent">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="chart.min.js"></script>
+    <script src="dashboard-data.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

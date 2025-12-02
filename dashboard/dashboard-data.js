@@ -1,4 +1,4 @@
-{
+window.VIBE_CHECK_DATA = {
   "version": "1.0.0",
   "generatedAt": "2025-12-02T17:11:51.304Z",
   "repo": "/Users/fullerbt/workspaces/personal/vibe-check",
@@ -761,4 +761,4 @@
       "description": "Recover from 5+ spirals to ELITE in same session"
     }
   ]
-}
+};
