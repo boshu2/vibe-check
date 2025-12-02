@@ -77,15 +77,8 @@ src/
 │   ├── xp.ts              # XP calculation, levels
 │   ├── streaks.ts         # Streak tracking
 │   ├── achievements.ts    # Achievement definitions
-│   ├── challenges.ts      # Weekly challenges
-│   ├── leaderboards.ts    # Personal high scores
-│   ├── hall-of-fame.ts    # Personal records
 │   ├── stats.ts           # Weekly stats, sparklines
-│   ├── badges.ts          # Rank badges
-│   ├── share.ts           # Shareable profiles
-│   ├── profile.ts         # Profile persistence
-│   ├── pattern-memory.ts  # Spiral trigger tracking
-│   └── intervention-memory.ts # What breaks spirals
+│   └── profile.ts         # Profile persistence
 │
 └── output/                # Output formatters
     ├── index.ts           # Format router
