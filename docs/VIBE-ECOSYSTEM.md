@@ -82,7 +82,7 @@ vibe-check start --level 3
 
 ---
 
-## Feature Overview (v1.5.0)
+## Feature Overview (v1.7.0)
 
 ### 1. Metrics Engine
 
@@ -125,47 +125,17 @@ Monitors commits and alerts when patterns indicate a spiral forming:
       Fixes: 3 commits, 7 min
 ```
 
-### 3. Automatic Baseline Comparison
+### 3. Session Integration
 
-After 5+ sessions, vibe-check learns your patterns and provides contextual feedback:
-
-```
-VS YOUR BASELINE
-
-  Trust:  92% (+7% vs avg 85%)
-  Rework: 18% (-4% vs avg 22%)
-
-  Better than your usual - nice flow!
-```
-
-### 4. Pattern Memory
-
-Tracks what triggers YOUR spirals over time:
+Track sessions with baseline comparison:
 
 ```bash
-vibe-check profile --patterns
+vibe-check session start --level 3   # Start session
+vibe-check session status            # Check active session
+vibe-check session end --format json # End and get metrics
 ```
 
-```
-YOUR SPIRAL TRIGGERS
-
-  Component    Times   Pattern
-  auth         5       OAuth/token/refresh issues
-  database     3       Connection pooling
-  api          2       External API timeouts
-```
-
-### 5. Intervention Tracking
-
-Records what breaks your spirals:
-
-```
-WHAT WORKS FOR YOU
-
-  Take a break      4 times (avg 12 min)
-  Write test first  3 times
-  Read docs         2 times
-```
+Output includes failure pattern detection for AgentOps integration.
 
 ---
 
@@ -203,18 +173,6 @@ Daily check-ins build streaks with visual progression:
 
 Streak freezes protect against occasional missed days.
 
-### Weekly Challenges
-
-Auto-generated based on your weak metrics:
-
-```
-WEEKLY CHALLENGES
-
-🎯 Trust Gauntlet:  ████████░░  4/5 (90%+ trust in 5 sessions)
-🧘 Zen Mode:        ██████████  ✓ COMPLETE (+100 XP)
-🔥 Streak Builder:  ██░░░░░░░░  1/5 (extend streak by 5 days)
-```
-
 ### Achievements (19 total)
 
 Categories:
@@ -223,29 +181,6 @@ Categories:
 - **Volume**: Centurion, Marathon Coder
 - **Improvement**: Comeback Kid, On Fire
 - **Special**: Night Owl, Early Bird, Weekend Warrior
-
-### Rank Badges
-
-```
-🥉 Bronze    (10+ sessions)
-🥈 Silver    (50+ sessions)
-🥇 Gold      (100+ sessions)
-💎 Platinum  (14+ day streak)
-🔷 Diamond   (5000+ XP)
-```
-
-### Local Leaderboards & Hall of Fame
-
-Track your personal bests across all repos:
-
-```
-🏛️  HALL OF FAME
-
-🏆 Best Score: 96% (Nov 15, my-project)
-🔥 Longest Streak: 15 days
-⚡ Best Week: 847 XP
-📊 Most Commits: 127 (Nov 10, big-refactor)
-```
 
 ---
 
@@ -364,13 +299,12 @@ The VibeScore combines metrics using validated weights derived from empirical an
 | Phase | Status | Description |
 |-------|--------|-------------|
 | CLI Core | ✅ Complete | Metrics, scoring, analysis |
-| Gamification | ✅ Complete | XP, streaks, achievements, challenges |
+| Gamification | ✅ Complete | XP, streaks, achievements |
 | Watch Mode | ✅ Complete | Real-time spiral detection |
 | GitHub Action | ✅ Complete | Automated PR feedback |
-| Pattern Memory | ✅ Complete | Track your spiral triggers |
-| Web Dashboard | 🔮 Planned | Visualizations, trends |
+| Session Integration | ✅ Complete | AgentOps integration |
+| Visual Dashboard | ✅ Complete | HTML dashboard with charts |
 | VS Code Extension | 🔮 Planned | Status bar, live alerts |
-| Team Features | 🔮 Planned | Opt-in leaderboards |
 
 ---
 
@@ -402,5 +336,5 @@ vibe-check watch
 
 *"The goal isn't perfect metrics. It's conscious awareness of your patterns."*
 
-**Version:** 1.5.0
-**Last Updated:** 2025-11-29
+**Version:** 1.7.0
+**Last Updated:** 2025-12-02

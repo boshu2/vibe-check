@@ -338,8 +338,7 @@ const XP_REWARDS = {
 
 ```
 ~/.vibe-check/           # Global (cross-repo)
-├── profile.json         # User profile
-└── leaderboards.json    # Personal high scores
+└── profile.json         # User profile
 
 .vibe-check/             # Per-repo (optional)
 └── profile.json         # Repo-specific profile
