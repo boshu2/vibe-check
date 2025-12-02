@@ -10,6 +10,8 @@ import { loadLearningState, saveLearningState, recordRetroCompletion } from './s
 import { loadProfile, getRecentSessions } from '../gamification/profile';
 import { formatPatternMemory } from '../gamification/pattern-memory';
 import { formatInterventionMemory } from '../gamification/intervention-memory';
+import { synthesizeLessons } from './synthesis';
+import { formatLessonsSummary } from './surfacing';
 
 /**
  * Generate a weekly retrospective summary
@@ -144,8 +146,38 @@ export function displayRetro(summary: RetroSummary): void {
  * Run and save retrospective
  */
 export function runAndSaveRetro(): RetroSummary {
+  const profile = loadProfile();
   const summary = generateWeeklyRetro();
   displayRetro(summary);
+
+  // Synthesize lessons from pattern + intervention memory
+  const { lessonsCreated, lessonsUpdated } = synthesizeLessons(
+    profile.patternMemory,
+    profile.interventionMemory
+  );
+
+  // Show lessons synthesis results
+  if (lessonsCreated > 0 || lessonsUpdated > 0) {
+    console.log(chalk.bold.cyan('  LESSONS SYNTHESIZED'));
+    if (lessonsCreated > 0) {
+      console.log(chalk.green(`    + ${lessonsCreated} new lessons created`));
+    }
+    if (lessonsUpdated > 0) {
+      console.log(chalk.cyan(`    ~ ${lessonsUpdated} lessons updated`));
+    }
+    console.log('');
+
+    // Show lessons summary
+    const lessonLines = formatLessonsSummary();
+    for (const line of lessonLines) {
+      console.log(line);
+    }
+    console.log('');
+    console.log(chalk.gray('  Run `vibe-check lesson` to view all lessons'));
+    console.log('');
+    console.log(chalk.bold.cyan('='.repeat(64)));
+    console.log('');
+  }
 
   const state = loadLearningState();
   const updatedState = recordRetroCompletion(state, summary);

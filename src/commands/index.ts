@@ -8,3 +8,4 @@ export { createTimelineCommand, runTimeline, TimelineOptions } from './timeline'
 export { createCacheCommand } from './cache';
 export { createDashboardCommand } from './dashboard';
 export { createLearnCommand } from './learn';
+export { createLessonCommand } from './lesson';

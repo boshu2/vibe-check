@@ -397,6 +397,27 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
         console.log(chalk.cyan('─'.repeat(64)));
       }
 
+      // Surface relevant lessons if spirals were detected
+      if (spiralCount > 0) {
+        const { surfaceLessonsForPattern, formatSurfacedLesson } = require('../learning/surfacing');
+        // Get patterns from detected spirals
+        const spiralPatterns = result.fixChains
+          .filter(fc => fc.isSpiral && fc.pattern)
+          .map(fc => fc.pattern as string);
+        const uniquePatterns = [...new Set(spiralPatterns)];
+
+        for (const pattern of uniquePatterns.slice(0, 2)) {
+          const surfaced = surfaceLessonsForPattern(pattern);
+          if (surfaced.length > 0) {
+            const lessonLines = formatSurfacedLesson(surfaced[0]);
+            for (const line of lessonLines) {
+              console.log(line);
+            }
+            console.log(chalk.cyan('─'.repeat(64)));
+          }
+        }
+      }
+
       console.log(chalk.gray(`  Run ${chalk.white('vibe-check profile')} to see your full stats`));
       console.log();
     }
