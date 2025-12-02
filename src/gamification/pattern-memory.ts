@@ -165,7 +165,7 @@ export function getPatternAdvice(pattern: string): string {
 /**
  * Format pattern memory for display
  */
-export function formatPatternMemory(memory: PatternMemory): {
+export function formatPatternMemory(memory: PatternMemory | undefined): {
   hasData: boolean;
   summary: string;
   topPatterns: Array<{

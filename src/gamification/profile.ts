@@ -4,6 +4,7 @@ import * as os from 'os';
 import {
   UserProfile,
   SessionRecord,
+  SessionMetrics,
   StreakState,
   XPState,
   Achievement,
@@ -151,7 +152,8 @@ export function recordSession(
   spirals: number,
   periodFrom?: Date,
   periodTo?: Date,
-  fixChains?: FixChain[]
+  fixChains?: FixChain[],
+  metrics?: SessionMetrics
 ): {
   profile: UserProfile;
   xpEarned: number;
@@ -200,6 +202,7 @@ export function recordSession(
     achievementsUnlocked: [],
     periodFrom: periodFrom?.toISOString(),
     periodTo: periodTo?.toISOString(),
+    metrics,  // Include detailed metrics for dashboard
   };
 
   const newAchievements = checkAchievements(
@@ -253,6 +256,15 @@ export function recordSession(
 
   // Save profile
   saveProfile(profile);
+
+  // Run learning cadence check (generates nudges)
+  const { runLearningCadence } = require('../learning/cadence');
+  runLearningCadence(
+    profile.patternMemory,
+    profile.streak.current,
+    profile.xp.nextLevelXP - profile.xp.currentLevelXP,
+    profile.xp.total
+  );
 
   return {
     profile,

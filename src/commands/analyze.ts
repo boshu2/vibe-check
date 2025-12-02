@@ -315,6 +315,7 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
     if (format === 'terminal' && resultV2.vibeScore) {
       const vibeScorePercent = Math.round(resultV2.vibeScore.value * 100);
 
+      // Use metric-based rating (quality grade) for session recording
       const gamificationResult = recordGamificationSession(
         vibeScorePercent,
         result.overall,
@@ -322,7 +323,15 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
         spiralCount,
         result.period.from,
         result.period.to,
-        result.fixChains  // Pass fix chains for pattern memory
+        result.fixChains,  // Pass fix chains for pattern memory
+        // Pass real metrics for dashboard visualization
+        {
+          iterationVelocity: result.metrics.iterationVelocity.value,
+          reworkRatio: result.metrics.reworkRatio.value,
+          trustPassRate: result.metrics.trustPassRate.value,
+          flowEfficiency: result.metrics.flowEfficiency.value,
+          debugSpiralDuration: result.metrics.debugSpiralDuration.value,
+        }
       );
 
       // Show gamification summary
@@ -377,6 +386,17 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
       }
 
       console.log(chalk.cyan('─'.repeat(64)));
+
+      // Display pending nudges from learning system
+      const { formatNudgesForCli } = require('../learning/nudges');
+      const nudgeLines = formatNudgesForCli(2);
+      if (nudgeLines.length > 0) {
+        for (const line of nudgeLines) {
+          console.log(line);
+        }
+        console.log(chalk.cyan('─'.repeat(64)));
+      }
+
       console.log(chalk.gray(`  Run ${chalk.white('vibe-check profile')} to see your full stats`));
       console.log();
     }
