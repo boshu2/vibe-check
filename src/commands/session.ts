@@ -10,7 +10,13 @@ import { calculateVelocityAnomaly } from '../metrics/velocity-anomaly';
 import { calculateCodeStability } from '../metrics/code-stability';
 import { calculateVibeScore } from '../score';
 import { loadSessionHistory, compareToBaseline } from '../sessions';
-import { appendSpiral } from '../storage/spiral-history';
+import {
+  appendSpiral,
+  getAdvice,
+  getPatternStats,
+  getPatternDisplayName,
+  getResolutionDisplayName,
+} from '../storage/spiral-history';
 
 // Session file stored in .vibe-check/active-session.json
 const ACTIVE_SESSION_FILE = '.vibe-check/active-session.json';
@@ -493,6 +499,40 @@ async function runSessionEnd(options: {
         console.log(chalk.gray(`    • ${l}`));
       }
       console.log('');
+    }
+
+    // Personalized coaching based on spiral history
+    if (spiralCount > 0) {
+      const spiralPatterns = result.fixChains
+        .filter(fc => fc.isSpiral && fc.pattern)
+        .map(fc => fc.pattern as string);
+      const uniquePatterns = [...new Set(spiralPatterns)];
+
+      if (uniquePatterns.length > 0) {
+        console.log(chalk.bold.cyan('  COACHING (based on your history):'));
+        console.log('');
+
+        for (const pattern of uniquePatterns.slice(0, 2)) {
+          const advice = getAdvice(pattern);
+          const patternName = getPatternDisplayName(pattern);
+
+          if (advice && advice.yourHistory.times > 1) {
+            console.log(chalk.yellow(`  🔄 You've hit ${patternName} ${advice.yourHistory.times} times`));
+
+            if (advice.whatWorked.length > 0) {
+              const topFix = advice.whatWorked[0];
+              console.log(chalk.white(`     Your go-to fix: ${getResolutionDisplayName(topFix.resolution).toLowerCase()}`));
+            }
+
+            console.log(chalk.cyan(`     → ${advice.suggestion}`));
+            console.log('');
+          } else if (advice) {
+            console.log(chalk.yellow(`  🆕 First time hitting ${patternName}`));
+            console.log(chalk.cyan(`     → ${advice.suggestion}`));
+            console.log('');
+          }
+        }
+      }
     }
 
     if (baselineComparison) {
