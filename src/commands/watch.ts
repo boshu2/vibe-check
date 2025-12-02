@@ -2,6 +2,32 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { getCommits, isGitRepo } from '../git';
 import { Commit } from '../types';
+import {
+  getAdvice,
+  getPatternDisplayName,
+  getResolutionDisplayName,
+  appendSpiral,
+  SpiralResolution,
+} from '../storage/spiral-history';
+
+// Pattern detection regexes (same as metrics/spirals.ts)
+const PATTERNS: Record<string, RegExp> = {
+  VOLUME_CONFIG: /volume|mount|path|permission|readonly|pvc|storage/i,
+  SECRETS_AUTH: /secret|auth|oauth|token|credential|password|key/i,
+  API_MISMATCH: /api|version|field|spec|schema|crd|resource/i,
+  SSL_TLS: /ssl|tls|cert|fips|handshake|https/i,
+  IMAGE_REGISTRY: /image|pull|registry|docker|tag/i,
+  GITOPS_DRIFT: /drift|sync|argocd|reconcil|outof/i,
+};
+
+function detectPattern(messages: string): string {
+  for (const [pattern, regex] of Object.entries(PATTERNS)) {
+    if (regex.test(messages)) {
+      return pattern;
+    }
+  }
+  return 'OTHER';
+}
 
 interface WatchState {
   lastCommitHash: string | null;
@@ -206,15 +232,44 @@ function displaySpiralWarning(component: string, fixes: Commit[]): void {
     ? Math.round((fixes[0].date.getTime() - fixes[fixes.length - 1].date.getTime()) / 60000)
     : 0;
 
+  // Detect pattern from commit messages
+  const allMessages = fixes.map(c => c.message).join(' ');
+  const pattern = detectPattern(allMessages);
+  const patternName = getPatternDisplayName(pattern);
+
+  // Get personalized advice from history
+  const advice = getAdvice(pattern, component);
+
   console.log('');
-  console.log(chalk.bold.yellow('  ⚠️  SPIRAL DETECTED'));
-  console.log(chalk.yellow(`      Component: ${component}`));
-  console.log(chalk.yellow(`      Fixes: ${fixes.length} commits${duration > 0 ? `, ${duration} min` : ''}`));
+  console.log(chalk.bold.yellow('  ⚠️  SPIRAL FORMING'));
+  console.log(chalk.yellow(`      ${component} component (${patternName})`));
+  console.log(chalk.yellow(`      ${fixes.length} fixes${duration > 0 ? `, ${duration} min` : ''}`));
   console.log('');
-  console.log(chalk.gray('      Consider:'));
-  console.log(chalk.gray('      • Step back and write a test'));
-  console.log(chalk.gray('      • Check the docs or ask for help'));
-  console.log(chalk.gray('      • Take a 5-minute break'));
+
+  // Show personalized history if available
+  if (advice && advice.yourHistory.times > 0) {
+    console.log(chalk.white(`      Your history: ${advice.yourHistory.times} ${component} spirals, avg ${advice.yourHistory.avgDuration} min`));
+
+    if (advice.whatWorked.length > 0) {
+      const topFixes = advice.whatWorked.slice(0, 2)
+        .map(w => `${getResolutionDisplayName(w.resolution).toLowerCase()} (${w.times}x)`)
+        .join(', ');
+      console.log(chalk.white(`      What worked: ${topFixes}`));
+    }
+
+    console.log('');
+    console.log(chalk.bold.cyan(`      → ${advice.suggestion}`));
+  } else {
+    // Generic advice for first-time spirals
+    console.log(chalk.gray('      Consider:'));
+    console.log(chalk.gray('      • Step back and write a test'));
+    console.log(chalk.gray('      • Check the docs or ask for help'));
+    console.log(chalk.gray('      • Take a 5-minute break'));
+  }
+
   console.log('');
   console.log(chalk.cyan('─'.repeat(60)));
+
+  // Record this spiral to history
+  appendSpiral(pattern, component, duration, fixes.length);
 }
