@@ -43,8 +43,13 @@ async function runDashboard(options: DashboardOptions): Promise<void> {
       process.exit(1);
     }
 
-    // Write data
+    // Write data as JSON
     fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
+
+    // Also write as JS for file:// compatibility (bypasses CORS)
+    const jsPath = path.join(dashboardDir, 'dashboard-data.js');
+    fs.writeFileSync(jsPath, `window.VIBE_CHECK_DATA = ${JSON.stringify(data, null, 2)};`);
+
     console.log(chalk.green(`Data exported to ${outputPath}`));
 
     // Show summary

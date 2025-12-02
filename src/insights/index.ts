@@ -84,7 +84,7 @@ export function buildDashboardData(repoPath: string = process.cwd()): DashboardD
 
   const avg = (arr: number[]) => arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
 
-  // Rating distribution
+  // Rating distribution from metric-based quality grades
   const ratingDistribution: Record<string, number> = { ELITE: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
   for (const s of sessions) {
     ratingDistribution[s.overall] = (ratingDistribution[s.overall] || 0) + 1;
@@ -119,8 +119,19 @@ export function buildDashboardData(repoPath: string = process.cwd()): DashboardD
   const scoreTrend = sessions.slice(-30).map(s => ({
     date: s.date,
     score: s.vibeScore,
-    rating: s.overall,
+    rating: s.overall,  // Metric-based quality grade
   }));
+
+  // Calculate average metrics from recent sessions with metrics data
+  const avgNum = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+  const recentWithMetrics = sessions.filter(s => s.metrics).slice(-10);
+  const avgMetrics = recentWithMetrics.length > 0 ? {
+    iterationVelocity: Math.round(avgNum(recentWithMetrics.map(s => s.metrics!.iterationVelocity)) * 10) / 10,
+    reworkRatio: Math.round(avgNum(recentWithMetrics.map(s => s.metrics!.reworkRatio))),
+    trustPassRate: Math.round(avgNum(recentWithMetrics.map(s => s.metrics!.trustPassRate))),
+    flowEfficiency: Math.round(avgNum(recentWithMetrics.map(s => s.metrics!.flowEfficiency))),
+    debugSpiralDuration: Math.round(avgNum(recentWithMetrics.map(s => s.metrics!.debugSpiralDuration))),
+  } : null;
 
   // Generate insights
   const insights = generateInsights(profile, commits, repoPath);
@@ -165,7 +176,7 @@ export function buildDashboardData(repoPath: string = process.cwd()): DashboardD
     stats: {
       current: {
         vibeScore: latestSession?.vibeScore || 0,
-        rating: latestSession?.overall || 'N/A',
+        rating: latestSession?.overall || 'N/A',  // Metric-based quality grade
       },
       averages: {
         day7: avg(day7Sessions.map(s => s.vibeScore)),
@@ -185,6 +196,7 @@ export function buildDashboardData(repoPath: string = process.cwd()): DashboardD
       ratingDistribution,
       hourlyActivity,
       scopeHealth,
+      avgMetrics,  // Average metrics for radar chart
     },
 
     insights,
@@ -192,10 +204,11 @@ export function buildDashboardData(repoPath: string = process.cwd()): DashboardD
     sessions: sessions.slice(-50).reverse().map(s => ({
       date: s.date,
       vibeScore: s.vibeScore,
-      rating: s.overall,
+      rating: s.overall,  // Metric-based quality grade
       commits: s.commits,
       spirals: s.spirals,
       xpEarned: s.xpEarned,
+      metrics: s.metrics || null,  // Include detailed metrics if available
     })),
 
     achievements: allAchievements,

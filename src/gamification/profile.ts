@@ -13,11 +13,6 @@ import { FixChain } from '../types';
 import { createInitialStreak, updateStreak } from './streaks';
 import { createInitialXP, addXP, calculateSessionXP } from './xp';
 import { checkAchievements, ACHIEVEMENTS } from './achievements';
-import {
-  updatePatternMemory,
-  createInitialPatternMemory,
-} from './pattern-memory';
-import { createInitialInterventionMemory } from './intervention-memory';
 
 const PROFILE_DIR = '.vibe-check';
 const PROFILE_FILE = 'profile.json';
@@ -246,25 +241,8 @@ export function recordSession(
     allScores.reduce((a, b) => a + b, 0) / allScores.length
   );
 
-  // Update pattern memory if fix chains provided
-  if (fixChains && fixChains.length > 0) {
-    profile.patternMemory = updatePatternMemory(
-      profile.patternMemory,
-      fixChains
-    );
-  }
-
   // Save profile
   saveProfile(profile);
-
-  // Run learning cadence check (generates nudges)
-  const { runLearningCadence } = require('../learning/cadence');
-  runLearningCadence(
-    profile.patternMemory,
-    profile.streak.current,
-    profile.xp.nextLevelXP - profile.xp.currentLevelXP,
-    profile.xp.total
-  );
 
   return {
     profile,
@@ -305,16 +283,6 @@ function migrateProfile(profile: UserProfile): UserProfile {
       totalSpiralsDetected: 0,
       spiralsAvoided: 0,
     };
-  }
-
-  // Initialize pattern memory if not present (v1.4.0+)
-  if (!profile.patternMemory) {
-    profile.patternMemory = createInitialPatternMemory();
-  }
-
-  // Initialize intervention memory if not present (v1.4.0+)
-  if (!profile.interventionMemory) {
-    profile.interventionMemory = createInitialInterventionMemory();
   }
 
   return profile;

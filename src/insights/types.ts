@@ -57,6 +57,13 @@ export interface DashboardData {
     ratingDistribution: Record<string, number>;
     hourlyActivity: Record<string, number>;
     scopeHealth: Array<{ scope: string; commits: number; fixRatio: number }>;
+    avgMetrics: {
+      iterationVelocity: number;
+      reworkRatio: number;
+      trustPassRate: number;
+      flowEfficiency: number;
+      debugSpiralDuration: number;
+    } | null;
   };
 
   insights: Insight[];
@@ -68,6 +75,13 @@ export interface DashboardData {
     commits: number;
     spirals: number;
     xpEarned: number;
+    metrics: {
+      iterationVelocity: number;
+      reworkRatio: number;
+      trustPassRate: number;
+      flowEfficiency: number;
+      debugSpiralDuration: number;
+    } | null;
   }>;
 
   achievements: Array<{

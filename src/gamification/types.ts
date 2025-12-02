@@ -1,7 +1,5 @@
 // Gamification Types for Vibe-Check
 
-import { Challenge } from './challenges';
-
 export interface StreakState {
   current: number;           // Current consecutive days
   longest: number;           // Personal best
@@ -35,6 +33,14 @@ export interface Achievement {
   hidden?: boolean;          // Secret achievements
 }
 
+export interface SessionMetrics {
+  iterationVelocity: number;   // commits/hour
+  reworkRatio: number;         // % fix commits
+  trustPassRate: number;       // % commits without immediate fix
+  flowEfficiency: number;      // % time building vs debugging
+  debugSpiralDuration: number; // avg minutes in spirals
+}
+
 export interface SessionRecord {
   date: string;              // ISO date
   timestamp: string;         // ISO datetime
@@ -46,6 +52,7 @@ export interface SessionRecord {
   achievementsUnlocked: string[];  // Achievement IDs
   periodFrom?: string;       // ISO datetime of analyzed period start
   periodTo?: string;         // ISO datetime of analyzed period end
+  metrics?: SessionMetrics;  // Detailed metrics for dashboard (v1.7+)
 }
 
 export interface UserProfile {
@@ -81,8 +88,6 @@ export interface UserProfile {
     spiralsAvoided: number;    // Sessions with 0 spirals
   };
 
-  // Weekly challenges (v1.5.0)
-  challenges?: Challenge[];
 }
 
 // ============================================
