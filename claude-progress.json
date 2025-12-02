@@ -162,16 +162,15 @@
   ],
   "current_state": {
     "phase": "implementing",
-    "working_on": "Actionable coaching enhancement (VIBE-040 to VIBE-044)",
+    "working_on": "Actionable coaching enhancement (VIBE-041 to VIBE-044)",
     "blockers": [],
     "next_steps": [
-      "Implement VIBE-040: Spiral history storage (NDJSON)",
       "Implement VIBE-041: Auto-record spirals during analyze/session",
       "Implement VIBE-042: Personalized watch alerts",
       "Implement VIBE-043: Session end coaching",
       "Implement VIBE-044: Insights command"
     ],
-    "resume_summary": "Published v1.7.0 after major cleanup (78→58 files, -3900 lines). Cut learning system and advanced gamification. Created actionable coaching plan with 5 features to make vibe-check actively coach users based on their spiral history."
+    "resume_summary": "Completed VIBE-040: Spiral history storage with NDJSON append-only log. Created src/storage/spiral-history.ts with appendSpiral, resolveSpiral, getAdvice, getPatternStats functions. 19 tests passing."
   },
   "sessions": [
     {

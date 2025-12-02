@@ -45,3 +45,18 @@ export {
   migrateStore,
   needsMigration,
 } from './schema';
+
+// Spiral history (coaching feature)
+export {
+  SpiralRecord,
+  SpiralResolution,
+  SpiralAdvice,
+  getSpiralHistoryPath,
+  appendSpiral,
+  resolveSpiral,
+  readSpiralHistory,
+  getAdvice,
+  getPatternStats,
+  getPatternDisplayName,
+  getResolutionDisplayName,
+} from './spiral-history';
