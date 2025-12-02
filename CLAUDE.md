@@ -140,11 +140,17 @@ src/
 ├── commands/
 │   ├── index.ts        # Command exports
 │   ├── analyze.ts      # Main analyze command
-│   ├── session.ts      # Session start/end/status commands
+│   ├── session.ts      # Session start/end/status + coaching
 │   ├── dashboard.ts    # Visual dashboard command
-│   ├── watch.ts        # Real-time monitoring
+│   ├── watch.ts        # Real-time monitoring + coaching
+│   ├── insights.ts     # Spiral patterns + recommendations
 │   ├── timeline.ts     # Session history
 │   └── profile.ts      # Profile/stats command
+├── storage/
+│   ├── spiral-history.ts  # Spiral history NDJSON log
+│   ├── atomic.ts          # Atomic file operations
+│   ├── commit-log.ts      # Commit log storage
+│   └── timeline-store.ts  # Timeline cache
 ├── metrics/
 │   ├── index.ts        # Orchestrates all metrics
 │   ├── velocity.ts     # Iteration velocity
@@ -188,9 +194,14 @@ dashboard/              # Static HTML dashboard
 ├── app.js              # Dashboard JavaScript
 └── styles.css          # Dashboard styles
 
-.vibe-check/            # Local profile data (per-repo)
+~/.vibe-check/          # Global profile data (in home dir)
 ├── profile.json        # XP, streaks, achievements
+├── spiral-history.ndjson  # Spiral log for coaching
 └── calibration.json    # Calibration samples
+
+.vibe-check/            # Local data (per-repo)
+├── active-session.json # Active session state
+└── timeline.json       # Timeline cache
 ```
 
 ## Commands
@@ -220,10 +231,10 @@ vibe-check level --calibrate 3 # Record calibration sample
 ```bash
 vibe-check session start --level 3   # Start session, capture baseline
 vibe-check session status            # Show active session
-vibe-check session end --format json # End session, get metrics + patterns
+vibe-check session end --format json # End session, get metrics + coaching
 ```
 
-Output includes failure pattern detection for `/session-end` integration:
+Output includes failure pattern detection and personalized coaching:
 ```json
 {
   "metrics": { "trust_pass_rate": 92, "rework_ratio": 11, ... },
@@ -233,6 +244,15 @@ Output includes failure pattern detection for `/session-end` integration:
   }
 }
 ```
+
+### Insights Command (Coaching)
+```bash
+vibe-check insights              # Your spiral patterns + what works
+vibe-check insights --days 90    # Longer history
+vibe-check insights --format json  # Export for analysis
+```
+
+Shows your spiral history, patterns by frequency, what resolutions worked, and personalized recommendations.
 
 ## The 5 Metrics
 
@@ -254,3 +274,5 @@ A "debug spiral" is detected when 3+ consecutive fix commits target the same com
 - `SSL_TLS` - Certificate problems
 - `IMAGE_REGISTRY` - Container pull issues
 - `GITOPS_DRIFT` - Sync/reconciliation issues
+
+**Coaching Integration:** Spirals are automatically recorded to `~/.vibe-check/spiral-history.ndjson`. Watch mode and session end show personalized advice based on what's worked before for you.

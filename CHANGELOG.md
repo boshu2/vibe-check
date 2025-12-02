@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Actionable Coaching** - Personalized coaching based on your spiral history
+  - `vibe-check insights` - View your spiral patterns and what works for you
+  - Watch mode shows personalized alerts ("Your history: 4 auth spirals, avg 18 min. What worked: test 3x")
+  - Session end shows coaching for spirals hit during the session
+  - All spirals auto-recorded to `~/.vibe-check/spiral-history.ndjson`
+  - Pattern categories: OAuth/Token, Volume/Mount, API Version, SSL/TLS, Image/Registry, GitOps Drift
+  - Resolution tracking: TEST, BREAK, DOCS, HELP, ROLLBACK
+
+## [1.7.0] - 2025-12-02
+
+### Added
 - **Session Integration** - New `vibe-check session` command suite for Claude Code integration
   - `session start` - Capture baseline metrics at session start
   - `session end` - Get session metrics with failure pattern detection
@@ -16,11 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automatic failure pattern detection (Debug Spiral, Context Amnesia, Velocity Crash, Trust Erosion, Flow Disruption)
   - Auto-generated learnings based on metrics and patterns
   - Baseline comparison with last 7 days
-- **Learning System** - New learning and lessons database
-  - `learn` command - Extract patterns from sessions
-  - `lesson` command - Manage synthesized lessons with `--list`, `--stats`, `--apply`, `--dismiss`
-  - Automatic synthesis from pattern + intervention memory
-  - Lessons surface during analyze when relevant spirals detected
+
+### Changed
+- Major cleanup: removed 20 files, -3900 lines of speculative features
+- Removed learning system (zero adoption evidence)
+- Removed advanced gamification (challenges, prestige, leaderboards)
+- Simplified to core value: metrics, coaching, insights
 
 ## [1.6.0] - 2025-11-30
 
