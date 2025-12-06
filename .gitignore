@@ -10,3 +10,6 @@ coverage/
 claude-progress.json
 claude-progress.txt
 feature-list.json
+
+# Agent bundles and plans (local working files)
+.agents/
