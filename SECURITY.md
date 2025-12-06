@@ -4,11 +4,12 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 1.7.x   | :white_check_mark: |
 | 1.x.x   | :white_check_mark: |
 
 ## Security Assessment
 
-**Last Review:** 2025-11-29
+**Last Review:** 2025-12-05
 **Risk Level:** LOW
 **Reviewer:** Automated + Manual
 
@@ -31,6 +32,8 @@ vibe-check is a local CLI tool that reads git history and writes statistics to l
 2. Calculates metrics from commit patterns
 3. Writes profile/calibration data to `.vibe-check/` directory
 4. Optionally installs a pre-push git hook
+5. Detects work sessions from commit timestamps (pure analysis)
+6. Analyzes patterns like debug spirals and vague commits (pure analysis)
 
 ### What vibe-check does NOT do
 
@@ -175,4 +178,5 @@ We aim to respond within 48 hours and will credit reporters in the fix announcem
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2025-12-05 | 1.7.0 | Added forensics, sessions commands; updated threat model |
 | 2025-11-29 | 1.2.0 | Initial security review documented |

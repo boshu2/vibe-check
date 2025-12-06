@@ -7,7 +7,7 @@ import {
 } from '../gamification/profile';
 import { formatStreak, formatFreezes } from '../gamification/streaks';
 import { formatLevel, formatXPProgress, getLevelProgress } from '../gamification/xp';
-import { LEVELS, PRESTIGE_TIERS } from '../gamification/types';
+import { LEVELS, PRESTIGE_TIERS, UserProfile } from '../gamification/types';
 import { getAllAchievements } from '../gamification/achievements';
 import { getWeeklyStats, formatWeeklyStats } from '../gamification/stats';
 
@@ -179,7 +179,7 @@ function showAllAchievements(unlockedAchievements: { id: string; name: string; i
   }
 }
 
-function showDetailedStats(profile: any): void {
+function showDetailedStats(profile: UserProfile): void {
   const { stats, xp, streak } = profile;
 
   console.log(chalk.bold('\n📊 Detailed Statistics\n'));
@@ -199,8 +199,4 @@ function showDetailedStats(profile: any): void {
   console.log(`  Longest Streak: ${chalk.bold(streak.longest)} days`);
 
   console.log();
-}
-
-export async function runProfile2(options: any): Promise<void> {
-  return runProfile(options);
 }
