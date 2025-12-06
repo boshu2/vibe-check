@@ -1,0 +1,262 @@
+{
+  "project": "vibe-check",
+  "created": "2025-11-29",
+  "mode": "standard",
+  "version": "1.7.0",
+  "features": [
+    {
+      "id": "VIBE-001",
+      "description": "Gamification module (streaks, XP, achievements)",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-002",
+      "description": "Profile command (vibe-check profile)",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-003",
+      "description": "Dashboard shell (HTML/CSS/JS)",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-004",
+      "description": "GitHub Action for PR comments",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-005",
+      "description": "JSON file output (--output flag)",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-006",
+      "description": "Pre-push git hook (vibe-check init-hook)",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-007",
+      "description": "Simple output mode (--simple flag)",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-008",
+      "description": "Security policy and assessment (SECURITY.md)",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-009",
+      "description": "Session workflow (start --level N, compare to declared)",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-010",
+      "description": "Watch mode for real-time spiral detection",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-011",
+      "description": "Automatic session detection and baseline comparison",
+      "passes": true,
+      "completed_date": "2025-11-29"
+    },
+    {
+      "id": "VIBE-024",
+      "description": "Timeline command Phase 1 MVP (session detection, day grouping, terminal output)",
+      "passes": true,
+      "completed_date": "2025-11-30"
+    },
+    {
+      "id": "VIBE-025",
+      "description": "Timeline Phase 2: Flow state detection",
+      "passes": true,
+      "completed_date": "2025-11-30"
+    },
+    {
+      "id": "VIBE-026",
+      "description": "Timeline Phase 2: Post-delete sprint detection",
+      "passes": true,
+      "completed_date": "2025-11-30"
+    },
+    {
+      "id": "VIBE-027",
+      "description": "Timeline Phase 2: Thrashing detection",
+      "passes": true,
+      "completed_date": "2025-11-30"
+    },
+    {
+      "id": "VIBE-028",
+      "description": "Timeline recommendation engine with actionable insights",
+      "passes": true,
+      "completed_date": "2025-11-30"
+    },
+    {
+      "id": "VIBE-029",
+      "description": "Timeline Phase 3: Detour detection and late-night spirals",
+      "passes": true,
+      "completed_date": "2025-11-30"
+    },
+    {
+      "id": "VIBE-030",
+      "description": "Timeline Phase 4: Export formats (Markdown, HTML for sharing)",
+      "passes": true,
+      "completed_date": "2025-11-30"
+    },
+    {
+      "id": "VIBE-031",
+      "description": "Timeline persistence: Cache to .vibe-check/timeline.json with compounding insights",
+      "passes": true,
+      "completed_date": "2025-11-30"
+    },
+    {
+      "id": "VIBE-033",
+      "description": "Session integration for AgentOps (session start/end/status commands)",
+      "passes": true,
+      "completed_date": "2025-12-02"
+    },
+    {
+      "id": "VIBE-034",
+      "description": "Feature audit and cleanup (remove bloated learning/gamification systems)",
+      "passes": true,
+      "completed_date": "2025-12-02"
+    },
+    {
+      "id": "VIBE-040",
+      "description": "Spiral history storage (NDJSON append-only log)",
+      "passes": true,
+      "completed_date": "2025-12-02",
+      "plan_bundle": "actionable-coaching-plan-2025-12-02.md",
+      "files": ["src/storage/spiral-history.ts"]
+    },
+    {
+      "id": "VIBE-041",
+      "description": "Auto-record spirals to history during analyze/session",
+      "passes": true,
+      "completed_date": "2025-12-02",
+      "plan_bundle": "actionable-coaching-plan-2025-12-02.md",
+      "files": ["src/commands/analyze.ts", "src/commands/session.ts"]
+    },
+    {
+      "id": "VIBE-042",
+      "description": "Personalized watch alerts (show what worked before)",
+      "passes": true,
+      "completed_date": "2025-12-02",
+      "plan_bundle": "actionable-coaching-plan-2025-12-02.md",
+      "files": ["src/commands/watch.ts"]
+    },
+    {
+      "id": "VIBE-043",
+      "description": "Session end coaching (actionable feedback, not just metrics)",
+      "passes": true,
+      "completed_date": "2025-12-02",
+      "plan_bundle": "actionable-coaching-plan-2025-12-02.md",
+      "files": ["src/commands/session.ts"]
+    },
+    {
+      "id": "VIBE-044",
+      "description": "Insights command (vibe-check insights - pattern summary)",
+      "passes": true,
+      "completed_date": "2025-12-02",
+      "plan_bundle": "actionable-coaching-plan-2025-12-02.md",
+      "files": ["src/commands/insights.ts", "src/cli.ts"]
+    },
+    {
+      "id": "VIBE-045",
+      "description": "Git forensics mode - pattern detection from history (vibe-check forensics)",
+      "passes": false,
+      "priority": 1,
+      "effort": "3-4 days",
+      "source": "release-engineering retrospective (475 commits analyzed)",
+      "plan_bundle": "git-forensics-enhancement-2025-12-05.md",
+      "files": [
+        "src/commands/forensics.ts",
+        "src/analyzers/patterns.ts",
+        "src/analyzers/quality.ts",
+        "src/cli.ts"
+      ],
+      "features": [
+        "Debug spiral detection (take N pattern)",
+        "Vague commit detection (<20 chars)",
+        "Context amnesia detection (scope revisits)",
+        "Quality metrics (conventional/descriptive/vague %)",
+        "Sweep recommendation engine",
+        "JSON/Markdown output"
+      ],
+      "evidence": {
+        "repo": "release-engineering",
+        "commits_analyzed": 475,
+        "spirals_detected": 14,
+        "vague_commits": 282,
+        "accuracy": "validated against manual analysis"
+      }
+    },
+    {
+      "id": "VIBE-046",
+      "description": "Session detection algorithm - identify work sessions (vibe-check sessions)",
+      "passes": false,
+      "priority": 2,
+      "effort": "2 days",
+      "source": "release-engineering retrospective (46 sessions detected)",
+      "plan_bundle": "git-forensics-enhancement-2025-12-05.md",
+      "files": [
+        "src/commands/sessions.ts",
+        "src/analyzers/sessions.ts",
+        "src/cli.ts"
+      ],
+      "dependencies": ["VIBE-045"],
+      "features": [
+        "90-minute gap threshold (configurable)",
+        "Session duration tracking",
+        "Commits per session metrics",
+        "Productivity pattern identification",
+        "JSON/Markdown output"
+      ],
+      "evidence": {
+        "repo": "release-engineering",
+        "sessions_detected": 46,
+        "avg_duration_min": 79.4,
+        "median_duration_min": 33.1,
+        "longest_session_min": 413.2
+      }
+    },
+    {
+      "id": "VIBE-047",
+      "description": "Era evolution tracking - transformation phases over time (vibe-check evolution)",
+      "passes": false,
+      "priority": 3,
+      "effort": "2-3 days",
+      "source": "release-engineering retrospective (5 eras tracked)",
+      "plan_bundle": "git-forensics-enhancement-2025-12-05.md",
+      "files": [
+        "src/commands/evolution.ts",
+        "src/analyzers/eras.ts",
+        "src/config/eras.schema.json",
+        "src/cli.ts"
+      ],
+      "dependencies": ["VIBE-045", "VIBE-046"],
+      "features": [
+        "User-defined era configuration",
+        "Per-era metrics calculation",
+        "Before/after comparison",
+        "Transformation tracking",
+        "JSON/Markdown/HTML output"
+      ],
+      "evidence": {
+        "repo": "release-engineering",
+        "eras": ["genesis", "monolith", "reckoning", "transformation", "proof"],
+        "transformation": "0% conventional → 100%",
+        "vague_elimination": "97.4% → 0%"
+      }
+    }
+  ]
+}
