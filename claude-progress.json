@@ -161,15 +161,16 @@
     }
   ],
   "current_state": {
-    "phase": "complete",
-    "working_on": "Actionable coaching complete (VIBE-040 to VIBE-044)",
+    "phase": "planning",
+    "working_on": "Git forensics enhancements from release-engineering retrospective",
     "blockers": [],
     "next_steps": [
-      "Bump version to v1.8.0 and publish",
-      "Consider adding resolution recording UI",
-      "Monitor user feedback on coaching features"
+      "Implement VIBE-045: Git forensics mode (pattern detection from history)",
+      "Implement VIBE-046: Session detection algorithm (90-min threshold)",
+      "Implement VIBE-047: Era evolution tracking (transformation phases)",
+      "Create plan bundle: git-forensics-enhancement-2025-12-05.md"
     ],
-    "resume_summary": "Completed all 5 actionable coaching features: VIBE-040 (spiral history), VIBE-041 (auto-record), VIBE-042 (personalized watch), VIBE-043 (session coaching), VIBE-044 (insights command). All 59 tests passing."
+    "resume_summary": "Added 3 new features to roadmap based on proven algorithms from release-engineering retrospective (475 commits analyzed). Git forensics (VIBE-045), session detection (VIBE-046), and era evolution (VIBE-047) will transform vibe-check from real-time → comprehensive retrospective tool. All algorithms validated with evidence."
   },
   "sessions": [
     {
