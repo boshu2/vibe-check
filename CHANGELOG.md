@@ -7,14 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2025-12-05
+
 ### Added
+
+- **Git Forensics** - `vibe-check forensics` command for deep pattern analysis (VIBE-045)
+  - Detects debug spirals ("take N" patterns indicating fix-retry loops)
+  - Detects vague commits (<20 characters)
+  - Detects context amnesia (repeatedly revisiting same scope)
+  - Quality metrics: conventional commit %, descriptive commit %
+  - Recommendations: sweep, maintain, or celebrate
+- **Session Detection** - `vibe-check sessions` command for work session analysis (VIBE-046)
+  - Identifies sessions from commit timestamps (90-minute gap threshold)
+  - Session statistics: avg duration, commits per session, longest/shortest
+  - Proven algorithm from release-engineering retrospective
+- **Brand Assets** - Professional logo and visual identity
+  - SVG logo with spiral-to-checkmark concept
+  - Light and dark mode variants
+  - Tagline: "catch the spiral before it catches you"
 - **Actionable Coaching** - Personalized coaching based on your spiral history
   - `vibe-check insights` - View your spiral patterns and what works for you
-  - Watch mode shows personalized alerts ("Your history: 4 auth spirals, avg 18 min. What worked: test 3x")
+  - Watch mode shows personalized alerts
   - Session end shows coaching for spirals hit during the session
   - All spirals auto-recorded to `~/.vibe-check/spiral-history.ndjson`
-  - Pattern categories: OAuth/Token, Volume/Mount, API Version, SSL/TLS, Image/Registry, GitOps Drift
-  - Resolution tracking: TEST, BREAK, DOCS, HELP, ROLLBACK
+
+### Changed
+
+- **README Redesign** - Modern visual flow inspired by top npm packages
+  - Centered hero section with logo and badges
+  - Progressive disclosure structure
+  - Cleaner section organization with horizontal rules
+  - Scannable tables instead of prose
+- **Security Policy Updated** - Added forensics and sessions to threat model
 
 ## [1.7.0] - 2025-12-02
 
