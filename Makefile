@@ -1,7 +1,7 @@
 # vibe-check Makefile
 # All npm commands and development shortcuts
 
-.PHONY: help build dev start test test-coverage lint clean install publish dashboard watch profile analyze session-start session-end
+.PHONY: help build dev start test test-coverage lint clean install publish dashboard watch profile analyze session-start session-end release-patch release-minor release-major github-release
 
 # Default target
 help:
@@ -19,12 +19,13 @@ help:
 	@echo "  make test-coverage  - Run tests with coverage report"
 	@echo "  make test-watch     - Run tests in watch mode"
 	@echo ""
-	@echo "Publishing:"
+	@echo "Publishing & Releases:"
+	@echo "  make release-patch  - Full release: patch version (1.0.x)"
+	@echo "  make release-minor  - Full release: minor version (1.x.0)"
+	@echo "  make release-major  - Full release: major version (x.0.0)"
+	@echo "  make github-release - Create GitHub release for current version"
+	@echo "  make publish        - npm publish only (no git/github)"
 	@echo "  make install        - Install dependencies"
-	@echo "  make publish        - Build, test, and publish to npm"
-	@echo "  make version-patch  - Bump patch version (1.0.x)"
-	@echo "  make version-minor  - Bump minor version (1.x.0)"
-	@echo "  make version-major  - Bump major version (x.0.0)"
 	@echo ""
 	@echo "Vibe-Check Commands:"
 	@echo "  make dashboard      - Open visual dashboard"
@@ -87,6 +88,42 @@ version-minor:
 
 version-major:
 	npm version major
+
+# ============================================
+# Release Workflow (Full Automation)
+# ============================================
+
+# Full release: bump, tag, push, GitHub release, npm publish
+release-patch: build test
+	@echo "📦 Releasing patch version..."
+	npm version patch -m "chore(release): %s"
+	git push --follow-tags
+	$(MAKE) github-release
+	npm publish --access=public
+	@echo "✅ Released v$$(node -p "require('./package.json').version")"
+
+release-minor: build test
+	@echo "📦 Releasing minor version..."
+	npm version minor -m "chore(release): %s"
+	git push --follow-tags
+	$(MAKE) github-release
+	npm publish --access=public
+	@echo "✅ Released v$$(node -p "require('./package.json').version")"
+
+release-major: build test
+	@echo "📦 Releasing major version..."
+	npm version major -m "chore(release): %s"
+	git push --follow-tags
+	$(MAKE) github-release
+	npm publish --access=public
+	@echo "✅ Released v$$(node -p "require('./package.json').version")"
+
+# Create GitHub release from latest tag
+github-release:
+	@VERSION=$$(node -p "require('./package.json').version"); \
+	gh release create "v$$VERSION" \
+		--title "v$$VERSION" \
+		--generate-notes
 
 # ============================================
 # Vibe-Check Commands
