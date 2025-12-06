@@ -173,7 +173,8 @@
     {
       "id": "VIBE-045",
       "description": "Git forensics mode - pattern detection from history (vibe-check forensics)",
-      "passes": false,
+      "passes": true,
+      "completed_date": "2025-12-05",
       "priority": 1,
       "effort": "3-4 days",
       "source": "release-engineering retrospective (475 commits analyzed)",
@@ -203,7 +204,8 @@
     {
       "id": "VIBE-046",
       "description": "Session detection algorithm - identify work sessions (vibe-check sessions)",
-      "passes": false,
+      "passes": true,
+      "completed_date": "2025-12-05",
       "priority": 2,
       "effort": "2 days",
       "source": "release-engineering retrospective (46 sessions detected)",
