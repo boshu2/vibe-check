@@ -10,3 +10,4 @@ export { createSessionCommand, SessionMetricsOutput } from './session';
 export { createInsightsCommand } from './insights';
 export { createPipelineCommand } from './pipeline';
 export { createSessionsCommand, runSessions, SessionsOptions } from './sessions';
+export { createForensicsCommand, runForensics, ForensicsOptions, ForensicsResult } from './forensics';

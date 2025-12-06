@@ -38,7 +38,7 @@ export function createSessionsCommand(): Command {
     .action(async (options) => {
       await runSessions({
         ...options,
-        threshold: parseInt(options.threshold, 10),
+        threshold: parseInt(options.threshold, 10) || 90,
         limit: options.limit ? parseInt(options.limit, 10) : undefined,
       });
     });
