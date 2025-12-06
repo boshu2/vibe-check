@@ -8,3 +8,5 @@ export { createCacheCommand } from './cache';
 export { createDashboardCommand } from './dashboard';
 export { createSessionCommand, SessionMetricsOutput } from './session';
 export { createInsightsCommand } from './insights';
+export { createPipelineCommand } from './pipeline';
+export { createSessionsCommand, runSessions, SessionsOptions } from './sessions';
