@@ -14,7 +14,7 @@
 
 <p align="center">
   Git-powered metrics for AI-assisted development.<br>
-  Detects the <strong>inner loop failure patterns</strong> from <a href="https://itrevolution.com/product/vibe-coding-book/"><em>Vibe Coding</em></a> (Gene Kim & Steve Yegge, 2025).
+  Detects the <a href="#the-12-failure-patterns">12 failure patterns</a> from <a href="https://itrevolution.com/product/vibe-coding-book/"><em>Vibe Coding</em></a> (Gene Kim & Steve Yegge, 2025).
 </p>
 
 ---
@@ -79,14 +79,42 @@ npx @boshu2/vibe-check dashboard
 | **Rework Ratio** | Building or debugging? | <30% |
 | **Debug Spirals** | Are you stuck? | 0 active |
 
-### Detection Patterns
+---
 
-| Pattern | Severity | What It Means |
-|---------|----------|---------------|
-| **Tests Passing Lie** | HIGH | AI claims tests pass, but they don't |
-| **Instruction Drift** | MEDIUM | AI gradually moves off-target |
-| **Debug Loop Spiral** | HIGH | 3+ fix commits on same component |
-| **Context Amnesia** | MEDIUM | Repeated fixes, forgotten solutions |
+## The 12 Failure Patterns
+
+*Vibe Coding* identifies 12 failure modes across three developer loops. vibe-check focuses on the **inner loop** (where spirals form) while providing awareness of all 12.
+
+### Inner Loop (Minutes) — **Primary Focus**
+
+| # | Pattern | Severity | vibe-check Detection |
+|---|---------|----------|----------------------|
+| 1 | **Tests Passing Lie** | 🔴 HIGH | Trust pass rate drops, fix commits follow "working" code |
+| 2 | **Context Amnesia** | 🟡 MEDIUM | Repeated fixes on same component, circular patterns |
+| 3 | **Instruction Drift** | 🟡 MEDIUM | Scope creep visible in commit message patterns |
+| 4 | **Debug Loop Spiral** | 🔴 HIGH | ✅ **Core detection**: 3+ fix commits on same component |
+
+### Middle Loop (Hours-Days) — *Monitored*
+
+| # | Pattern | Severity | vibe-check Detection |
+|---|---------|----------|----------------------|
+| 5 | **Eldritch Code Horror** | 🔴 CRITICAL | High file churn, repeated touches to same files |
+| 6 | **Workspace Collision** | 🔴 HIGH | — (multi-agent, future) |
+| 7 | **Memory Decay** | 🟡 MEDIUM | Session baseline comparison shows degradation |
+| 8 | **Multi-Agent Deadlock** | 🔴 HIGH | — (multi-agent, future) |
+
+### Outer Loop (Weeks-Months) — *Awareness*
+
+| # | Pattern | Severity | vibe-check Detection |
+|---|---------|----------|----------------------|
+| 9 | **Bridge Torching** | 🔴 CRITICAL | — (API tracking, future) |
+| 10 | **Repository Deletion** | 🔴 CRITICAL | — (git safety, future) |
+| 11 | **Process Gridlock** | 🔴 HIGH | — (CI/CD analysis, future) |
+| 12 | **Stewnami** | 🔴 HIGH | — (cross-repo, future) |
+
+> **Inner loop mastery prevents middle/outer loop disasters.** Catch the spiral at 3 commits, not 30.
+
+See the [full 12 Failure Patterns catalog](https://github.com/boshu2/12-factor-agentops/blob/main/docs/reference/failure-patterns.md) for prevention strategies and AgentOps integration.
 
 ---
 
@@ -213,39 +241,16 @@ When inner loop issues are detected:
 
 ---
 
-## The Ecosystem
+## For Autonomous Agents
 
-vibe-check implements **Factor V (Measurement)** from [12-Factor AgentOps](https://github.com/boshu2/12-factor-agentops):
+vibe-check measures **human-AI collaboration sessions**—the inner loop where you're working with an AI assistant.
 
-```text
-BUILD              →     WORK          →     RUN
-12-Factor Agents        Vibe Coding         12-Factor AgentOps
-(HumanLayer)           (Gene & Steve)       (Operations)
-                                                  ↓
-                                             vibe-check
-                                            (Measurement)
-```
+For **autonomous agents** that run without a human in the loop, see [12-Factor AgentOps](https://12factoragentops.com)—DevOps and SRE patterns adapted for AI systems.
 
-| Factor | What vibe-check Provides |
-|--------|-------------------------|
-| **IV: Validation Gates** | Pre-commit hooks, CI integration |
-| **V: Measurement** | Quantified feedback loop |
-| **VII: Smart Routing** | Spiral detection triggers intervention |
-| **XI: Fail-Safe Checks** | Pattern detection for all 12 failures |
-
----
-
-## Scope: What vibe-check Covers
-
-vibe-check focuses on the **inner developer loop** — the patterns you can detect and fix during a single coding session.
-
-| Loop | Patterns | vibe-check Coverage |
-|------|----------|---------------------|
-| **Inner Loop** | Tests Passing Lie, Context Amnesia, Instruction Drift, Debug Spiral | **Full detection** |
-| **Middle Loop** | Eldritch Code Horror, Agent Collisions, Memory Decay, Deadlocks | Partial (via metrics) |
-| **Outer Loop** | Bridge Torching, Repo Deletion, Process Gridlock, Stewnami | Not covered |
-
-The middle and outer loop patterns require multi-agent coordination, code structure analysis, and organizational awareness beyond git history.
+| Use Case | Tool |
+|----------|------|
+| Working *with* AI (pair programming) | vibe-check |
+| Running AI *autonomously* (agents) | [12-Factor AgentOps](https://12factoragentops.com) |
 
 ---
 
@@ -270,10 +275,10 @@ It's not a productivity metric. It's not for performance reviews.
 
 ## Learn More
 
-- [Vibe-Coding Ecosystem](docs/VIBE-ECOSYSTEM.md) — Full methodology, all features
 - [Vibe Coding Book](https://itrevolution.com/product/vibe-coding-book/) — Gene Kim & Steve Yegge (2025)
-- [12-Factor AgentOps](https://github.com/boshu2/12-factor-agentops) — Operational framework
-- [12-Factor Agents](https://github.com/humanlayer/12-factor-agents) — Engineering patterns (HumanLayer)
+- [12-Factor AgentOps](https://12factoragentops.com) — Reliability patterns for autonomous agents
+- [12 Failure Patterns](https://github.com/boshu2/12-factor-agentops/blob/main/docs/reference/failure-patterns.md) — Complete catalog with prevention strategies
+- [vibe-check on bofuller.com](https://bofuller.com/builds/vibe-check) — Trust calibration, 40% rule, and results
 
 ---
 
