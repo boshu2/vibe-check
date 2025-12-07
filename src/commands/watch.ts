@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getCommits, isGitRepo } from '../git';
-import { Commit } from '../types';
+import { getCommits, isGitRepo, getCommitStats } from '../git';
+import { Commit, TimelineEvent } from '../types';
 import {
   getAdvice,
   getPatternDisplayName,
@@ -9,6 +9,11 @@ import {
   appendSpiral,
   SpiralResolution,
 } from '../storage/spiral-history';
+import {
+  quickInnerLoopCheck,
+  analyzeInnerLoop,
+  InnerLoopAnalysis,
+} from '../inner-loop';
 
 // Pattern detection regexes (same as metrics/spirals.ts)
 const PATTERNS: Record<string, RegExp> = {
@@ -33,6 +38,8 @@ interface WatchState {
   lastCommitHash: string | null;
   recentCommits: Commit[];
   spiralWarnings: Map<string, number>; // component -> warning count
+  lastInnerLoopWarning: string | null; // track which inner-loop warning was last shown
+  innerLoopIssueCount: number; // track issue count to detect changes
 }
 
 const SPIRAL_THRESHOLD = 3; // commits before warning
@@ -75,6 +82,8 @@ async function runWatch(options: {
     lastCommitHash: null,
     recentCommits: [],
     spiralWarnings: new Map(),
+    lastInnerLoopWarning: null,
+    innerLoopIssueCount: 0,
   };
 
   // Get initial state
@@ -90,6 +99,9 @@ async function runWatch(options: {
 
     // Check for existing spirals
     checkForSpirals(state, options.quiet);
+
+    // Check for inner-loop issues on initial load
+    await checkForInnerLoopIssues(options.repo, state, options.quiet);
   }
 
   // Poll for new commits
@@ -126,6 +138,9 @@ async function runWatch(options: {
 
           // Check for spirals
           checkForSpirals(state, options.quiet);
+
+          // Check for inner-loop issues
+          await checkForInnerLoopIssues(options.repo, state, options.quiet);
         }
       }
     } catch (error) {
@@ -272,4 +287,95 @@ function displaySpiralWarning(component: string, fixes: Commit[]): void {
 
   // Record this spiral to history
   appendSpiral(pattern, component, duration, fixes.length);
+}
+
+async function checkForInnerLoopIssues(
+  repoPath: string,
+  state: WatchState,
+  quiet: boolean
+): Promise<void> {
+  if (state.recentCommits.length < 3) return;
+
+  try {
+    // Get commit stats for inner-loop analysis
+    const commitStats = await getCommitStats(repoPath, '1 hour ago');
+
+    // Convert commits to TimelineEvent format
+    const events: TimelineEvent[] = state.recentCommits.map((c, idx) => ({
+      hash: c.hash,
+      timestamp: c.date,
+      author: c.author,
+      subject: c.message,
+      type: c.type,
+      scope: c.scope,
+      sessionId: 'watch',
+      sessionPosition: idx,
+      gapMinutes: 0,
+      isRefactor: c.type === 'refactor',
+      spiralDepth: 0,
+    }));
+
+    // Run quick inner-loop check
+    const check = quickInnerLoopCheck(
+      events,
+      commitStats.filesPerCommit,
+      commitStats.lineStatsPerCommit
+    );
+
+    // Only show warning if issues changed
+    if (check.hasIssues && check.issueCount > state.innerLoopIssueCount) {
+      // Get full analysis for detailed warning
+      const analysis = analyzeInnerLoop(
+        events,
+        commitStats.filesPerCommit,
+        commitStats.lineStatsPerCommit
+      );
+
+      displayInnerLoopWarning(analysis);
+      state.innerLoopIssueCount = check.issueCount;
+      state.lastInnerLoopWarning = check.topIssue;
+    }
+  } catch {
+    // Silently ignore errors
+  }
+}
+
+function displayInnerLoopWarning(analysis: InnerLoopAnalysis): void {
+  const healthEmoji = analysis.summary.overallHealth === 'critical' ? '🚨' :
+                      analysis.summary.overallHealth === 'warning' ? '⚠️' : '✅';
+  const healthColor = analysis.summary.overallHealth === 'critical' ? chalk.red :
+                      analysis.summary.overallHealth === 'warning' ? chalk.yellow : chalk.green;
+
+  console.log('');
+  console.log(healthColor(`  ${healthEmoji} INNER LOOP ${analysis.summary.overallHealth.toUpperCase()}`));
+  console.log('');
+
+  // Show detected issues
+  if (analysis.testsPassingLie.detected) {
+    console.log(chalk.red(`      🤥 ${analysis.testsPassingLie.message}`));
+  }
+  if (analysis.contextAmnesia.detected) {
+    console.log(chalk.yellow(`      🧠 ${analysis.contextAmnesia.message}`));
+  }
+  if (analysis.instructionDrift.detected) {
+    console.log(chalk.yellow(`      🎯 ${analysis.instructionDrift.message}`));
+  }
+  if (analysis.loggingOnly.detected) {
+    console.log(chalk.yellow(`      🔍 ${analysis.loggingOnly.message}`));
+  }
+
+  // Show top recommendation
+  if (analysis.recommendations.length > 0) {
+    console.log('');
+    console.log(chalk.bold.cyan(`      → ${analysis.recommendations[0]}`));
+  }
+
+  // Emergency protocol for critical issues
+  if (analysis.summary.overallHealth === 'critical') {
+    console.log('');
+    console.log(chalk.red.bold('      STOP → git status → backup → start simple'));
+  }
+
+  console.log('');
+  console.log(chalk.cyan('─'.repeat(60)));
 }

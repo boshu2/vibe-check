@@ -14,7 +14,7 @@
 
 <p align="center">
   Git-powered metrics for AI-assisted development.<br>
-  Detects the failure patterns from <a href="https://itrevolution.com/product/vibe-coding-book/"><em>Vibe Coding</em></a> (Gene Kim & Steve Yegge, 2025).
+  Detects the <strong>inner loop failure patterns</strong> from <a href="https://itrevolution.com/product/vibe-coding-book/"><em>Vibe Coding</em></a> (Gene Kim & Steve Yegge, 2025).
 </p>
 
 ---
@@ -26,6 +26,21 @@ npx @boshu2/vibe-check
 <p align="center">
   <img src="https://raw.githubusercontent.com/boshu2/vibe-check/main/assets/demo.gif" alt="vibe-check demo" width="600">
 </p>
+
+---
+
+## Focus: The Inner Developer Loop
+
+vibe-check focuses on detecting the **4 Inner Loop Disasters** — the immediate, developer-facing failures that happen during a coding session:
+
+| Pattern | What Goes Wrong | How vibe-check Detects It |
+|---------|-----------------|---------------------------|
+| **"Tests Passing" Lie** | AI claims "fixed" but code doesn't work | Commits claiming success followed by immediate fixes |
+| **Context Amnesia** | AI forgets instructions from 5 minutes ago | Reverts, reimplementations, repeated similar fixes |
+| **Instruction Drift** | AI "improves" things you didn't ask for | Unrequested refactors, scope explosion |
+| **Debug Loop Spiral** | AI adds logging instead of fixing root cause | 3+ consecutive debugging commits |
+
+These are the patterns you can catch and fix **right now**, in your current session.
 
 ---
 
@@ -173,8 +188,27 @@ vibe-check session end --format json
   "retro": {
     "failure_patterns_hit": [],
     "failure_patterns_avoided": ["Debug Spiral", "Context Amnesia"]
+  },
+  "inner_loop": {
+    "health": "healthy",
+    "issues_detected": 0,
+    "tests_passing_lies": 0,
+    "context_amnesia_incidents": 0,
+    "instruction_drift_commits": 0,
+    "debug_loop_detected": false
   }
 }
+```
+
+When inner loop issues are detected:
+
+```
+⚠️ Inner Loop Health: WARNING
+
+  🤥 2 "tests passing" lies detected
+  🎯 Instruction drift: 3 commits went outside scope
+
+  → STOP: AI claimed success but code needed fixes. Verify builds/tests pass.
 ```
 
 ---
@@ -198,6 +232,20 @@ BUILD              →     WORK          →     RUN
 | **V: Measurement** | Quantified feedback loop |
 | **VII: Smart Routing** | Spiral detection triggers intervention |
 | **XI: Fail-Safe Checks** | Pattern detection for all 12 failures |
+
+---
+
+## Scope: What vibe-check Covers
+
+vibe-check focuses on the **inner developer loop** — the patterns you can detect and fix during a single coding session.
+
+| Loop | Patterns | vibe-check Coverage |
+|------|----------|---------------------|
+| **Inner Loop** | Tests Passing Lie, Context Amnesia, Instruction Drift, Debug Spiral | **Full detection** |
+| **Middle Loop** | Eldritch Code Horror, Agent Collisions, Memory Decay, Deadlocks | Partial (via metrics) |
+| **Outer Loop** | Bridge Torching, Repo Deletion, Process Gridlock, Stewnami | Not covered |
+
+The middle and outer loop patterns require multi-agent coordination, code structure analysis, and organizational awareness beyond git history.
 
 ---
 
