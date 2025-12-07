@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import * as fs from 'fs';
 import * as path from 'path';
-import { getCommits, isGitRepo, getFileStats } from '../git';
+import { getCommits, isGitRepo, getFileStats, getCommitStats } from '../git';
 import { analyzeCommits } from '../metrics';
 import { calculateFileChurn } from '../metrics/file-churn';
 import { calculateTimeSpiral } from '../metrics/time-spiral';
@@ -17,6 +17,11 @@ import {
   getPatternDisplayName,
   getResolutionDisplayName,
 } from '../storage/spiral-history';
+import {
+  analyzeInnerLoop,
+  formatInnerLoopAnalysis,
+  InnerLoopAnalysis,
+} from '../inner-loop';
 
 // Session file stored in .vibe-check/active-session.json
 const ACTIVE_SESSION_FILE = '.vibe-check/active-session.json';
@@ -53,6 +58,15 @@ export interface SessionMetricsOutput {
     failure_patterns_avoided: string[];
     spirals_detected: number;
     learnings: string[];
+  };
+  inner_loop?: {
+    health: 'healthy' | 'warning' | 'critical';
+    issues_detected: number;
+    tests_passing_lies: number;
+    context_amnesia_incidents: number;
+    instruction_drift_commits: number;
+    debug_loop_detected: boolean;
+    recommendations: string[];
   };
   baseline_comparison: {
     trust_delta: number;
@@ -370,8 +384,10 @@ async function runSessionEnd(options: {
 
   // Get enhanced metrics if possible
   let vibeScoreValue: number | undefined;
+  let innerLoopAnalysis: InnerLoopAnalysis | undefined;
   try {
     const fileStats = await getFileStats(repo, session.startedAt);
+    const commitStats = await getCommitStats(repo, session.startedAt);
     const fileChurn = calculateFileChurn(commits, fileStats.filesPerCommit);
     const timeSpiral = calculateTimeSpiral(commits);
     const velocityAnomaly = calculateVelocityAnomaly(commits);
@@ -383,6 +399,27 @@ async function runSessionEnd(options: {
       codeStability,
     });
     vibeScoreValue = Math.round(vibeScore.value * 100);
+
+    // Run inner-loop failure pattern detection
+    // Convert commits to TimelineEvent format
+    const events = commits.map((c, idx) => ({
+      hash: c.hash,
+      timestamp: c.date,
+      author: c.author,
+      subject: c.message,
+      type: c.type,
+      scope: c.scope,
+      sessionId: session.id,
+      sessionPosition: idx,
+      gapMinutes: 0,
+      isRefactor: c.type === 'refactor',
+      spiralDepth: 0,
+    }));
+    innerLoopAnalysis = analyzeInnerLoop(
+      events,
+      commitStats.filesPerCommit,
+      commitStats.lineStatsPerCommit
+    );
   } catch {
     // Enhanced metrics not available
   }
@@ -447,6 +484,15 @@ async function runSessionEnd(options: {
       spirals_detected: spiralCount,
       learnings,
     },
+    inner_loop: innerLoopAnalysis ? {
+      health: innerLoopAnalysis.summary.overallHealth,
+      issues_detected: innerLoopAnalysis.summary.totalIssuesDetected,
+      tests_passing_lies: innerLoopAnalysis.testsPassingLie.totalLies,
+      context_amnesia_incidents: innerLoopAnalysis.contextAmnesia.totalIncidents,
+      instruction_drift_commits: innerLoopAnalysis.instructionDrift.totalDriftCommits,
+      debug_loop_detected: innerLoopAnalysis.loggingOnly.detected,
+      recommendations: innerLoopAnalysis.recommendations,
+    } : undefined,
     baseline_comparison: baselineComparison,
   };
 
@@ -499,6 +545,39 @@ async function runSessionEnd(options: {
         console.log(chalk.gray(`    • ${l}`));
       }
       console.log('');
+    }
+
+    // Inner Loop Failure Pattern Analysis
+    if (innerLoopAnalysis && innerLoopAnalysis.summary.totalIssuesDetected > 0) {
+      const healthEmoji = innerLoopAnalysis.summary.overallHealth === 'critical' ? '🚨' :
+                          innerLoopAnalysis.summary.overallHealth === 'warning' ? '⚠️' : '✅';
+      const healthColor = innerLoopAnalysis.summary.overallHealth === 'critical' ? chalk.red :
+                          innerLoopAnalysis.summary.overallHealth === 'warning' ? chalk.yellow : chalk.green;
+
+      console.log(healthColor(`  ${healthEmoji} Inner Loop Health: ${innerLoopAnalysis.summary.overallHealth.toUpperCase()}`));
+      console.log('');
+
+      if (innerLoopAnalysis.testsPassingLie.detected) {
+        console.log(chalk.red(`    🤥 ${innerLoopAnalysis.testsPassingLie.message}`));
+      }
+      if (innerLoopAnalysis.contextAmnesia.detected) {
+        console.log(chalk.yellow(`    🧠 ${innerLoopAnalysis.contextAmnesia.message}`));
+      }
+      if (innerLoopAnalysis.instructionDrift.detected) {
+        console.log(chalk.yellow(`    🎯 ${innerLoopAnalysis.instructionDrift.message}`));
+      }
+      if (innerLoopAnalysis.loggingOnly.detected) {
+        console.log(chalk.yellow(`    🔍 ${innerLoopAnalysis.loggingOnly.message}`));
+      }
+      console.log('');
+
+      if (innerLoopAnalysis.recommendations.length > 0) {
+        console.log(chalk.bold('  Inner Loop Recommendations:'));
+        for (const rec of innerLoopAnalysis.recommendations.slice(0, 3)) {
+          console.log(chalk.cyan(`    ${rec}`));
+        }
+        console.log('');
+      }
     }
 
     // Personalized coaching based on spiral history

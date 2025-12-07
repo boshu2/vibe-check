@@ -183,6 +183,13 @@ src/
 ├── score/
 │   ├── index.ts        # VibeScore calculation
 │   └── weights.ts      # Metric weights
+├── inner-loop/
+│   ├── index.ts           # Inner loop failure detection aggregator
+│   ├── types.ts           # Types and configuration
+│   ├── tests-passing-lie.ts    # "Tests Passing" Lie detector
+│   ├── context-amnesia.ts      # Context Amnesia detector
+│   ├── instruction-drift.ts    # Instruction Drift detector
+│   └── logging-only.ts         # Debug Loop Spiral detector
 └── output/
     ├── index.ts        # Output format router
     ├── terminal.ts     # Colored terminal output
@@ -276,3 +283,54 @@ A "debug spiral" is detected when 3+ consecutive fix commits target the same com
 - `GITOPS_DRIFT` - Sync/reconciliation issues
 
 **Coaching Integration:** Spirals are automatically recorded to `~/.vibe-check/spiral-history.ndjson`. Watch mode and session end show personalized advice based on what's worked before for you.
+
+## Inner Loop Failure Pattern Detection
+
+vibe-check detects the 4 "Inner Loop Disasters" from vibe coding:
+
+| Pattern | Detects | How |
+|---------|---------|-----|
+| **"Tests Passing" Lie** | AI claims success but code doesn't work | Commits claiming "fix/done/working" followed by immediate fixes |
+| **Context Amnesia** | AI forgets instructions, re-does work | Reverts, reimplementations, repeated similar fixes |
+| **Instruction Drift** | AI "improves" things not asked for | Unrequested refactors, scope explosion, file changes outside intent |
+| **Debug Loop Spiral** | AI adds logging instead of fixing | Consecutive commits adding console.log/print without fixes |
+
+### Integration Points
+
+**Session End Output:**
+```json
+{
+  "inner_loop": {
+    "health": "warning",
+    "issues_detected": 2,
+    "tests_passing_lies": 1,
+    "context_amnesia_incidents": 0,
+    "instruction_drift_commits": 1,
+    "debug_loop_detected": false,
+    "recommendations": ["..."]
+  }
+}
+```
+
+**Watch Mode:** Real-time detection alerts when inner loop issues are detected.
+
+### Architecture
+
+```
+src/inner-loop/
+├── index.ts           # Aggregates all detectors
+├── types.ts           # Inner loop types and config
+├── tests-passing-lie.ts    # "Tests Passing" Lie detector
+├── context-amnesia.ts      # Context Amnesia detector
+├── instruction-drift.ts    # Instruction Drift detector
+└── logging-only.ts         # Debug Loop Spiral (logging) detector
+```
+
+### Emergency Protocol
+
+When critical inner loop failures are detected:
+
+```
+🚨 EMERGENCY PROTOCOL: Multiple inner loop failures detected.
+STOP → git status → backup → start simple
+```
