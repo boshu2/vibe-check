@@ -263,5 +263,11 @@
         "vague_elimination": "97.4% → 0%"
       }
     }
+    {
+      "id": "VIBE-048",
+      "description": "Repo audit command (monoliths, test gaps, TODOs)",
+      "passes": true,
+      "completed_date": "2025-12-15"
+    }
   ]
 }

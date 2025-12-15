@@ -11,3 +11,4 @@ export { createInsightsCommand } from './insights.js';
 export { createPipelineCommand } from './pipeline.js';
 export { createSessionsCommand, runSessions, SessionsOptions } from './sessions.js';
 export { createForensicsCommand, runForensics, ForensicsOptions, ForensicsResult } from './forensics.js';
+export { createAuditCommand } from './audit.js';

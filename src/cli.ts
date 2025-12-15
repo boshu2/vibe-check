@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import { createRequire } from 'module';
-import { createAnalyzeCommand, createStartCommand, createProfileCommand, createInitHookCommand, createWatchCommand, createTimelineCommand, createCacheCommand, createDashboardCommand, createSessionCommand, createInsightsCommand, createPipelineCommand, createSessionsCommand, createForensicsCommand, runAnalyze } from './commands/index.js';
+import { createAnalyzeCommand, createStartCommand, createProfileCommand, createInitHookCommand, createWatchCommand, createTimelineCommand, createCacheCommand, createDashboardCommand, createSessionCommand, createInsightsCommand, createPipelineCommand, createSessionsCommand, createForensicsCommand, createAuditCommand, runAnalyze } from './commands/index.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('../package.json');
@@ -30,6 +30,7 @@ program.addCommand(createInsightsCommand());
 program.addCommand(createPipelineCommand());
 program.addCommand(createSessionsCommand());
 program.addCommand(createForensicsCommand());
+program.addCommand(createAuditCommand());
 
 // Default behavior: if no subcommand, run analyze with passed options
 // This maintains backwards compatibility with v1.x usage
