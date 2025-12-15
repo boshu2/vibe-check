@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-12-15
+
+### Added
+- **Audit Command** - `vibe-check audit` for static analysis of code messes (monoliths, test gaps, TODOs)
+
+### Changed
+- **ESM Migration** - Package is now pure ESM (`type: module`). Requires Node.js 20+.
+- **Dependencies** - Updated all dependencies to December 2025 latest versions.
+- **Chalk v5** - Updated to `chalk` v5 (ESM only).
+
 ## [1.8.0] - 2025-12-05
 
 ### Added
