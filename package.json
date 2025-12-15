@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@boshu2/vibe-check",
-  "version": "1.8.1",
+  "version": "2.0.0",
   "description": "Track git commit patterns during AI-assisted coding (experimental)",
   "main": "dist/cli.js",
   "bin": {
