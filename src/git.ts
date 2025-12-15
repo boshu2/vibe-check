@@ -1,5 +1,5 @@
-import simpleGit, { SimpleGit, LogResult, DefaultLogFields } from 'simple-git';
-import { Commit } from './types';
+import { simpleGit, SimpleGit, LogResult, DefaultLogFields } from 'simple-git';
+import { Commit } from './types.js';
 
 const COMMIT_TYPES = ['feat', 'fix', 'docs', 'chore', 'refactor', 'test', 'style'] as const;
 

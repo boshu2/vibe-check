@@ -4,12 +4,12 @@ import {
   loadProfile,
   getAchievementCounts,
   getRecentSessions,
-} from '../gamification/profile';
-import { formatStreak, formatFreezes } from '../gamification/streaks';
-import { formatLevel, formatXPProgress, getLevelProgress } from '../gamification/xp';
-import { LEVELS, PRESTIGE_TIERS, UserProfile } from '../gamification/types';
-import { getAllAchievements } from '../gamification/achievements';
-import { getWeeklyStats, formatWeeklyStats } from '../gamification/stats';
+} from '../gamification/profile.js';
+import { formatStreak, formatFreezes } from '../gamification/streaks.js';
+import { formatLevel, formatXPProgress, getLevelProgress } from '../gamification/xp.js';
+import { LEVELS, PRESTIGE_TIERS, UserProfile } from '../gamification/types.js';
+import { getAllAchievements } from '../gamification/achievements.js';
+import { getWeeklyStats, formatWeeklyStats } from '../gamification/stats.js';
 
 export function createProfileCommand(): Command {
   const cmd = new Command('profile')

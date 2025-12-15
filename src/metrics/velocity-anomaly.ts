@@ -1,5 +1,5 @@
-import { Commit, VelocityAnomalyResult, Rating } from '../types';
-import { calculateActiveHours } from './velocity';
+import { Commit, VelocityAnomalyResult, Rating } from '../types.js';
+import { calculateActiveHours } from './velocity.js';
 
 interface Baseline {
   mean: number;

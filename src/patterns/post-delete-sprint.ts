@@ -1,4 +1,4 @@
-import { TimelineSession } from '../types';
+import { TimelineSession } from '../types.js';
 
 export interface PostDeleteSprintResult {
   detected: boolean;

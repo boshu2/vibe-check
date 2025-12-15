@@ -7,16 +7,16 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getCommits, isGitRepo } from '../git';
+import { getCommits, isGitRepo } from '../git.js';
 import {
   detectPatterns,
   PatternDetectionResult,
-} from '../analyzers/patterns';
+} from '../analyzers/patterns.js';
 import {
   calculateQualityMetrics,
   getRecommendation,
   QualityMetrics,
-} from '../analyzers/quality';
+} from '../analyzers/quality.js';
 import { format } from 'date-fns';
 
 export interface ForensicsOptions {

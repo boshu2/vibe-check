@@ -1,4 +1,4 @@
-import { Achievement, SessionRecord, StreakState, XPState } from './types';
+import { Achievement, SessionRecord, StreakState, XPState } from './types.js';
 
 // All available achievements
 export const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [

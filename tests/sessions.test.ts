@@ -6,11 +6,13 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { detectSessions, DetectedSession } from '../src/analyzers/sessions';
-import { Commit } from '../src/types';
+import { detectSessions, DetectedSession } from '../src/analyzers/sessions.js';
+import { Commit } from '../src/types.js';
 import { execSync } from 'child_process';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLI_PATH = path.join(__dirname, '..', 'dist', 'cli.js');
 const TEST_REPO = process.cwd();
 

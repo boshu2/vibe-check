@@ -2,7 +2,9 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLI_PATH = path.join(__dirname, '..', 'dist', 'cli.js');
 const TEST_REPO = process.cwd(); // vibe-check repo itself
 const ACTIVE_SESSION_PATH = path.join(TEST_REPO, '.vibe-check', 'active-session.json');

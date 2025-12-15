@@ -2,8 +2,8 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import * as fs from 'fs';
 import * as path from 'path';
-import { getStoreDir, getStorePath, getCommitLogPath, readNdjsonWithErrors } from '../storage';
-import { StoredCommit } from '../storage/commit-log';
+import { getStoreDir, getStorePath, getCommitLogPath, readNdjsonWithErrors } from '../storage/index.js';
+import { StoredCommit } from '../storage/commit-log.js';
 
 export interface CacheOptions {
   repo: string;

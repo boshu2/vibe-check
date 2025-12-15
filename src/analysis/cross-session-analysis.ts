@@ -2,8 +2,8 @@
  * Cross-session analysis for querying historical commit data.
  * Enables queries like "show all auth spirals" or "commits by scope".
  */
-import { readCommitLog, StoredCommit } from '../storage/commit-log';
-import { Commit } from '../types';
+import { readCommitLog, StoredCommit } from '../storage/commit-log.js';
+import { Commit } from '../types.js';
 
 export interface QueryFilter {
   scope?: string;           // Filter by commit scope

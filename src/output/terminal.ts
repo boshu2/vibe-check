@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { VibeCheckResult, VibeCheckResultV2, Rating, OverallRating } from '../types';
+import { VibeCheckResult, VibeCheckResultV2, Rating, OverallRating } from '../types.js';
 import { format } from 'date-fns';
 
 function isV2Result(result: VibeCheckResult | VibeCheckResultV2): result is VibeCheckResultV2 {

@@ -1,4 +1,4 @@
-import { StreakState } from './types';
+import { StreakState } from './types.js';
 
 /**
  * Create initial streak state

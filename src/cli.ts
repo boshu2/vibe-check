@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { createAnalyzeCommand, createStartCommand, createProfileCommand, createInitHookCommand, createWatchCommand, createTimelineCommand, createCacheCommand, createDashboardCommand, createSessionCommand, createInsightsCommand, createPipelineCommand, createSessionsCommand, createForensicsCommand, runAnalyze } from './commands';
+import { createRequire } from 'module';
+import { createAnalyzeCommand, createStartCommand, createProfileCommand, createInitHookCommand, createWatchCommand, createTimelineCommand, createCacheCommand, createDashboardCommand, createSessionCommand, createInsightsCommand, createPipelineCommand, createSessionsCommand, createForensicsCommand, runAnalyze } from './commands/index.js';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+const require = createRequire(import.meta.url);
 const { version } = require('../package.json');
 
 const program = new Command();

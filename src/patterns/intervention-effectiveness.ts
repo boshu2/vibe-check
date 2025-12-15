@@ -5,7 +5,7 @@
  * and provides data-driven recommendations.
  */
 
-import { InterventionMemory, InterventionRecord, InterventionType } from '../gamification/types';
+import { InterventionMemory, InterventionRecord, InterventionType } from '../gamification/types.js';
 
 export interface InterventionScore {
   type: InterventionType;

@@ -1,4 +1,4 @@
-import { SessionRecord } from './types';
+import { SessionRecord } from './types.js';
 
 /**
  * Create a sparkline from values

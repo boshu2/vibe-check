@@ -1,7 +1,7 @@
-import { VibeCheckResult, VibeCheckResultV2, OutputFormat } from '../types';
-import { formatTerminal, formatTerminalSimple } from './terminal';
-import { formatJson } from './json';
-import { formatMarkdown } from './markdown';
+import { VibeCheckResult, VibeCheckResultV2, OutputFormat } from '../types.js';
+import { formatTerminal, formatTerminalSimple } from './terminal.js';
+import { formatJson } from './json.js';
+import { formatMarkdown } from './markdown.js';
 
 export interface OutputOptions {
   simple?: boolean;
@@ -23,6 +23,6 @@ export function formatOutput(
   }
 }
 
-export { formatTerminal, formatTerminalSimple } from './terminal';
-export { formatJson } from './json';
-export { formatMarkdown } from './markdown';
+export { formatTerminal, formatTerminalSimple } from './terminal.js';
+export { formatJson } from './json.js';
+export { formatMarkdown } from './markdown.js';

@@ -8,11 +8,11 @@ import {
   StreakState,
   XPState,
   Achievement,
-} from './types';
-import { FixChain } from '../types';
-import { createInitialStreak, updateStreak } from './streaks';
-import { createInitialXP, addXP, calculateSessionXP } from './xp';
-import { checkAchievements, ACHIEVEMENTS } from './achievements';
+} from './types.js';
+import { FixChain } from '../types.js';
+import { createInitialStreak, updateStreak } from './streaks.js';
+import { createInitialXP, addXP, calculateSessionXP } from './xp.js';
+import { checkAchievements, ACHIEVEMENTS } from './achievements.js';
 
 const PROFILE_DIR = '.vibe-check';
 const PROFILE_FILE = 'profile.json';

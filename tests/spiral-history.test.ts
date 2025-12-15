@@ -23,7 +23,7 @@ import {
   getSpiralHistoryPath,
   getPatternDisplayName,
   getResolutionDisplayName,
-} from '../src/storage/spiral-history';
+} from '../src/storage/spiral-history.js';
 
 describe('spiral-history', () => {
   beforeEach(() => {

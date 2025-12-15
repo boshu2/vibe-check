@@ -1,35 +1,35 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { writeFileSync } from 'fs';
-import { getCommits, isGitRepo, getFileStats } from '../git';
-import { analyzeCommits } from '../metrics';
-import { formatOutput } from '../output';
-import { formatJson } from '../output/json';
+import { getCommits, isGitRepo, getFileStats } from '../git.js';
+import { analyzeCommits } from '../metrics/index.js';
+import { formatOutput } from '../output/index.js';
+import { formatJson } from '../output/json.js';
 import {
   OutputFormat,
   VibeCheckResultV2,
-} from '../types';
-import { calculateFileChurn } from '../metrics/file-churn';
-import { calculateTimeSpiral } from '../metrics/time-spiral';
-import { calculateVelocityAnomaly } from '../metrics/velocity-anomaly';
-import { calculateCodeStability } from '../metrics/code-stability';
-import { calculateVibeScore } from '../score';
-import { recordSession as recordGamificationSession } from '../gamification/profile';
-import { LEVELS } from '../gamification/types';
-import { loadSession, clearSession, LEVEL_INFO } from './start';
+} from '../types.js';
+import { calculateFileChurn } from '../metrics/file-churn.js';
+import { calculateTimeSpiral } from '../metrics/time-spiral.js';
+import { calculateVelocityAnomaly } from '../metrics/velocity-anomaly.js';
+import { calculateCodeStability } from '../metrics/code-stability.js';
+import { calculateVibeScore } from '../score/index.js';
+import { recordSession as recordGamificationSession } from '../gamification/profile.js';
+import { LEVELS } from '../gamification/types.js';
+import { loadSession, clearSession, LEVEL_INFO } from './start.js';
 import {
   detectSessionBoundary,
   recordSession as recordSessionHistory,
   compareToBaseline,
   loadSessionHistory,
-} from '../sessions';
+} from '../sessions/index.js';
 import {
   loadAllCommits,
   queryCommits,
   getCrossSessionSummary,
   analyzeScopeDetail,
-} from '../analysis';
-import { appendSpiral } from '../storage/spiral-history';
+} from '../analysis/index.js';
+import { appendSpiral } from '../storage/spiral-history.js';
 
 export interface AnalyzeOptions {
   since?: string;
@@ -398,36 +398,6 @@ export async function runAnalyze(options: AnalyzeOptions): Promise<void> {
 
       console.log(chalk.cyan('─'.repeat(64)));
 
-      // Display pending nudges from learning system
-      const { formatNudgesForCli } = require('../learning/nudges');
-      const nudgeLines = formatNudgesForCli(2);
-      if (nudgeLines.length > 0) {
-        for (const line of nudgeLines) {
-          console.log(line);
-        }
-        console.log(chalk.cyan('─'.repeat(64)));
-      }
-
-      // Surface relevant lessons if spirals were detected
-      if (spiralCount > 0) {
-        const { surfaceLessonsForPattern, formatSurfacedLesson } = require('../learning/surfacing');
-        // Get patterns from detected spirals
-        const spiralPatterns = result.fixChains
-          .filter(fc => fc.isSpiral && fc.pattern)
-          .map(fc => fc.pattern as string);
-        const uniquePatterns = [...new Set(spiralPatterns)];
-
-        for (const pattern of uniquePatterns.slice(0, 2)) {
-          const surfaced = surfaceLessonsForPattern(pattern);
-          if (surfaced.length > 0) {
-            const lessonLines = formatSurfacedLesson(surfaced[0]);
-            for (const line of lessonLines) {
-              console.log(line);
-            }
-            console.log(chalk.cyan('─'.repeat(64)));
-          }
-        }
-      }
 
       console.log(chalk.gray(`  Run ${chalk.white('vibe-check profile')} to see your full stats`));
       console.log();

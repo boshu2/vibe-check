@@ -8,7 +8,7 @@
  * 4. Debug Loop Spiral - Adds logging instead of fixing
  */
 
-import { TimelineEvent } from '../types';
+import { TimelineEvent } from '../types.js';
 import {
   InnerLoopAnalysis,
   InnerLoopConfig,
@@ -18,20 +18,20 @@ import {
   InstructionDriftResult,
   LoggingOnlyResult,
   SessionScope,
-} from './types';
-import { detectTestsPassingLie } from './tests-passing-lie';
-import { detectContextAmnesia } from './context-amnesia';
-import { detectInstructionDrift, createSessionScope, inferSessionScope } from './instruction-drift';
-import { detectLoggingOnlyCommits, analyzeCommitsForLogging } from './logging-only';
+} from './types.js';
+import { detectTestsPassingLie } from './tests-passing-lie.js';
+import { detectContextAmnesia } from './context-amnesia.js';
+import { detectInstructionDrift, createSessionScope, inferSessionScope } from './instruction-drift.js';
+import { detectLoggingOnlyCommits, analyzeCommitsForLogging } from './logging-only.js';
 
 // Re-export types
-export * from './types';
+export * from './types.js';
 
 // Re-export individual detectors
-export { detectTestsPassingLie } from './tests-passing-lie';
-export { detectContextAmnesia } from './context-amnesia';
-export { detectInstructionDrift, createSessionScope, inferSessionScope } from './instruction-drift';
-export { detectLoggingOnlyCommits, analyzeCommitsForLogging } from './logging-only';
+export { detectTestsPassingLie } from './tests-passing-lie.js';
+export { detectContextAmnesia } from './context-amnesia.js';
+export { detectInstructionDrift, createSessionScope, inferSessionScope } from './instruction-drift.js';
+export { detectLoggingOnlyCommits, analyzeCommitsForLogging } from './logging-only.js';
 
 /**
  * Run all inner loop failure pattern detectors.

@@ -10,13 +10,13 @@
  */
 
 import { differenceInMinutes } from 'date-fns';
-import { TimelineEvent } from '../types';
+import { TimelineEvent } from '../types.js';
 import {
   ContextAmnesiaResult,
   ContextAmnesiaIncident,
   InnerLoopConfig,
   DEFAULT_INNER_LOOP_CONFIG,
-} from './types';
+} from './types.js';
 
 interface CommitDiff {
   hash: string;

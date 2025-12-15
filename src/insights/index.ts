@@ -2,7 +2,7 @@
  * Insight Engine - generates prioritized insights from all data sources
  */
 
-import { Insight, DashboardData } from './types';
+import { Insight, DashboardData } from './types.js';
 import {
   generatePeakHoursInsight,
   generateImprovementStreakInsight,
@@ -13,14 +13,14 @@ import {
   generateLateNightInsight,
   generateRecentAchievementInsight,
   generateBestDayInsight,
-} from './generators';
-import { UserProfile, LEVELS } from '../gamification/types';
-import { loadStore, readCommitLog } from '../storage';
-import { loadProfile } from '../gamification/profile';
-import { ACHIEVEMENTS } from '../gamification/achievements';
-import { Commit } from '../types';
+} from './generators.js';
+import { UserProfile, LEVELS } from '../gamification/types.js';
+import { loadStore, readCommitLog } from '../storage/index.js';
+import { loadProfile } from '../gamification/profile.js';
+import { ACHIEVEMENTS } from '../gamification/achievements.js';
+import { Commit } from '../types.js';
 
-export { Insight, DashboardData } from './types';
+export { Insight, DashboardData } from './types.js';
 
 /**
  * Generate all insights from available data

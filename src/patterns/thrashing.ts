@@ -1,4 +1,4 @@
-import { TimelineEvent } from '../types';
+import { TimelineEvent } from '../types.js';
 import { differenceInMinutes } from 'date-fns';
 
 export interface ThrashingFile {

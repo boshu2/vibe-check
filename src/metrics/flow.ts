@@ -1,4 +1,4 @@
-import { FixChain, MetricResult, Rating } from '../types';
+import { FixChain, MetricResult, Rating } from '../types.js';
 
 export function calculateFlowEfficiency(
   activeMinutes: number,

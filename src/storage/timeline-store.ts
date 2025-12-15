@@ -4,9 +4,9 @@ import {
   TimelineSession,
   TimelineDay,
   TimelineEvent,
-} from '../types';
-import { atomicWriteSync, safeReadJsonSync } from './atomic';
-import { CURRENT_SCHEMA_VERSION, SchemaVersion } from './schema';
+} from '../types.js';
+import { atomicWriteSync, safeReadJsonSync } from './atomic.js';
+import { CURRENT_SCHEMA_VERSION, SchemaVersion } from './schema.js';
 
 const STORE_DIR = '.vibe-check';
 const TIMELINE_FILE = 'timeline.json';

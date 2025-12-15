@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { detectDetour } from '../src/patterns/detour';
-import { detectLateNightSpiral } from '../src/patterns/late-night';
-import { TimelineEvent, TimelineSession, FixChain } from '../src/types';
+import { detectDetour } from '../src/patterns/detour.js';
+import { detectLateNightSpiral } from '../src/patterns/late-night.js';
+import { TimelineEvent, TimelineSession, FixChain } from '../src/types.js';
 
 /**
  * Unit tests for Phase 3 pattern detection

@@ -1,4 +1,4 @@
-import { Commit, FileChurnResult, Rating } from '../types';
+import { Commit, FileChurnResult, Rating } from '../types.js';
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 

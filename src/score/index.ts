@@ -1,5 +1,5 @@
-import { VibeScore, FileChurnResult, TimeSpiralResult, VelocityAnomalyResult, CodeStabilityResult } from '../types';
-import { DEFAULT_WEIGHTS, ScoreWeights } from './weights';
+import { VibeScore, FileChurnResult, TimeSpiralResult, VelocityAnomalyResult, CodeStabilityResult } from '../types.js';
+import { DEFAULT_WEIGHTS, ScoreWeights } from './weights.js';
 
 export interface ScoreInputs {
   fileChurn: FileChurnResult;
@@ -51,4 +51,4 @@ export function scoreToExpectedLevel(score: number): { min: number; max: number 
   return { min: 0, max: 1 };
 }
 
-export { DEFAULT_WEIGHTS, ScoreWeights } from './weights';
+export { DEFAULT_WEIGHTS, ScoreWeights } from './weights.js';

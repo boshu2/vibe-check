@@ -1,4 +1,4 @@
-import { TimelineEvent, TimelineSession, FixChain } from '../types';
+import { TimelineEvent, TimelineSession, FixChain } from '../types.js';
 
 export interface LateNightSpiralResult {
   detected: boolean;

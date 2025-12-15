@@ -11,14 +11,14 @@
  * This is a key "Inner Loop Disaster" in vibe coding.
  */
 
-import simpleGit, { SimpleGit } from 'simple-git';
-import { TimelineEvent } from '../types';
+import { simpleGit, SimpleGit } from 'simple-git';
+import { TimelineEvent } from '../types.js';
 import {
   LoggingOnlyResult,
   LoggingOnlyCommit,
   InnerLoopConfig,
   DEFAULT_INNER_LOOP_CONFIG,
-} from './types';
+} from './types.js';
 
 // Patterns that indicate logging statements by language
 const LOGGING_PATTERNS: Record<string, RegExp[]> = {

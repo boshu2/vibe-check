@@ -2,10 +2,10 @@
  * Insight generators - each produces insights from specific data sources
  */
 
-import { Insight } from './types';
-import { UserProfile } from '../gamification/types';
-import { TimelineStore } from '../storage/timeline-store';
-import { Commit } from '../types';
+import { Insight } from './types.js';
+import { UserProfile } from '../gamification/types.js';
+import { TimelineStore } from '../storage/timeline-store.js';
+import { Commit } from '../types.js';
 
 /**
  * Find peak productivity hours from commits

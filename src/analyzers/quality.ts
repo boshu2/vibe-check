@@ -9,7 +9,7 @@
  * Proven algorithm from release-engineering retrospective.
  */
 
-import { Commit } from '../types';
+import { Commit } from '../types.js';
 
 export interface QualityMetrics {
   totalCommits: number;

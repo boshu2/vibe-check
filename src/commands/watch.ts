@@ -1,19 +1,19 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getCommits, isGitRepo, getCommitStats } from '../git';
-import { Commit, TimelineEvent } from '../types';
+import { getCommits, isGitRepo, getCommitStats } from '../git.js';
+import { Commit, TimelineEvent } from '../types.js';
 import {
   getAdvice,
   getPatternDisplayName,
   getResolutionDisplayName,
   appendSpiral,
   SpiralResolution,
-} from '../storage/spiral-history';
+} from '../storage/spiral-history.js';
 import {
   quickInnerLoopCheck,
   analyzeInnerLoop,
   InnerLoopAnalysis,
-} from '../inner-loop';
+} from '../inner-loop/index.js';
 
 // Pattern detection regexes (same as metrics/spirals.ts)
 const PATTERNS: Record<string, RegExp> = {

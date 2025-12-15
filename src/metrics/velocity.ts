@@ -1,5 +1,5 @@
 import { differenceInMinutes } from 'date-fns';
-import { Commit, MetricResult, Rating } from '../types';
+import { Commit, MetricResult, Rating } from '../types.js';
 
 const SESSION_GAP_MINUTES = 120; // 2 hours = new session
 

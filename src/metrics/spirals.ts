@@ -1,5 +1,5 @@
 import { differenceInMinutes } from 'date-fns';
-import { Commit, FixChain, MetricResult, Rating } from '../types';
+import { Commit, FixChain, MetricResult, Rating } from '../types.js';
 
 const SPIRAL_THRESHOLD = 3; // 3+ consecutive fixes = spiral
 

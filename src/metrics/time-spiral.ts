@@ -1,4 +1,4 @@
-import { Commit, TimeSpiralResult, Rating } from '../types';
+import { Commit, TimeSpiralResult, Rating } from '../types.js';
 
 /**
  * Spiral threshold: commits < 5 minutes apart suggest frustrated iteration.

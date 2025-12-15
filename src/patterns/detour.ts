@@ -1,4 +1,4 @@
-import { TimelineEvent } from '../types';
+import { TimelineEvent } from '../types.js';
 
 export interface DetourResult {
   detected: boolean;

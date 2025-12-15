@@ -1,4 +1,4 @@
-import { VibeCheckResult, VibeCheckResultV2 } from '../types';
+import { VibeCheckResult, VibeCheckResultV2 } from '../types.js';
 import { format } from 'date-fns';
 
 function isV2Result(result: VibeCheckResult | VibeCheckResultV2): result is VibeCheckResultV2 {

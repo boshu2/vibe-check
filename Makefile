@@ -100,7 +100,7 @@ release-patch: build test
 	git push --follow-tags
 	$(MAKE) github-release
 	npm publish --access=public
-	@echo "✅ Released v$$(node -p "require('./package.json').version")"
+	@echo "✅ Released v$$(npm pkg get version | tr -d '"')"
 
 release-minor: build test
 	@echo "📦 Releasing minor version..."
@@ -108,7 +108,7 @@ release-minor: build test
 	git push --follow-tags
 	$(MAKE) github-release
 	npm publish --access=public
-	@echo "✅ Released v$$(node -p "require('./package.json').version")"
+	@echo "✅ Released v$$(npm pkg get version | tr -d '"')"
 
 release-major: build test
 	@echo "📦 Releasing major version..."
@@ -116,11 +116,11 @@ release-major: build test
 	git push --follow-tags
 	$(MAKE) github-release
 	npm publish --access=public
-	@echo "✅ Released v$$(node -p "require('./package.json').version")"
+	@echo "✅ Released v$$(npm pkg get version | tr -d '"')"
 
 # Create GitHub release from latest tag
 github-release:
-	@VERSION=$$(node -p "require('./package.json').version"); \
+	@VERSION=$$(npm pkg get version | tr -d '"'); \
 	gh release create "v$$VERSION" \
 		--title "v$$VERSION" \
 		--generate-notes

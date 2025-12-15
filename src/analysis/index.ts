@@ -9,4 +9,4 @@ export {
   findProblematicScopes,
   findPeakHours,
   analyzeScopeDetail,
-} from './cross-session-analysis';
+} from './cross-session-analysis.js';

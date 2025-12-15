@@ -1,4 +1,4 @@
-import { VibeCheckResult, VibeCheckResultV2 } from '../types';
+import { VibeCheckResult, VibeCheckResultV2 } from '../types.js';
 
 function isV2Result(result: VibeCheckResult | VibeCheckResultV2): result is VibeCheckResultV2 {
   return 'semanticMetrics' in result;

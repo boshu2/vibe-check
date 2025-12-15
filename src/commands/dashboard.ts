@@ -3,7 +3,11 @@ import chalk from 'chalk';
 import * as fs from 'fs';
 import * as path from 'path';
 import { exec } from 'child_process';
-import { buildDashboardData } from '../insights';
+import { fileURLToPath } from 'url';
+import { buildDashboardData } from '../insights/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export interface DashboardOptions {
   repo: string;

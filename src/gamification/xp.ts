@@ -1,4 +1,4 @@
-import { XPState, LEVELS, PRESTIGE_TIERS, XP_REWARDS, SessionRecord, StreakState } from './types';
+import { XPState, LEVELS, PRESTIGE_TIERS, XP_REWARDS, SessionRecord, StreakState } from './types.js';
 
 /**
  * Create initial XP state

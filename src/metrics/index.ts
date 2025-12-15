@@ -1,13 +1,13 @@
-import { Commit, VibeCheckResult, OverallRating, Rating } from '../types';
-import { calculateIterationVelocity, calculateActiveHours } from './velocity';
-import { calculateReworkRatio } from './rework';
-import { calculateTrustPassRate } from './trust';
+import { Commit, VibeCheckResult, OverallRating, Rating } from '../types.js';
+import { calculateIterationVelocity, calculateActiveHours } from './velocity.js';
+import { calculateReworkRatio } from './rework.js';
+import { calculateTrustPassRate } from './trust.js';
 import {
   detectFixChains,
   calculateDebugSpiralDuration,
   calculatePatternSummary,
-} from './spirals';
-import { calculateFlowEfficiency } from './flow';
+} from './spirals.js';
+import { calculateFlowEfficiency } from './flow.js';
 
 export function analyzeCommits(commits: Commit[]): VibeCheckResult {
   if (commits.length === 0) {
@@ -166,4 +166,4 @@ function emptyResult(): VibeCheckResult {
   };
 }
 
-export { calculateActiveHours } from './velocity';
+export { calculateActiveHours } from './velocity.js';

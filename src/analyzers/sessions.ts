@@ -7,7 +7,7 @@
  * Default threshold: 90 minutes between commits starts a new session.
  */
 
-import { Commit } from '../types';
+import { Commit } from '../types.js';
 
 export interface DetectedSession {
   sessionId: number;

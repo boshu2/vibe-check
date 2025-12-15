@@ -13,13 +13,13 @@
 import { differenceInMinutes } from 'date-fns';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { TimelineEvent } from '../types';
+import { TimelineEvent } from '../types.js';
 import {
   TestsPassingLieResult,
   TestsPassingLie,
   InnerLoopConfig,
   DEFAULT_INNER_LOOP_CONFIG,
-} from './types';
+} from './types.js';
 
 const execAsync = promisify(exec);
 

@@ -2,26 +2,26 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import * as fs from 'fs';
 import * as path from 'path';
-import { getCommits, isGitRepo, getFileStats, getCommitStats } from '../git';
-import { analyzeCommits } from '../metrics';
-import { calculateFileChurn } from '../metrics/file-churn';
-import { calculateTimeSpiral } from '../metrics/time-spiral';
-import { calculateVelocityAnomaly } from '../metrics/velocity-anomaly';
-import { calculateCodeStability } from '../metrics/code-stability';
-import { calculateVibeScore } from '../score';
-import { loadSessionHistory, compareToBaseline } from '../sessions';
+import { getCommits, isGitRepo, getFileStats, getCommitStats } from '../git.js';
+import { analyzeCommits } from '../metrics/index.js';
+import { calculateFileChurn } from '../metrics/file-churn.js';
+import { calculateTimeSpiral } from '../metrics/time-spiral.js';
+import { calculateVelocityAnomaly } from '../metrics/velocity-anomaly.js';
+import { calculateCodeStability } from '../metrics/code-stability.js';
+import { calculateVibeScore } from '../score/index.js';
+import { loadSessionHistory, compareToBaseline } from '../sessions/index.js';
 import {
   appendSpiral,
   getAdvice,
   getPatternStats,
   getPatternDisplayName,
   getResolutionDisplayName,
-} from '../storage/spiral-history';
+} from '../storage/spiral-history.js';
 import {
   analyzeInnerLoop,
   formatInnerLoopAnalysis,
   InnerLoopAnalysis,
-} from '../inner-loop';
+} from '../inner-loop/index.js';
 
 // Session file stored in .vibe-check/active-session.json
 const ACTIVE_SESSION_FILE = '.vibe-check/active-session.json';

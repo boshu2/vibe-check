@@ -5,7 +5,7 @@
  * Uses weekly trend analysis to identify regressions.
  */
 
-import { StoredSession, TrendData, WeekTrend } from '../storage/timeline-store';
+import { StoredSession, TrendData, WeekTrend } from '../storage/timeline-store.js';
 
 export interface RegressionAlert {
   type: 'spiral_regression' | 'recovery_time_regression';

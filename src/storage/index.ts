@@ -14,7 +14,7 @@ export {
   getLastCommitHash,
   getStorePath,
   getStoreDir,
-} from './timeline-store';
+} from './timeline-store.js';
 
 // Atomic file operations
 export {
@@ -25,7 +25,7 @@ export {
   safeReadJsonSync,
   ensureGitignore,
   NdjsonReadResult,
-} from './atomic';
+} from './atomic.js';
 
 // Commit log (NDJSON source of truth)
 export {
@@ -35,7 +35,7 @@ export {
   readCommitLog,
   getLastLoggedCommitHash,
   getCommitLogCount,
-} from './commit-log';
+} from './commit-log.js';
 
 // Schema versioning
 export {
@@ -44,7 +44,7 @@ export {
   VersionedStore,
   migrateStore,
   needsMigration,
-} from './schema';
+} from './schema.js';
 
 // Spiral history (coaching feature)
 export {
@@ -59,4 +59,4 @@ export {
   getPatternStats,
   getPatternDisplayName,
   getResolutionDisplayName,
-} from './spiral-history';
+} from './spiral-history.js';

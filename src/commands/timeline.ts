@@ -1,11 +1,11 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getCommits, isGitRepo, getCommitStats, getLatestCommitHash } from '../git';
-import { analyzeCommits } from '../metrics';
-import { formatTimelineTerminal } from '../output/timeline';
-import { formatTimelineMarkdown } from '../output/timeline-markdown';
-import { formatTimelineHtml } from '../output/timeline-html';
-import { loadStore, saveStore, updateStore, getStorePath, appendCommits } from '../storage';
+import { getCommits, isGitRepo, getCommitStats, getLatestCommitHash } from '../git.js';
+import { analyzeCommits } from '../metrics/index.js';
+import { formatTimelineTerminal } from '../output/timeline.js';
+import { formatTimelineMarkdown } from '../output/timeline-markdown.js';
+import { formatTimelineHtml } from '../output/timeline-html.js';
+import { loadStore, saveStore, updateStore, getStorePath, appendCommits } from '../storage/index.js';
 import {
   Commit,
   TimelineResult,
@@ -17,14 +17,14 @@ import {
   ThrashingInfo,
   DetourInfo,
   LateNightSpiralInfo,
-} from '../types';
+} from '../types.js';
 import { format, differenceInMinutes, differenceInDays, parseISO } from 'date-fns';
-import { detectFlowState as detectFlowStatePattern } from '../patterns/flow-state';
-import { detectPostDeleteSprint } from '../patterns/post-delete-sprint';
-import { detectThrashing } from '../patterns/thrashing';
-import { detectDetour } from '../patterns/detour';
-import { detectLateNightSpiral } from '../patterns/late-night';
-import { detectRegressions, getAllRecoveryTrends } from '../patterns/spiral-regression';
+import { detectFlowState as detectFlowStatePattern } from '../patterns/flow-state.js';
+import { detectPostDeleteSprint } from '../patterns/post-delete-sprint.js';
+import { detectThrashing } from '../patterns/thrashing.js';
+import { detectDetour } from '../patterns/detour.js';
+import { detectLateNightSpiral } from '../patterns/late-night.js';
+import { detectRegressions, getAllRecoveryTrends } from '../patterns/spiral-regression.js';
 
 // Session gap threshold: 60 minutes
 const SESSION_GAP_MINUTES = 60;

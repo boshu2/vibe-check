@@ -7,8 +7,8 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getCommits, isGitRepo } from '../git';
-import { detectSessions, SessionDetectionResult, DetectedSession } from '../analyzers/sessions';
+import { getCommits, isGitRepo } from '../git.js';
+import { detectSessions, SessionDetectionResult, DetectedSession } from '../analyzers/sessions.js';
 import { format } from 'date-fns';
 
 export interface SessionsOptions {

@@ -9,7 +9,7 @@
  * Proven algorithm from release-engineering retrospective (475 commits analyzed).
  */
 
-import { Commit } from '../types';
+import { Commit } from '../types.js';
 
 export interface DebugSpiral {
   count: number;

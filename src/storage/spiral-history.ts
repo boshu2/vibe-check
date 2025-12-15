@@ -6,7 +6,7 @@
  */
 import * as path from 'path';
 import * as os from 'os';
-import { appendLineSync, readNdjsonSync, atomicWriteSync } from './atomic';
+import { appendLineSync, readNdjsonSync, atomicWriteSync } from './atomic.js';
 
 // Resolution types - what broke the spiral
 export type SpiralResolution = 'TEST' | 'BREAK' | 'DOCS' | 'HELP' | 'ROLLBACK' | 'OTHER';

@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { TimelineEvent } from '../src/types';
+import { TimelineEvent } from '../src/types.js';
 import {
   detectTestsPassingLie,
   detectContextAmnesia,
   detectInstructionDrift,
   detectLoggingOnlyCommits,
   analyzeInnerLoop,
-} from '../src/inner-loop';
+} from '../src/inner-loop/index.js';
 
 /**
  * Unit tests for Inner Loop Failure Pattern Detection

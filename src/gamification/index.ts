@@ -1,12 +1,12 @@
 // Gamification Module - Main Export
 
-export * from './types';
-export * from './streaks';
-export * from './xp';
-export * from './achievements';
-export * from './profile';
-export * from './stats';
+export * from './types.js';
+export * from './streaks.js';
+export * from './xp.js';
+export * from './achievements.js';
+export * from './profile.js';
+export * from './stats.js';
 
 // Re-export commonly used items for convenience
-export { LEVELS, XP_REWARDS } from './types';
-export { ACHIEVEMENTS } from './achievements';
+export { LEVELS, XP_REWARDS } from './types.js';
+export { ACHIEVEMENTS } from './achievements.js';

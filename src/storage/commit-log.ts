@@ -3,8 +3,8 @@
  * This is the source of truth - timeline.json is derived from this.
  */
 import * as path from 'path';
-import { Commit } from '../types';
-import { appendLineSync, readNdjsonSync } from './atomic';
+import { Commit } from '../types.js';
+import { appendLineSync, readNdjsonSync } from './atomic.js';
 
 const STORE_DIR = '.vibe-check';
 const COMMIT_LOG_FILE = 'commits.ndjson';

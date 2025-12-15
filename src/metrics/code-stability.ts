@@ -1,4 +1,4 @@
-import { Commit, CodeStabilityResult, Rating } from '../types';
+import { Commit, CodeStabilityResult, Rating } from '../types.js';
 
 /**
  * Calculate code stability score.

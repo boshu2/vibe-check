@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { TimelineResult, TimelineDay, TimelineSession, OverallRating } from '../types';
+import { TimelineResult, TimelineDay, TimelineSession, OverallRating } from '../types.js';
 
 /**
  * Format timeline as shareable HTML (self-contained single file)

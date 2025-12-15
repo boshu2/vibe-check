@@ -10,14 +10,14 @@
  * This is a key "Inner Loop Disaster" in vibe coding.
  */
 
-import { TimelineEvent } from '../types';
+import { TimelineEvent } from '../types.js';
 import {
   InstructionDriftResult,
   InstructionDrift,
   SessionScope,
   InnerLoopConfig,
   DEFAULT_INNER_LOOP_CONFIG,
-} from './types';
+} from './types.js';
 
 // Patterns that indicate unrequested changes
 const DRIFT_PATTERNS = {

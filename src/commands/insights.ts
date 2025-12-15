@@ -5,7 +5,7 @@ import {
   getPatternDisplayName,
   getResolutionDisplayName,
   readSpiralHistory,
-} from '../storage/spiral-history';
+} from '../storage/spiral-history.js';
 
 export function createInsightsCommand(): Command {
   const cmd = new Command('insights')

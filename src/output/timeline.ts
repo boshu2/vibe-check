@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { format } from 'date-fns';
-import { TimelineResult, TimelineDay, TimelineSession, OverallRating } from '../types';
+import { TimelineResult, TimelineDay, TimelineSession, OverallRating } from '../types.js';
 
 export interface TimelineOutputOptions {
   expand?: string | boolean; // 'all', a specific date like 'Nov-29', true for all, or undefined

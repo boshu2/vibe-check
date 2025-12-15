@@ -1,5 +1,5 @@
 import { differenceInMinutes } from 'date-fns';
-import { Commit, MetricResult, Rating } from '../types';
+import { Commit, MetricResult, Rating } from '../types.js';
 
 const FOLLOWUP_WINDOW_MINUTES = 30;
 

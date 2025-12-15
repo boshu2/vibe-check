@@ -1,4 +1,4 @@
-import { Commit, MetricResult, Rating } from '../types';
+import { Commit, MetricResult, Rating } from '../types.js';
 
 export function calculateReworkRatio(commits: Commit[]): MetricResult {
   if (commits.length === 0) {

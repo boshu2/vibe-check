@@ -11,18 +11,20 @@ import {
   detectVagueCommits,
   detectContextAmnesia,
   detectPatterns,
-} from '../src/analyzers/patterns';
+} from '../src/analyzers/patterns.js';
 import {
   isConventionalCommit,
   isDescriptiveCommit,
   isVagueCommit,
   calculateQualityMetrics,
   getRecommendation,
-} from '../src/analyzers/quality';
-import { Commit } from '../src/types';
+} from '../src/analyzers/quality.js';
+import { Commit } from '../src/types.js';
 import { execSync } from 'child_process';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLI_PATH = path.join(__dirname, '..', 'dist', 'cli.js');
 const TEST_REPO = process.cwd();
 

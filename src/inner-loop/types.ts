@@ -8,7 +8,7 @@
  * 4. Debug Loop Spiral - Adds logging instead of fixing
  */
 
-import { Commit, TimelineEvent } from '../types';
+import { Commit, TimelineEvent } from '../types.js';
 
 // ===========================================
 // 1. "Tests Passing" Lie
