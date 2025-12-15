@@ -87,13 +87,13 @@ describe('CLI Integration', () => {
 
   describe('timeline command', () => {
     it('runs timeline with default format', () => {
-      const result = run('timeline --since "1 week ago"');
+      const result = run('timeline --since "30 days ago"');
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('VIBE-CHECK TIMELINE');
     });
 
     it('outputs timeline as JSON', () => {
-      const result = run('timeline --since "1 week ago" --format json');
+      const result = run('timeline --since "30 days ago" --format json');
       expect(result.exitCode).toBe(0);
       const data = JSON.parse(result.stdout);
       expect(data).toHaveProperty('days');
@@ -103,7 +103,7 @@ describe('CLI Integration', () => {
     });
 
     it('outputs timeline as Markdown', () => {
-      const result = run('timeline --since "1 week ago" --format markdown');
+      const result = run('timeline --since "30 days ago" --format markdown');
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('# Vibe-Check Timeline Report');
       expect(result.stdout).toContain('## Summary');
@@ -112,7 +112,7 @@ describe('CLI Integration', () => {
     });
 
     it('outputs timeline as HTML', () => {
-      const result = run('timeline --since "1 week ago" --format html');
+      const result = run('timeline --since "30 days ago" --format html');
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('<!DOCTYPE html>');
       expect(result.stdout).toContain('VIBE-CHECK TIMELINE');
@@ -120,27 +120,27 @@ describe('CLI Integration', () => {
     });
 
     it('timeline --expand shows session details', () => {
-      const result = run('timeline --since "1 week ago" --expand');
+      const result = run('timeline --since "30 days ago" --expand');
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Session');
     });
 
     it('timeline creates cache file', () => {
-      run('timeline --since "1 week ago"');
+      run('timeline --since "30 days ago"');
       expect(fs.existsSync('.vibe-check/timeline.json')).toBe(true);
     });
 
     // These tests depend on cache being populated by previous test
     // and can be flaky when run in parallel or isolation
     it.skip('timeline verbose shows cache info', () => {
-      const result = run('timeline --since "1 week ago" -v 2>&1');
+      const result = run('timeline --since "30 days ago" -v 2>&1');
       expect(result.exitCode).toBe(0);
       const combined = result.stdout + result.stderr;
       expect(combined).toMatch(/Cache:/);
     });
 
     it.skip('timeline JSON includes stored insights', () => {
-      const result = run('timeline --since "1 week ago" --format json');
+      const result = run('timeline --since "30 days ago" --format json');
       expect(result.exitCode).toBe(0);
       const data = JSON.parse(result.stdout);
       expect(data).toHaveProperty('storedInsights');

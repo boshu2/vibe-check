@@ -326,7 +326,7 @@ describe('Quality Metrics (VIBE-045)', () => {
 
 describe('Forensics CLI Command', () => {
   it('runs without error', () => {
-    const output = runCli('forensics --since "1 week ago" --format json');
+    const output = runCli('forensics --since "30 days ago" --format json');
     expect(() => JSON.parse(output)).not.toThrow();
   });
 
@@ -349,7 +349,7 @@ describe('Forensics CLI Command', () => {
   });
 
   it('shows terminal output by default', () => {
-    const output = runCli('forensics --since "1 week ago"');
+    const output = runCli('forensics --since "30 days ago"');
     expect(output).toContain('Git Forensics Report');
     expect(output).toContain('Quality Metrics');
     expect(output).toContain('Patterns Detected');
@@ -357,7 +357,7 @@ describe('Forensics CLI Command', () => {
   });
 
   it('outputs markdown format', () => {
-    const output = runCli('forensics --since "1 week ago" --format markdown');
+    const output = runCli('forensics --since "30 days ago" --format markdown');
     expect(output).toContain('# Git Forensics Report');
     expect(output).toContain('## Quality Metrics');
     expect(output).toContain('## Patterns Detected');

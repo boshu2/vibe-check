@@ -175,7 +175,7 @@ describe('Session Detection Algorithm (VIBE-046)', () => {
 
   describe('sessions CLI command', () => {
     it('runs without error', () => {
-      const output = runCli('sessions --since "1 week ago" --format json');
+      const output = runCli('sessions --since "30 days ago" --format json');
       // Should either return valid JSON or empty result
       expect(() => JSON.parse(output)).not.toThrow();
     });
@@ -206,13 +206,13 @@ describe('Session Detection Algorithm (VIBE-046)', () => {
     });
 
     it('shows terminal output by default', () => {
-      const output = runCli('sessions --since "1 week ago"');
+      const output = runCli('sessions --since "30 days ago"');
       expect(output).toContain('Session Analysis');
       expect(output).toContain('Total Sessions');
     });
 
     it('outputs markdown format', () => {
-      const output = runCli('sessions --since "1 week ago" --format markdown');
+      const output = runCli('sessions --since "30 days ago" --format markdown');
       expect(output).toContain('# Session Analysis');
       expect(output).toContain('| Metric | Value |');
     });
