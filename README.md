@@ -187,6 +187,15 @@ vibe-check profile              # XP and achievements
 vibe-check insights             # Your spiral patterns
 ```
 
+### Code Quality
+
+```bash
+vibe-check audit                # Scan for monoliths, test gaps, TODOs
+vibe-check modularity           # Pattern-aware modularity analysis
+vibe-check modularity --verbose # Detailed breakdown with metrics
+vibe-check modularity -f json   # JSON output for CI integration
+```
+
 ### Tools
 
 ```bash
@@ -238,6 +247,92 @@ When inner loop issues are detected:
 
   → STOP: AI claimed success but code needed fixes. Verify builds/tests pass.
 ```
+
+---
+
+## Modularity Analysis
+
+Goes beyond simple LOC counting to assess whether large files are well-organized or problematic.
+
+```bash
+vibe-check modularity
+```
+
+```
+📐 Modularity Analysis
+────────────────────────────────────────────────────────────
+
+Analyzed 584 files (195,345 lines)
+Average modularity score: 9.5/10
+
+Score Distribution:
+  Elite (9-10):      ████████████████░░░░ 82%
+  Good (7-8):        ███░░░░░░░░░░░░░░░░░ 15%
+  Acceptable (5-6):  ░░░░░░░░░░░░░░░░░░░░ 2%
+  Needs Work (3-4):  ░░░░░░░░░░░░░░░░░░░░ 1%
+  Poor (0-2):        ░░░░░░░░░░░░░░░░░░░░ 0%
+
+⚠️  Files Needing Attention (8):
+
+  6/10 stores/network.js 1023 lines [state-machine]
+       ⚠ no sections/organization
+  5/10 server/WebSocketGateway.ts 702 lines
+       ⚠ no sections/organization
+  4/10 client/App.tsx 568 lines [component]
+       ⚠ no sections/organization, ⚠ high coupling
+
+👍 Good modularity. Minor improvements possible.
+```
+
+### Pattern-Aware Scoring
+
+A 2,500-line file can score **10/10** if well-organized. A 300-line file can score **4/10** if it's a mess.
+
+| Factor | Impact | What It Checks |
+|--------|--------|----------------|
+| **Pattern Match** | +1 | Is it a controller/store/routes/state-machine? |
+| **Internal Sections** | +1/-2 | Does it use `// ====` dividers or nested classes? |
+| **Single Responsibility** | +2/-2 | Can purpose be described in one sentence? |
+| **Coupling** | -1/-2 | >15 imports = high coupling warning |
+| **Export Surface** | -1 | >20 exports = bloated API |
+
+### Pattern-Specific Thresholds
+
+Different file types have different acceptable sizes:
+
+| Pattern | Yellow | Red | Why |
+|---------|--------|-----|-----|
+| `store` | 1,500 | 2,500 | Data layer naturally groups many methods |
+| `controller` | 800 | 1,200 | K8s-style with reconciliation loops |
+| `routes` | 1,000 | 1,500 | Vertical slice entry points |
+| `component` | 250 | 400 | React components should stay focused |
+| `utility` | 150 | 250 | Utilities should be smallest |
+
+### Automatic Exemptions
+
+These patterns skip modularity checks:
+- `*.test.ts` — Tests can be comprehensive
+- `*.generated.ts` — Generated files
+- Type definition files — Central types are OK to be large
+
+### Forensics Integration
+
+Modularity is also included in `vibe-check forensics` for complete code health analysis:
+
+```bash
+vibe-check forensics
+```
+
+```
+Modularity Health:
+  Average Score: 9.5/10 (303 files analyzed)
+  ⚠️  8 files need attention:
+     6/10 stores/network.js 1023 lines (no-internal-structure)
+     5/10 server/WebSocketGateway.ts 702 lines
+     ...
+```
+
+Poor modularity (score <5) triggers the **SWEEP** recommendation alongside commit pattern issues.
 
 ---
 
