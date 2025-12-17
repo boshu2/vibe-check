@@ -17,6 +17,11 @@ import {
   getRecommendation,
   QualityMetrics,
 } from '../analyzers/quality.js';
+import {
+  analyzeModularity,
+  ModularityResult,
+  FileModularity,
+} from '../analyzers/modularity.js';
 import { format } from 'date-fns';
 
 export interface ForensicsOptions {
@@ -27,6 +32,13 @@ export interface ForensicsOptions {
   verbose: boolean;
 }
 
+export interface ModularityForensics {
+  avgScore: number;
+  filesAnalyzed: number;
+  problemFiles: FileModularity[];
+  hasIssues: boolean;
+}
+
 export interface ForensicsResult {
   analysisPeriod: {
     from: string;
@@ -35,6 +47,7 @@ export interface ForensicsResult {
   totalCommits: number;
   patterns: PatternDetectionResult;
   qualityMetrics: QualityMetrics;
+  modularity: ModularityForensics;
   recommendation: 'sweep' | 'maintain' | 'celebrate';
 }
 
@@ -89,10 +102,21 @@ export async function runForensics(options: ForensicsOptions): Promise<Forensics
     // Calculate quality metrics
     const qualityMetrics = calculateQualityMetrics(commits);
 
-    // Get recommendation
+    // Analyze modularity
+    const modularityResult = analyzeModularity(repo, { minLines: 100 });
+    const problemFiles = modularityResult.files.filter(f => f.score < 7);
+    const modularity: ModularityForensics = {
+      avgScore: modularityResult.summary.avgScore,
+      filesAnalyzed: modularityResult.files.length,
+      problemFiles: problemFiles.slice(0, 10), // Top 10 worst
+      hasIssues: problemFiles.length > 0,
+    };
+
+    // Get recommendation (factor in modularity issues)
+    const hasModularityProblems = problemFiles.some(f => f.score < 5);
     const recommendation = getRecommendation(
       qualityMetrics,
-      patterns.debugSpirals !== null
+      patterns.debugSpirals !== null || hasModularityProblems
     );
 
     // Sort commits to get date range
@@ -108,6 +132,7 @@ export async function runForensics(options: ForensicsOptions): Promise<Forensics
       totalCommits: commits.length,
       patterns,
       qualityMetrics,
+      modularity,
       recommendation,
     };
 
@@ -137,7 +162,7 @@ function outputJson(result: ForensicsResult): void {
 }
 
 function outputMarkdown(result: ForensicsResult): void {
-  const { analysisPeriod, totalCommits, patterns, qualityMetrics, recommendation } = result;
+  const { analysisPeriod, totalCommits, patterns, qualityMetrics, modularity, recommendation } = result;
 
   console.log('# Git Forensics Report\n');
   console.log(`**Analysis Period:** ${analysisPeriod.from.split('T')[0]} to ${analysisPeriod.to.split('T')[0]}`);
@@ -186,6 +211,23 @@ function outputMarkdown(result: ForensicsResult): void {
     console.log('');
   }
 
+  // Modularity
+  console.log('## Modularity Health\n');
+  console.log(`**Average Score:** ${modularity.avgScore}/10 (${modularity.filesAnalyzed} files analyzed)\n`);
+
+  if (modularity.hasIssues) {
+    console.log('### Files Needing Attention\n');
+    console.log('| File | Lines | Score | Issue |');
+    console.log('|------|-------|-------|-------|');
+    for (const f of modularity.problemFiles.slice(0, 10)) {
+      const issue = f.flags[0] || 'needs review';
+      console.log(`| ${f.file} | ${f.lines} | ${f.score}/10 | ${issue} |`);
+    }
+    console.log('');
+  } else {
+    console.log('✅ All files have good modularity.\n');
+  }
+
   // Recommendation
   console.log('## Recommendation\n');
   const emoji = recommendation === 'celebrate' ? '🎉' : recommendation === 'sweep' ? '🧹' : '👍';
@@ -201,7 +243,7 @@ function outputMarkdown(result: ForensicsResult): void {
 }
 
 function outputTerminal(result: ForensicsResult): void {
-  const { analysisPeriod, totalCommits, patterns, qualityMetrics, recommendation } = result;
+  const { analysisPeriod, totalCommits, patterns, qualityMetrics, modularity, recommendation } = result;
 
   console.log('');
   console.log(chalk.bold.cyan('🔍 Git Forensics Report'));
@@ -247,6 +289,27 @@ function outputTerminal(result: ForensicsResult): void {
   if (patterns.vagueCommits.examples.length > 0) {
     const examples = patterns.vagueCommits.examples.slice(0, 3).map(e => `"${e}"`).join(', ');
     console.log(chalk.gray(`  📝 Vague examples: ${examples}`));
+  }
+
+  console.log('');
+
+  // Modularity
+  console.log(chalk.bold('Modularity Health:'));
+  const modScoreColor = modularity.avgScore >= 8 ? chalk.green : modularity.avgScore >= 6 ? chalk.yellow : chalk.red;
+  console.log(`  Average Score: ${modScoreColor(modularity.avgScore + '/10')} (${modularity.filesAnalyzed} files analyzed)`);
+
+  if (modularity.hasIssues) {
+    console.log(chalk.yellow(`  ⚠️  ${modularity.problemFiles.length} files need attention:`));
+    modularity.problemFiles.slice(0, 5).forEach(f => {
+      const scoreStr = f.score < 5 ? chalk.red(`${f.score}/10`) : chalk.yellow(`${f.score}/10`);
+      const flags = f.flags.length > 0 ? chalk.gray(` (${f.flags[0]})`) : '';
+      console.log(`     ${scoreStr} ${f.file} ${chalk.gray(f.lines + ' lines')}${flags}`);
+    });
+    if (modularity.problemFiles.length > 5) {
+      console.log(chalk.gray(`     ...and ${modularity.problemFiles.length - 5} more`));
+    }
+  } else {
+    console.log(chalk.green('  ✅ All files have good modularity'));
   }
 
   console.log('');
