@@ -1,14 +1,18 @@
 # Vibe Check CI - Quality gates for AI-assisted development
-# EXAMPLE: Copy this file to your repo's .github/workflows/vibe-check.yml
-# (This .example.yml file is not executed - it's a template for other repos)
+# EXAMPLE: Copy this file to your repo as .github/workflows/vibe-check.yml
+# Then uncomment the 'on:' section below to enable triggers
 
 name: Vibe Check
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+# Uncomment these lines when you copy this file to your repo:
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
+
+# This prevents the workflow from running in the vibe-check repo itself
+on: workflow_dispatch
 
 jobs:
   vibe-check:
