@@ -1,0 +1,46 @@
+# Node modules (installed during build)
+node_modules/
+
+# Source files (only need dist/)
+src/
+*.ts
+tsconfig.json
+
+# Development files
+.git/
+.github/
+.vscode/
+.vibe-check/
+
+# Tests
+test/
+tests/
+*.test.ts
+*.spec.ts
+vitest.config.ts
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD files
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+.nyc_output/

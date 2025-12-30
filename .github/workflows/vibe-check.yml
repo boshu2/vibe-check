@@ -1,0 +1,101 @@
+# Vibe Check CI - Quality gates for AI-assisted development
+# Copy this to your repo's .github/workflows/vibe-check.yml
+
+name: Vibe Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  vibe-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git analysis
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Vibe Check
+        id: vibe
+        run: |
+          npx @boshu2/vibe-check --json > vibe-report.json
+          cat vibe-report.json
+
+          # Extract key metrics
+          SCORE=$(jq '.vibeScore // 0' vibe-report.json)
+          RATING=$(jq -r '.rating // "UNKNOWN"' vibe-report.json)
+          REWORK=$(jq '.reworkRatio // 0' vibe-report.json)
+          TRUST=$(jq '.trustPassRate // 0' vibe-report.json)
+
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "rating=$RATING" >> $GITHUB_OUTPUT
+          echo "rework=$REWORK" >> $GITHUB_OUTPUT
+          echo "trust=$TRUST" >> $GITHUB_OUTPUT
+
+          # Quality gate: fail if score below threshold
+          if [ "$SCORE" -lt 50 ]; then
+            echo "❌ Vibe score too low: $SCORE (minimum: 50)"
+            exit 1
+          fi
+
+          echo "✅ Vibe check passed: $RATING ($SCORE%)"
+
+      - name: Check for Spirals
+        run: |
+          npx @boshu2/vibe-check spiral --json > spiral-report.json
+          cat spiral-report.json
+
+          SPIRALING=$(jq '.spiraling' spiral-report.json)
+          if [ "$SPIRALING" = "true" ]; then
+            echo "⚠️ Debug spiral detected!"
+            jq -r '.escape_actions[]' spiral-report.json
+            # Warning only, don't fail the build
+          fi
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          SCORE: ${{ steps.vibe.outputs.score }}
+          RATING: ${{ steps.vibe.outputs.rating }}
+          REWORK: ${{ steps.vibe.outputs.rework }}
+          TRUST: ${{ steps.vibe.outputs.trust }}
+        with:
+          script: |
+            const score = process.env.SCORE;
+            const rating = process.env.RATING;
+            const rework = process.env.REWORK;
+            const trust = process.env.TRUST;
+
+            const emoji = rating === 'ELITE' ? '🏆' :
+                          rating === 'HIGH' ? '✅' :
+                          rating === 'MEDIUM' ? '⚠️' : '❌';
+
+            const body = `## ${emoji} Vibe Check: ${rating}
+
+            | Metric | Value |
+            |--------|-------|
+            | **Score** | ${score}% |
+            | **Trust Pass Rate** | ${trust}% |
+            | **Rework Ratio** | ${rework}% |
+
+            <sub>Powered by [vibe-check](https://github.com/boshu2/vibe-check)</sub>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

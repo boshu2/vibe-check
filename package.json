@@ -1,0 +1,47 @@
+{
+  "type": "module",
+  "name": "@boshu2/vibe-check",
+  "version": "0.1.0",
+  "description": "Quick check: are you building or spiraling?",
+  "main": "dist/cli.js",
+  "bin": {
+    "vc": "bin/vc.js",
+    "vibe-check": "bin/vibe-check.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/cli.ts",
+    "start": "node dist/cli.js",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "vibe-coding",
+    "git",
+    "metrics",
+    "cli"
+  ],
+  "author": "bodefuller",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boshu2/vibe-check"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "date-fns": "^4.1.0",
+    "simple-git": "^3.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.2",
+    "@vitest/coverage-v8": "^4.0.15",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

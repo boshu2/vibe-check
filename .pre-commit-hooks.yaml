@@ -1,0 +1,11 @@
+# Pre-commit hooks for vibe-check
+# https://pre-commit.com/
+
+- id: vibe-check
+  name: Vibe Check - Code Quality Analysis
+  description: Analyze git commit patterns for code quality issues
+  entry: npx @boshu2/vibe-check
+  language: system
+  pass_filenames: false
+  stages: [commit, push]
+  verbose: true
