@@ -67,8 +67,8 @@ jobs:
       - name: 'CLI: vc --format markdown'
         run: node dist/cli.js --since "1 month ago" --format markdown
 
-      - name: 'CLI: vc --score --recommend'
-        run: node dist/cli.js --since "1 month ago" --score --recommend
+      - name: 'CLI: vc --score'
+        run: node dist/cli.js --since "1 month ago" --score
 
       - name: 'CLI: vc --output (JSON file)'
         run: |

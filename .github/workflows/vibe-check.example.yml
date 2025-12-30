@@ -1,5 +1,6 @@
 # Vibe Check CI - Quality gates for AI-assisted development
-# Copy this to your repo's .github/workflows/vibe-check.yml
+# EXAMPLE: Copy this file to your repo's .github/workflows/vibe-check.yml
+# (This .example.yml file is not executed - it's a template for other repos)
 
 name: Vibe Check
 
