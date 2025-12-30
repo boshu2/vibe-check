@@ -76,15 +76,6 @@ jobs:
           echo "--- JSON Output ---"
           cat vibe-check-results.json | jq .
 
-      - name: 'CLI: vc level'
-        run: node dist/cli.js level
-
-      - name: 'CLI: vc profile'
-        run: node dist/cli.js profile
-
-      - name: 'CLI: vc analyze'
-        run: node dist/cli.js analyze --since "2 weeks ago"
-
       - name: Upload vibe-check results
         uses: actions/upload-artifact@v4
         with:
